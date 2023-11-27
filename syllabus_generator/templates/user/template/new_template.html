@@ -1,0 +1,394 @@
+{% extends '../../base/base_userpage.html' %}
+
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}Setup Syllabus{% endblock %}
+{% block content %}
+{% include '../../includes/top_nav.html' %}
+{% include '../../includes/side_nav.html' %}
+<main class="col-md-9 ms-sm-auto col-lg-9 col-xl-10 p-md-4 create-template" >
+    <div class="w-100 text-light">
+        <div class="multisteps-form">
+            <!--progress bar-->
+            <div class="row d-none">
+                <div class="col-12 col-lg-8 ml-auto mr-auto mb-4">
+                <div class="multisteps-form__progress">
+                    <button class="multisteps-form__progress-btn js-active" type="button" title="User Info">User Info</button>
+                    <button class="multisteps-form__progress-btn" type="button" title="Address">Address</button>
+                    <button class="multisteps-form__progress-btn" type="button" title="Order Info">Order Info</button>
+                    <button class="multisteps-form__progress-btn" type="button" title="Comments">Comments</button>
+                </div>
+                </div>
+            </div>
+            <!--form panels-->
+            <form class="row mt-3 px-3 mt-lg-0 px-lg-0 form" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <div class="col-12 col-lg-12 m-auto">
+                    <div class="multisteps-form__form">
+                        <!--single form panel-->
+                        <div class="multisteps-form__panel shadow p-4 rounded background-color-custom js-active" data-animation="fadeIn">
+                            <h3 class="multisteps-form__title">Create Syllabus Template</h3>
+                            <div class="multisteps-form__content ">
+                                <h4>First Part</h4>
+                                <div class="container-fluid scroll overflow-auto">
+                                    <div class="row">
+                                        <div class="mb-3 col-lg-12">
+                                            <label for="exampleFormControlTextarea1" class="form-label">Template Name</label>
+                                            <input class="form-control med-input" name="name" id="exampleFormControlTextarea1">
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <h5>Images</h5>
+                                        <div class="col-4">
+                                            <div class="input-group mb-3">
+                                                <label class="input-group-text" for="inputGroupFile01">Course Logo</label>
+                                                {{ form.course_logo|add_class:"form-control" }}
+                                            </div>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="input-group mb-3">
+                                                <label class="input-group-text" for="inputGroupFile01">WMSU Logo</label>
+                                                {{ form.wmsu_logo|add_class:"form-control" }}
+                                            </div>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="input-group mb-3">
+                                                <label class="input-group-text" for="inputGroupFile01">ISO Logo</label>
+                                                {{ form.iso_logo|add_class:"form-control" }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <div id="vision-cont" class="row mb-3">
+                                        <div class="mb-3 col-lg-12">
+                                            <label for="exampleFormControlTextarea1" class="form-label">WMSU Vision</label>
+                                            <textarea class="form-control big-input" name="vision" id="exampleFormControlTextarea1">{% if vision %}{{ vision.vision }}{% endif %}</textarea>
+                                        </div>
+
+                                        <label>Itemized Vision</label>
+                                        <div class="list-input-container">
+                                            <div class="input-group mt-1">
+                                                <input type="text" class="form-control med-input" name="vision_itemize">
+                                                <button class="btn btn-danger remove-input" type="button"><i class='bx bx-minus-circle'></i></button>
+                                            </div>
+                                        </div>
+                                        <div class="mt-2">
+                                            <button class="btn btn-success btn-sm add-input" id="add-vision" type="button">Add Itemized Vision</button>
+                                        </div>
+                                    </div>
+                                    <div id="mission-cont" class="row mb-3">
+                                        <div class="mb-3 col-lg-12">
+                                            <label for="exampleFormControlTextarea1" class="form-label">WMSU Mission</label>
+                                            <textarea class="form-control big-input" name="mission" id="exampleFormControlTextarea1">{% if mission %}{{ mission.mission }}{% endif %}</textarea>
+                                        </div>
+
+                                        <label>Itemized Mission</label>
+                                        <div class="list-input-container">
+                                        {% if mission_itemizes|length < 1 %}
+                                            <div class="input-group mt-1">
+                                                <input type="text" class="form-control med-input" name="mission_itemize">
+                                                <button class="btn btn-danger remove-input" type="button"><i class='bx bx-minus-circle'></i></button>
+                                            </div>
+                                        {% endif %}
+
+                                        {% for mission_itemize in mission_itemizes %}
+                                            <div class="input-group mt-1">
+                                                <input type="text" class="form-control med-input" name="mission_itemize" value="{{ mission_itemize.mission_itemize }}">
+                                                <button class="btn btn-danger remove-input" type="button"><i class='bx bx-minus-circle'></i></button>
+                                            </div>
+                                        {% endfor %}
+                                        </div>
+                                        <div class="mt-2">
+                                            <button class="btn btn-success btn-sm add-input" id="add-mission" type="button">Add Itemized Mission</button>
+                                        </div>
+                                    </div>
+                                    <div id="goal-cont" class="row">
+                                        <div class="mb-3 col-lg-12">
+                                            <label for="exampleFormControlTextarea1" class="form-label">Goal Description of College</label>
+                                            <textarea class="form-control big-input" name="goal" id="exampleFormControlTextarea1"></textarea>
+                                        </div>
+
+                                        <label>Itemized Goals</label>
+                                        <div class="list-input-container">
+                                            <div class="input-group mt-1">
+                                                <input type="text" class="form-control med-input" name="goal_itemize">
+                                                <button class="btn btn-danger remove-input" type="button"><i class='bx bx-minus-circle'></i></button>
+                                            </div>
+                                        </div>
+                                        <div class="mt-2">
+                                            <button class="btn btn-success btn-sm add-input" id="add-goal" type="button">Add Itemized Goal</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr>
+                                
+                                <div class="d-flex justify-content-end mt-4">
+                                    <button class="btn btn-primary ml-auto js-btn-next" type="button" title="Next">Next</button>
+                                </div>
+                            </div>
+                        </div>
+                        <!--single form panel-->
+                        <div class="multisteps-form__panel shadow p-4 rounded background-color-custom" data-animation="fadeIn">
+                            <h3 class="multisteps-form__title">Setting Up Your Syllabus</h3>
+                            <div class="multisteps-form__content ">
+                                <h4>Second Part</h4>
+                                <div class="container-fluid scroll overflow-auto">
+                                    <h4>College Course Outcomes</h4>
+                                    <div id="college-cont" class="row mb-3">
+                                        <div class="list-input-container">
+                                            <div class="input-group mt-1">
+                                                {% comment %} <input type="text" class="form-control big-input" name="course_outcome"> {% endcomment %}
+                                                <textarea class="form-control big-input input" name="course_outcome"></textarea>
+                                                <button class="btn btn-danger remove-input" type="button"><i class='bx bx-minus-circle'></i></button>
+                                            </div>
+                                        </div>
+                                        <div class="mt-2">
+                                            <button class="btn btn-success btn-sm add-input" id="add-college" type="button">Add College Course</button>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <h4>Grading System</h4>
+                                    <div class="form-group radio-buttons">
+                                        <div class="form-check form-check-inline">
+                                            <!---------- the input value has 'only' after the initial value, this is will be use for later prompting in creating syllabus ---------->
+                                            <input class="form-check-input" id="lecture" type="radio" name="grading_system_type" value="lecture only" checked>
+                                            <label class="form-check-label" for="lecture">Lecture</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" id="laboratory" type="radio" name="grading_system_type" value="laboratory only">
+                                            <label class="form-check-label" for="laboratory">Laboratory</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" id="both" type="radio" name="grading_system_type" value="laboratory & lecture">
+                                            <label class="form-check-label" for="both">Both</label>
+                                        </div>
+                                    </div>
+                                    <div class="row terms-cont" id="midterm-cont">
+                                        <div class="mb-3 col-lg-6">
+                                            <label for="" class="form-label">Mid Term Grade</label>
+                                            <input type="number" class="form-control med-input" name="midterm-grade" placeholder="percentage">
+                                        </div>
+                                        <div class="term-description-cont lecture-cont" id="midterm-lecture">
+                                            <div class="mb-3 col-lg-6">
+                                                <label for="" class="form-label">Lecture Grade</label>
+                                                <input type="number" class="form-control med-input" name="midterm-lecture-grade" placeholder="percentage">
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <label class="form-label">Description and Percent</label>
+                                                <div class="list-input-container">
+                                                    <div class="input-group mb-2">
+                                                        <input type="text" class="form-control med-input" name="midterm-lecture-description" placeholder="Attendance">
+                                                        <input type="number" aria-label="First name" class="form-control med-input" name="midterm-lecture-percentage" placeholder="Percentage">
+                                                        <button class="btn btn-danger remove-input" type="button"><i class='bx bx-minus-circle'></i></button>
+                                                    </div>
+                                                </div>
+                                                <div class="mt-2">
+                                                    <button class="btn btn-success btn-sm mb-2 add-input" id="add-midterm-lecture" type="button">Add More</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="term-description-cont laboratory-cont" id="midterm-laboratory">
+                                            <div class="mb-3 col-lg-6">
+                                                <label for="" class="form-label">Laboratory Grade</label>
+                                                <input type="number" class="form-control med-input" name="midterm-laboratory-grade" placeholder="percentage">
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <label class="form-label">Description and Percent</label>
+                                                <div class="list-input-container">
+                                                    <div class="input-group mb-2">
+                                                        <input type="text" class="form-control med-input" name="midterm-laboratory-description" placeholder="Attendance">
+                                                        <input type="number" aria-label="First name" class="form-control med-input" name="midterm-laboratory-percentage" placeholder="Percentage">
+                                                        <button class="btn btn-danger remove-input" type="button"><i class='bx bx-minus-circle'></i></button>
+                                                    </div>
+                                                </div>
+                                                <div class="mt-2">
+                                                    <button class="btn btn-success btn-sm mb-2 add-input" id="add-midterm-laboratory" type="button">Add More</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row terms-cont" id="finalterm-cont">
+                                        <div class="mb-3 col-lg-6">
+                                            <label for="" class="form-label">Final Term Grade</label>
+                                            <input type="number" class="form-control med-input" name="finalterm-grade" placeholder="percentage">
+                                        </div>
+                                        <div class="term-description-cont lecture-cont" id="finalterm-lecture">
+                                            <div class="mb-3 col-lg-6">
+                                                <label for="" class="form-label">Lecture Grade</label>
+                                                <input type="number" class="form-control med-input" name="finalterm-lecture-grade" placeholder="percentage">
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <label class="form-label">Description and Percent</label>
+                                                <div class="list-input-container">
+                                                    <div class="input-group mb-2">
+                                                        <input type="text" class="form-control med-input" name="finalterm-lecture-description" placeholder="Attendance">
+                                                        <input type="number" aria-label="First name" class="form-control med-input" name="finalterm-lecture-percentage" placeholder="Percentage">
+                                                        <button class="btn btn-danger remove-input" type="button"><i class='bx bx-minus-circle'></i></button>
+                                                    </div>
+                                                </div>
+                                                <div class="mt-2">
+                                                    <button class="btn btn-success btn-sm mb-2 add-input" id="add-finalterm-lecture" type="button">Add More</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="term-description-cont laboratory-cont" id="finalterm-laboratory">
+                                            <div class="mb-3 col-lg-6">
+                                                <label for="" class="form-label">Laboratory Grade</label>
+                                                <input type="number" class="form-control med-input" name="finalterm-laboratory-grade" placeholder="percentage">
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <label class="form-label">Description and Percent</label>
+                                                <div class="list-input-container">
+                                                    <div class="input-group mb-2">
+                                                        <input type="text" class="form-control med-input" name="finalterm-laboratory-description" placeholder="Attendance">
+                                                        <input type="number" aria-label="First name" class="form-control med-input" name="finalterm-laboratory-percentage" placeholder="Percentage">
+                                                        <button class="btn btn-danger remove-input" type="button"><i class='bx bx-minus-circle'></i></button>
+                                                    </div>
+                                                </div>
+                                                <div class="mt-2">
+                                                    <button class="btn btn-success btn-sm mb-2 add-input" id="add-finalterm-laboratory" type="button">Add More</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" id="range-cont">
+                                        <label>Percentage Grade Range</label>
+                                        <div class="col-lg-12">
+                                            <div class="list-input-container">
+                                                {% if percentage_grade_ranges|length < 1 %}
+                                                <div class="input-group mt-2">
+                                                    <span class="input-group-text">Enter Range Here</span>
+                                                    <input type="number" aria-label="First name" name="min-range" class="form-control med-input" placeholder="96">
+                                                    <input type="number" aria-label="First name" name="max-range" class="form-control med-input" placeholder="100">
+                                                    <span class="input-group-text">Enter Grade Here</span>
+                                                    <input type="text" aria-label="Last name" name="grade" class="form-control med-input" placeholder="1.0">
+                                                    <button class="btn btn-danger remove-input" type="button"><i class='bx bx-minus-circle'></i></button>
+                                                </div>
+                                                {% endif %}
+                                                
+                                                {% for percentage_grade_range in percentage_grade_ranges %}
+                                                <div class="input-group mt-2">
+                                                    <span class="input-group-text">Enter Range Here</span>
+                                                    <input type="number" aria-label="First name" name="min-range" class="form-control med-input" placeholder="96" value="{{ percentage_grade_range.min_range }}">
+                                                    <input type="number" aria-label="First name" name="max-range" class="form-control med-input" placeholder="100" value="{{ percentage_grade_range.max_range }}">
+                                                    <span class="input-group-text">Enter Grade Here</span>
+                                                    <input type="text" aria-label="Last name" name="grade" class="form-control med-input" placeholder="1.0" value="{{ percentage_grade_range.grade }}">
+                                                    <button class="btn btn-danger remove-input" type="button"><i class='bx bx-minus-circle'></i></button>
+                                                </div>
+                                                {% endfor %}
+                                            </div>
+                                            <div class="mt-2">
+                                                <button class="btn btn-success btn-sm add-input" id="add-range" type="button">Add Grade Range</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row pt-3">
+                                    <hr>
+                                    <div class="col d-flex justify-content-start">
+                                        <button class="btn btn-primary js-btn-prev" type="button" title="Prev">Back</button>
+                                    </div>
+                                    <div class="col d-flex justify-content-end">
+                                        <button class="btn btn-primary ml-auto js-btn-next" type="submit" title="Save">Save</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!--single form panel-->
+                        {% comment %} <div class="multisteps-form__panel shadow p-4 rounded background-color-custom" data-animation="fadeIn">
+                            <div class="row mb-2">
+                                <div class="col-12 col-lg-6">
+                                    <h3 class="multisteps-form__title">Your Template</h3>
+                                </div>
+                                <div class="col-12 col-lg-6 d-flex justify-content-end">
+                                    <div class="btn-group dropstart">
+                                        <button class="btn btn-primary btn-sm mt-2 dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                                            Save As
+                                        </button>
+                                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1" style="min-width:20px;">
+                                            <li><a class="dropdown-item" href="#">Print</a></li>
+                                            <li><a class="dropdown-item" href="#">PDF</a></li>
+                                            <li><a class="dropdown-item" href="#">Word</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="multisteps-form__content">
+                                <embed src="{% static 'files/Software-Engineering-1-Syllabus-Ballaho-2021v1.1-1.pdf' %}" type="application/pdf" width="100%" height="600px" />
+        
+                                <div class="row pt-3">
+                                    <div class="col d-flex justify-content-start">
+                                        <button class="btn btn-primary js-btn-prev" type="button" title="Prev">Back</button>
+                                    </div>
+                                    <div class="col d-flex justify-content-end">
+                                        <a href="userpage" class="btn btn-primary ml-auto js-btn-next">Finish</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div> {% endcomment %}
+
+                        <div class="multisteps-form__panel shadow p-4 rounded background-color-custom last-content" data-animation="fadeIn">
+                            <div class="wait-cont">
+                                <h3 class="multisteps-form__title mb-3">Saving new Syllabus Template</h3>
+                                <div class="multisteps-form__content">
+                                    <div class="spinner-wrapper">
+                                        <div class="d-flex justify-content-center mt-2">
+                                            <div class="spinner-border" role="status">
+                                                <span class="visually-hidden">Loading...</span>
+                                            </div>
+                                        </div>
+                                        <div class="text-center mt-3">
+                                            <span id="words">Uploading data</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+
+<!---------- SYLLABUS TEMPLATE JS ---------->
+<script src="{% static 'js/syllabus_template.js' %}"></script>
+
+<script src="{% static 'js/multi_form.js' %}"></script>
+<script>
+  $('.cust-btn').on('click', function (event) {
+    event.preventDefault();
+    $('.cust-div').addClass('active');
+});
+
+function myFunction() {
+  var x = document.getElementById("myDIV");
+  if (x.style.display === "none") {
+    x.style.display = "block";
+  } else {
+    x.style.display = "none";
+  }
+}
+</script>
+<script type="text/javascript">
+      (function () {
+        var words = ["Checking fields", "Adjusting Rows", "Uploading logos", "Uploading infos to database"],
+        i = 0;
+        setInterval(function(){ $('#words').fadeOut(function(){
+            $(this).html(words[(i = (i + 1) % words.length)]).fadeIn();
+          }); }, 3000)
+      })();
+</script>
+<script type="text/javascript">
+      (function () {
+        var words = ["Getting Information From GPT","Filling in Tables","Adjusting Rows","Inputting Information" ],
+        i = 0;
+        setInterval(function(){ $('#words_2').fadeOut(function(){
+            $(this).html(words[(i = (i + 1) % words.length)]).fadeIn();
+          }); }, 3000)
+      })();
+</script>
+{% endblock %}

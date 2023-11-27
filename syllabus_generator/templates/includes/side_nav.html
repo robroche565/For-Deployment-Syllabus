@@ -1,0 +1,75 @@
+{% load static %}
+
+<div class="container-fluid">
+  <div class="row">
+    <nav id="sidebarMenu" class="col-md-3 col-lg-3 col-xl-2 d-md-block background-color-custom sidebar collapse">
+      <div class="mh-100">
+        <div class="d-grid">
+          {% if syllabus_templates %}
+          <a href="{% url 'new_syllabus' %}" class="btn btn-outline-secondary text-start text-light btn-lg py-3"
+            style="font-size: 15px">
+            <i class="bx bx-list-plus me-2" style="font-size: 20px; vertical-align: middle"></i>New Syllabus
+          </a>
+          {% else %}
+          <button class="btn btn-outline-secondary text-start text-light btn-lg py-3" style="font-size: 15px"
+            id="syllabus-btn-toast">
+            <i class="bx bx-list-plus me-2" style="font-size: 20px; vertical-align: middle"></i>New Syllabus
+          </button>
+          {% endif %}
+        </div>
+        <ul class="nav flex-column text-decoration-none text-light">
+          {% for syllabus in syllabuses %}
+          <li class="nav-item pt-1">
+            <a href="{% url 'edit_syllabus' syllabus.id %}" class="nav-link text-decoration-none text-light">
+              <i class="bx bxs-book-reader me-2"></i>
+              <span class="links-name text-light">{{ syllabus.syllabus_name }}</span>
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+        <div class="position-absolute bottom-0 start-0 w-100 px-2 mb-2">
+          <hr class="line" />
+          <ul class="nav flex-column text-decoration-none">
+            <li class="nav-item">
+              <a href="{% url 'templates_list' %}" class="nav-link text-decoration-none text-light" title="Setup">
+                <i class="bx bx-edit-alt me-2" style="font-size: 20px; vertical-align: middle"></i>
+                <span class="links-name">Templates</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="{% url 'settings' %}" class="nav-link text-decoration-none text-light" title="Settings">
+                <i class="bx bx-cog me-2" style="font-size: 20px; vertical-align: middle"></i>
+                <span class="links-name">Settings</span>
+              </a>
+            </li>
+            {% if user.is_authenticated %}
+            <li id="logout-link" class="nav-item">
+              <a class="logout-link nav-link text-decoration-none text-light" href="{% url 'logout' %}" title="Logout">
+                <i class="bx bx-log-out me-1" style="font-size: 20px; vertical-align: middle"></i><span
+                  class="links-name">Log out</span>
+              </a>
+            </li>
+            {% endif %}
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </div>
+</div>
+
+
+<!---------- Warning Toast ---------->
+
+<div class="toast-container position-fixed top-0 end-0 p-3 text-light">
+  <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true"
+    style="background-color:#373738;">
+    <div class="toast-header text-light" style="background-color:#212122;">
+      <img src="{% static 'images/logo.png' %}" class="rounded me-2" alt="..." style="width:20px;">
+      <strong class="me-auto text-light"></strong>
+      <small>Just Now</small>
+      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+    <div class="toast-body">
+    </div>
+  </div>
+</div>

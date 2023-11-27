@@ -1,0 +1,50 @@
+{% extends '../../base/base_userpage.html' %}
+{% load static %}
+
+{% block title %}List of Templates{% endblock %}
+{% block content %}
+{% comment %} <main class="col-md-9 min-vh-100 ms-sm-auto col-lg-9 col-xl-10 p-md-4">
+    <div class="top-content">
+        <h3>List of templates</h3>
+        <a href="new_template" class="btn btn-primary">create new</a>
+    </div>
+    <div class="content">
+        {% for template in templates %}
+        <a href="{% url 'edit_template' template.id %}" class="btn btn-outline-secondary text-start text-light btn-lg py-3">
+            <p class="name">{{ template.name }}</p>
+            <p class="date">{{ template.revision_date }}</p>
+        </a>
+        {% endfor %}
+    </div>
+</main> {% endcomment %}
+<main class="col-md-9 ms-sm-auto col-lg-9 col-xl-10 p-md-4" >
+    <div class="multisteps-form__form">
+        <!--single form panel-->
+        <div class="multisteps-form__panel shadow p-4 rounded background-color-custom js-active templates-list" style="min-height: calc(100vh - 3rem);">
+            {% if templates %}
+            <div class="row top-action">
+                <div class="col-10"><h3 class="text-light">List of templates</h3></div>
+                <div class="col-2 d-flex justify-content-end"><a href="new_template" class="btn btn-primary">Create new</a></div>
+            </div>
+            <div class="content">
+                {% for template in templates %}
+                <a href="{% url 'edit_template' template.id %}" class="btn btn-outline-secondary text-start text-light btn-lg py-3 templates">
+                    <p class="name">{{ template.name }}</p>
+                    <p class="date">{{ template.revision_date }}</p>
+                </a>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="row top-action">
+                <div class="col-10"><h3 class="text-light">List of templates</h3></div>
+            </div>
+            <div class="empty">
+                <h3 class="text-light">Syllabus Template is empty</h3>
+                <a href="new_template" class="btn btn-primary">create template</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</main>
+
+{% endblock %}

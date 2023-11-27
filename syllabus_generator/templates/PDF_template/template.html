@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sample PDF</title>
+</head>
+
+{% load static %}
+{% load custom_filters %}
+
+<link rel="stylesheet" href="{% static '/css/sass/app.css' %}" />
+<style>
+  * {
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+  }
+</style>
+
+<body>
+  <section class="section_1">
+    <div class="top_content">
+      <div class="cont">
+        <img class="logo1" src="{% static 'upload/' %}{{ wmsu_logo.img_name }}" />
+
+        <div>
+          <p>Republic of the Philippines</p>
+          <p>Western Mindanao State University</p>
+          <p>{{ syllabus.college }}</p>
+          <p class="title">DEPARTMENT OF {{ syllabus.department }}</p>
+        </div>
+
+        <img class="logo2" src="{% static 'upload/' %}{{ course_logo.img_name }}" />
+
+        <img class="logo3" src="{% static 'upload/' %}{{ iso_logo.img_name }}" />
+      </div>
+
+      <div class="cont info-cont">
+        <div class="labels">
+          <p>Semester Adopted:</p>
+          <p>Revision Status:</p>
+          <p>Revision Date:</p>
+          <p>Recommending approval:</p>
+          <p>Concurred:</p>
+          <p>Approved:</p>
+        </div>
+
+        <div class="infos">
+          <p class="title">Sem: {{ syllabus.semester }} S.Y.: {{ syllabus.school_year }}</p>
+          <p class="title">{{ syllabus_template.revision_status }}</p>
+          <p class="title">{{ syllabus_template.revision_date|date:"F j, Y" }}</p>
+          <p class="title">{{ syllabus.recommending_approval_name }}</p>
+          <p class="title">{{ syllabus.concured_name }}</p>
+          <p class="title">{{ syllabus.approved_name }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="title_cont">
+      <h4>OUTCOMES-BASED EDUCATION (OBE) RESTRUCTURED COURSE SYLLABUS IN {{ syllabus.course_name|upper }}</h4>
+      <p>{{ syllabus.semester }} Semester, SY {{ syllabus.school_year }}</p>
+    </div>
+
+    <div class="uni-cont">
+      <div class="uni-info">
+        <p class="title">Western Mindanao State University</p>
+
+        <p class="title">VISION</p>
+        <p>{{ vision.vision }}</p>
+        {% if vision_itemizes.length > 0 %}
+        <ul>
+          {% for vision_itemize in vision_itemizes %}
+          <li>
+            <p>{{ vision_itemize.vision_itemize }}</p>
+          </li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+
+        <p class="title">MISSION</p>
+        <p>{{ mission.mission }}</p>
+        {% if mission_itemizes %}
+        <ul>
+          {% for mission_itemize in mission_itemizes %}
+          <li>
+            <p>{{ mission_itemize.mission_itemize }}</p>
+          </li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+      </div>
+
+      <div class="college-info">
+        <p class="title">{{ syllabus.college }}</p>
+
+        <p class="title">GOALS</p>
+        <p>{{ goal.goal }}</p>
+        {% if goal_itemizes %}
+        <ul>
+          {% for goal_itemize in goal_itemizes %}
+          <li>
+            <p>{{ goal_itemize.goal_itemize }}</p>
+          </li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+
+  <div class="section_2">
+    <table>
+      <thead>
+        <tr>
+          <th rowspan="2">Bachelor of {{ syllabus.bachelor }} Program Outcomes</th>
+          <th colspan="4" class="center">GOALS</th>
+        </tr>
+        <tr class="subcolumn">
+          <th class="center">A</th>
+          <th class="center">B</th>
+          <th class="center">C</th>
+          <th class="center">D</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for course_outcome in course_outcomes %}
+        <tr>
+          <td>{{ forloop.counter|alphabet }}. {{ course_outcome.course_outcome }}</td>
+          <td class="center">✓</td>
+          <td class="center">✓</td>
+          <td class="center">✓</td>
+          <td class="center">✓</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="subject-description">
+      <div class="label">
+        <p>COURSE CODE</p>
+        <p>COURSE NAME</p>
+        <p>PREREQUISITE</p>
+        <p>COURSE CREDIT</p>
+        <p>COURSE DESCRIPTION</p>
+      </div>
+
+      <div class="info">
+        <p>{{ syllabus.course_code }}</p>
+        <p>{{ syllabus.course_name }}</p>
+        <p>{% for preriquisite in preriquisites %} {{ preriquisite.preriquisite }}{% if not forloop.last %}, {% endif
+          %}{% endfor %}</p>
+        <p>{{ syllabus.course_credit }} Units {{ syllabus.course_credit_description }}</p>
+        <p>{{ syllabus.course_description }}</p>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th rowspan="2">Course Learning Outcomes</th>
+          <th colspan="{{ course_outcomes|length }}" class="center">Program Outcomes</th>
+        </tr>
+        <tr class="subcolumn">
+          {% for course_outcome in course_outcomes %}
+          <th class="center">{{ forloop.counter|alphabet }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for learning_outcome in learning_outcomes %}
+        <tr>
+          <td>{{ learning_outcome.course_learning_outcome }}</td>
+          {% for course_outcome in course_outcomes %}
+          <td class="center">✓</td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <table class="references">
+      <thead>
+        <th>References</th>
+        <th>
+          {% for source in sources %}
+          <p>{{ source.reference }}</p>
+          {% endfor %}
+        </th>
+      </thead>
+    </table>
+
+    <p class="title">Grading System</p>
+
+    <div class="grading-system">
+      <div class="term-container">
+        <div class="terms">
+          <p class="title">Midterm Grade ({{ midterm.term_percentage }}%)</p>
+
+          <div class="content">
+            <div class="label">
+              <p>Lecture Grade ({{ midterm_lectures.0.lecture_percentage }}%)</p>
+            </div>
+
+            <div>
+              {% for midterm_lecture in midterm_lectures %}
+              <p>{{ midterm_lecture.term_description }} ({{ midterm_lecture.percentage }}%)</p>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="content">
+            <div class="label">
+              <p>Laboratory Grade ({{ midterm_laboratories.0.laboratory_percentage }}%)</p>
+            </div>
+
+            <div>
+              {% for midterm_laboratory in midterm_laboratories %}
+              <p>{{ midterm_laboratory.term_description }} ({{ midterm_laboratory.percentage }}%)</p>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        <div class="terms">
+          <p class="title">Final term Grade ({{ finalterm.term_percentage }}%)</p>
+
+          <div class="content">
+            <div class="label">
+              <p>Lecture Garde ({{ finalterm_lectures.0.lecture_percentage }}%)</p>
+            </div>
+
+            <div>
+              {% for finalterm_lecture in finalterm_lectures %}
+              <p>{{ finalterm_lecture.term_description }} ({{ finalterm_lecture.percentage }}%)</p>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="content">
+            <div class="label">
+              <p>Laboratory Grade ({{ finalterm_laboratories.0.laboratory_percentage }}%)</p>
+            </div>
+
+            <div>
+              {% for finalterm_laboratory in finalterm_laboratories %}
+              <p>{{ finalterm_laboratory.term_description }} ({{ finalterm_laboratory.percentage }}%)</p>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        <div class="terms final-rate">
+          <div class="content">
+            <div class="label title">
+              <p>Final Rating</p>
+            </div>
+
+            <div class="all-term">
+              <div>
+                <p>Midterm Grade</p>
+                <p>{{ midterm.term_percentage }}%</p>
+              </div>
+
+              <div>
+                <p>Final term Grade</p>
+                <p>{{ finalterm.term_percentage }}%</p>
+              </div>
+
+              <div>
+                <p class="title" style="width: 100%; text-align: right; padding-right: 36px;">{{ total_term_percentage
+                  }}%</p>
+              </div>
+
+              <div>
+                <p class="title">PASSING GRADE</p>
+                <p class="title">60%</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="rating-container">
+        <table class="table2">
+          <thead>
+            <tr>
+              <th>% EQUIVALENT</th>
+              <th>NUMERICAL RATING</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for percentage_grade_range in percentage_grade_ranges %}
+            <tr>
+              <td>{{ percentage_grade_range.min_range }} - {{ percentage_grade_range.max_range }}</td>
+              <td>{{ percentage_grade_range.grade }}</td>
+            </tr>
+            {% endfor %}
+
+            <tr>
+              <td>Below 60/Failed the Panel Defense</td>
+              <td>5.0</td>
+            </tr>
+
+            <tr>
+              <td>Lacks requirements/no final exam/no presentation</td>
+              <td>INC</td>
+            </tr>
+
+            <tr>
+              <td>Authorized Withdrawal (Dropped with permit)</td>
+              <td>AW</td>
+            </tr>
+
+            <tr>
+              <td>Unauthorized Withdrawal (Dropped from class for non-attendance/non-appearance for 20% of prescribed
+                attendance)</td>
+              <td>UW</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="sample-computation">
+          <p>Sample Computation:</p>
+          <p>Score/Total x 100</p>
+          <p>40/50 x 100 = 80.0</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="course-requirements">
+      <p class="title">Course Requirements</p>
+
+      <ul>
+        {% for course_requirement in course_requirements %}
+        <li>
+          <p>{{ course_requirement.requirements }}</p>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <table class="class-policy">
+      <thead>
+        <tr>
+          <th>Classroom Policy</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><b>Attendance:</b> Per article 286 of the WMSU code, regular attendance is required of all students.
+            Attendance is counted upon the first day of regular classes, regardless of the
+            time of the student's enrolment. Students who came into class within 15 minutes after the start time will
+            still be considered present; otherwise, the student will be marked
+            as late. Seven consecutive absences may be a ground for students to be dropped in the subject. Students who
+            cannot attend either face-to-face or online class due to illness
+            must contact the instructor immediately regarding the absence and discuss any activities missed in the
+            class.</td>
+        </tr>
+        <tr>
+          <td><b>Wearing of Prescribed School Uniform and ID:</b> Per article 391 of the WMSU code, every student must
+            wear the prescribed college uniform unless, for certain valid
+            reasons, s/he has written exemption from the Dean of Student Affairs which s/he must show on demand.
+            Students are exempted from wearing their school uniforms
+            during Wednesdays and Saturdays since these days are considered a wash day. Students are also required to
+            wear their school ID when inside the campus, at all times.
+            For online classes via video conferences, students are not required to wear their school uniform and advise
+            to wear any appropriate attire.</td>
+        </tr>
+        <tr>
+          <td><b>Cleanliness and Room Organization:</b> For lecture and laboratory, students are advised to arrange the
+            chairs and tables (if any), and pick up pieces of trash before the
+            start of the class. A student is also assigned at random to keep the white or blackboard clean before and
+            after the class. Lighting, air conditioners, and other electrical
+            equipment should also be turned on and off during and after the class respectively. An additional rule for
+            the laboratory is that students are required to wear their shoe
+            protectors when coming into the laboratory room. During online classes, students are expected to attend
+            their classes in a quiet place.</td>
+        </tr>
+        <tr>
+          <td><b>Seat Plan:</b> For the seating plan during lecture classes, students are given the freedom to choose
+            the seat and place they are comfortable with inside the room. For the
+            laboratory, if the instructor deems it necessary, students are rearranged randomly. There should be one
+            computer for each student.</td>
+        </tr>
+        <tr>
+          <td><b>Cellphone/Mobile Devices:</b> Cellular phones or any mobile device should be set to silent or vibrate
+            mode to avoid disruption especially during face-to-face class
+            discussion. Important calls and texts must be answered outside the classroom. Students are permitted to use
+            their mobile phones when attending their online classes. The
+            use of laptops/computers is recommended for a better learning experience.</td>
+        </tr>
+        <tr>
+          <td><b>Student Facilitators:</b> Student facilitators are selected from the class by the teacher. These
+            students will assist their classmates in accomplishing the laboratory activity
+            given by the teacher. This is done only upon the instruction of the teacher and also applicable during
+            online classes but not to the extent of sharing/copying answers.</td>
+        </tr>
+        <tr>
+          <td><b>Quizzes:</b> Quizzes are given to students at least once after a chapter or two which should be
+            announced. Students are advised to use the CET Exam Booklet during quizzes.
+            For online quizzes/exams, students will take the quiz/exam through the Learning Management System platform,
+            questions and options are shuffled, navigation is disabled
+            if necessary. Quiz/exam is always time-pressured.</td>
+        </tr>
+        <tr>
+          <td><b>Major Examinations:</b> Major exams such as midterm and final exams are given to students based on the
+            schedule specified in the university calendar. They are also advised
+            to use the CET examination booklet for the major exams. Students who fail to take the major exams due to
+            illness (with a medical certificate) should inform the instructor
+            early so they will be given a special exam before the submission of grades. Otherwise, an “INC with No
+            Final/Midterm exam” will be submitted by the instructor. A calculator
+            may be used depending on the content of the exam. However, mobile devices are strictly prohibited during
+            major exams. Failure to do so will be considered a form of
+            cheating. Major exams can be also administered online in the same manner how the online quizzes are
+            conducted.</td>
+        </tr>
+        <tr>
+          <td><b>Laboratory Activities:</b> Laboratory hands-on activities are given to students at every meeting. The
+            laboratory output is graded based on a rubric scorecard. A major
+            laboratory hands-on activity is given to students during the midterm and final exam week.</td>
+        </tr>
+        <tr>
+          <td><b>Consultation:</b> Aside from the regular system of consultation offered by the adviser and/or guidance
+            counselor, the faculty shall provide the student with consultation
+            hours for students to inquire regarding their subject/course, ask for clarification or further explanation
+            of certain topics discussed, or to be discussed in the subject, and
+            other concerns related to the subject. The student should set an appointment at least a day before the
+            consultation to avoid conflicts of schedule. Consultation can be done
+            online through any messaging platform.</td>
+        </tr>
+        <tr>
+          <td><b>Student Integrity/Academic Honesty</b></td>
+        </tr>
+        <tr>
+          <td><b>Cheating:</b> Receiving or providing unapproved help in any academic task, test, or treatise. Cheating
+            includes the attempt to use or the actual use of any unauthorized information,
+            educational material, or learning aid in a test or assignment. Cheating includes multiple submissions of any
+            academic exercise more than once for credit without prior
+            authorization and approval of the instructor.</td>
+        </tr>
+      </tbody>
+      <tr>
+        <td><b>Plagiarism:</b> Presenting someone else's work as though it is your own. In an academic community, the
+          use of words, ideas, or discoveries of another person without explicit, formal
+          acknowledgment constitutes an act of theft or plagiarism. In order to avoid the charge of plagiarism, students
+          must engage in standard academic practices such as
+          paraphrasing or replacing words that are not their own and employing the appropriate documentation or
+          citation, and including a formal acknowledgment of the source
+          in the proper format.</td>
+      </tr>
+      <tr>
+        <td><b>Fabrication, Obstruction, and Collusion</b>
+          <p>Fabrication - Inventing or falsifying any data, information, or records.</p>
+          <p>Obstruction - Impeding the ability of another student to perform assigned work.</p>
+          <p>Collusion - Assisting any of the above situations or performing work that another student presents as his
+            or her own.</p>
+        </td>
+      </tr>
+      <tr>
+        <td><b>Penalties:</b>
+          <p>Penalties for an academic offense include one or more of the following:</p>
+          <ul>
+            <li>
+              <p>Resubmission of the work in question</p>
+            </li>
+            <li>
+              <p>Submission of additional work for the course in which the offense occurred</p>
+            </li>
+            <li>
+              <p>A lower grade or loss of credit for the work found to be in violation</p>
+            </li>
+            <li>
+              <p>A failing grade of 5.0 for the course in which the offense occurred</p>
+            </li>
+          </ul>
+        </td>
+      </tr>
+      <tr>
+        <td><b>Submission/Presentation of Projects/Requirements:</b> Submission or presentation of projects or
+          requirements must be on time. No project or requirement will be
+          accepted after the due date unless with a valid reason.</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="section_3">
+    <div class="course-rubrics">
+      <p class="title">Course Rubrics</p>
+
+      {% for course_rubric in course_rubrics %}
+      <table>
+        <thead>
+          <tr>
+            <th colspan="5">{{ course_rubric.title }}</th>
+          </tr>
+          <tr>
+            <th>Criteria</th>
+            <th>Beginner 1-2/5</th>
+            <th>Capable 3/5</th>
+            <th>Accomplished 4/5</th>
+            <th>Expert 5/5</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for items in course_rubric.course_rubric_item_set.all %}
+          <tr>
+            <td>{{ items.criteria }}</td>
+            <td>{{ items.beginner }}</td>
+            <td>{{ items.capable }}</td>
+            <td>{{ items.accomplished }}</td>
+            <td>{{ items.expert }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% endfor %}
+    </div>
+
+    <div class="course-outline">
+      <!----------  DEFAULT ---------->
+      <p class="title">COURSE OUTLINE</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>TIME FRAME</th>
+            <th>COURSE CONTENT (No. of Hours/Topic)</th>
+            <th>DESIRED STUDENT LEARNING OUTCOMES/COMPETENCIES At the end of each topic and semester, the students can:
+            </th>
+            <th>OUTCOME-BASED (OBA) ACTIVITIES (Teaching & Learning Activities)</th>
+            <th>EVIDENCE OF OUTCOMES (Assessment of Learning Outcome)</th>
+            <th>COURSE LEARNING OUTCOMES</th>
+            <th>PROGRAM OUTCOMES</th>
+            <th>VALUES INTEGRATED</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr>
+            <td></td>
+            <td colspan="7" class="title">Topic 1: WMSU VMGO, Classroom Policies, Course Overview, Course Requirements,
+              Grading System (2 hours)</td>
+          </tr>
+          <tr>
+            <td>Week 1</td>
+
+            <td class="baseline">
+              <p>✓ WMSU VMGO, Classroom Policies, Course Overview, Course Requirements, Grading System</p>
+              <p>✓ Introduction to gender sensitivity, responsiveness and equality in the classroom and society</p>
+              <p>✓ Different laws on gender based biases and violence and the Magna Carta of Women</p>
+            </td>
+
+            <td class="baseline">
+              <p>✓ Exhibit awareness and appreciation of the University Vision, Mission & Quality Policy, College Goals,
+                and Program objectives.</p>
+              <p>✓ Demonstrate understanding of the classroom policies, course requirements, and grading system. Exhibit
+                efforts to understand and apply gender equality concepts.</p>
+              <p>✓ Demonstrate gender awareness and knowledge on gender issues</p>
+            </td>
+
+            <td class="baseline">
+              <p>✓ Individual participation in class discussion and group presentation using a rubric to assess quality
+                of participation.</p>
+              <p>✓ Video Presentation on Violence Against Women and other gender-based related videos.</p>
+              <p>✓ Group activity: members are chosen randomly and are asked to share :</p>
+              <p>✓ Gender-biased experiences</p>
+              <p>✓ Gender-biased experiences</p>
+            </td>
+
+            <td class="baseline">
+              <p>✓ Rubric score cards of class participation accomplished by: <br>✓ Professor <br>✓ Peer <br>✓ Self</p>
+              <p>✓ Video Presentation on Violence Against Women and other gender-based related videos.</p>
+              <p>✓ Group activity: members are chosen randomly and are asked to share :</p>
+              <p>✓ Gender-biased experiences</p>
+              <p>✓ Identify gender bias</p>
+            </td>
+
+            <td></td>
+
+            <td>B, C, D</td>
+
+            <td></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    {% for course_outline in course_outlines %}
+    <div class="course-outline">
+      <!---------- AI GENERATED ---------->
+      <p class="title">COURSE OUTLINE</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>TIME FRAME</th>
+            <th>COURSE CONTENT (No. of Hours/Topic)</th>
+            <th>DESIRED STUDENT LEARNING OUTCOMES/COMPETENCIES At the end of each topic and semester, the students can:
+            </th>
+            <th>OUTCOME-BASED (OBA) ACTIVITIES (Teaching & Learning Activities)</th>
+            <th>EVIDENCE OF OUTCOMES (Assessment of Learning Outcome)</th>
+            <th>COURSE LEARNING OUTCOMES</th>
+            <th>PROGRAM OUTCOMES</th>
+            <th>VALUES INTENDED</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr>
+            <td></td>
+            <td colspan="7" class="title">Topic {{ forloop.counter }}{% if forloop.first %} (Cont.){% endif %}: {{
+              course_outline.topic }}</td>
+          </tr>
+          <tr>
+            <td>{{ course_outline.week }}</td>
+
+            <td class="baseline">
+              {% for course_content in course_outline.course_content_set.all %}
+              <p>✓ {{ course_content.course_content }}</p>
+              {% endfor %}
+            </td>
+
+            <td class="baseline">
+              {% for dslo in course_outline.desired_student_learning_outcome_set.all %}
+              <p>✓ {{ dslo.dslo }}</p>
+              {% endfor %}
+            </td>
+
+            <td class="baseline">
+              {% for oba in course_outline.outcome_based_activity_set.all %}
+              <p>✓ {{ oba.oba }}</p>
+              {% endfor %}
+            </td>
+
+            <td class="baseline">
+              {% for eoo in course_outline.evidence_of_outcome_set.all %}
+              <p>✓ {{ eoo.eoo }}</p>
+              {% endfor %}
+            </td>
+
+            <td>{{ course_outline.course_learning_outcomes }}</td>
+
+            <td>{% for course_outcome in course_outcomes %}{{ forloop.counter|alphabet }}{% if not forloop.last %}, {%
+              endif %}{% endfor %}</td>
+
+            <td class="baseline">
+              {% for values in course_outline.values_intended_set.all %}
+              <p>✓ {{ values.values }}</p>
+              {% endfor %}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    {% endfor %}
+
+    <div class="below-info">
+      <table>
+        <thead>
+          <tr>
+            <th>Prepared by:</th>
+            <th>Recommending Approval by:</th>
+            <th>Concurred by:</th>
+            <th>Approved by:</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="personel">
+            <td>{% for prepared in prepares %}<p>{{ prepared.fullname }}</p>{% endfor %}</td>
+            <td>{{ syllabus.recommending_approval_name }}</td>
+            <td>{{ syllabus.concured_name }}</td>
+            <td>{{ syllabus.approved_name }}</td>
+          </tr>
+
+          <tr>
+            <td>Instructor</td>
+            <td>{{ syllabus.recommending_approval_position }}</td>
+            <td>{{ syllabus.concured_position }}</td>
+            <td>{{ syllabus.approved_position }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+
+</html>

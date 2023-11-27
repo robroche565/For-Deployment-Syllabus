@@ -1,0 +1,2032 @@
+{% extends '../../base/base_userpage.html' %}
+
+{% load static %}
+
+{% block title %}Generated Info{% endblock %}
+{% block content %}
+<main class="col-md-9 ms-sm-auto col-lg-9 col-xl-10 p-md-4" >
+    <div class="w-100 text-light">
+        <div class="multisteps-form">
+            <!--progress bar-->
+            <div class="row d-none">
+                <div class="col-12 col-lg-8 ml-auto mr-auto mb-4">
+                <div class="multisteps-form__progress">
+                    <button class="multisteps-form__progress-btn js-active" type="button" title="User Info">User Info</button>
+                    <button class="multisteps-form__progress-btn" type="button" title="Address">Address</button>
+                    <button class="multisteps-form__progress-btn" type="button" title="Order Info">Order Info</button>
+                    <button class="multisteps-form__progress-btn" type="button" title="Comments">Comments</button>
+                </div>
+                </div>
+            </div>
+            <!--form panels-->
+            <div class="row mt-2 px-3 mt-lg-0 px-lg-0">
+                <div class="col-12 col-lg-12 m-auto">
+                    <div class="multisteps-form__form">
+                        <!--single form panel-->
+                        <div class="multisteps-form__panel shadow p-4 rounded background-color-custom js-active" data-animation="fadeIn">
+                            <div class="d-flex">
+                                <div class="flex-grow-1"><h3 class="multisteps-form__title">Generated Information</h3></div>
+                            </div>
+                            <hr>
+                            <div class="multisteps-form__content ">
+                                <div class="container-fluid scroll overflow-auto">
+                                    <h4>Syllabus Course Subject: {{ syllabus.course_name }} </h4>
+                                    <hr>
+                                    <h4>Course Learning Outcome</h4>
+                                    <ul class="list-group">
+                                        {% for clo in course_learning_outcomes %}
+                                        <li class="list-group-item text-light">{{ clo.course_learning_outcome }}</li>
+                                        {% endfor %}
+                                    </ul>
+
+                                    <div class="row my-3">
+                                        <div class="cust-head d-flex align-items-center">
+                                            <h4>Course Rubric</h4>
+                                            <button class="badge bg-primary rounded-pill border-0 ms-3" data-bs-toggle="modal" data-bs-target="#addCourseRubricmodal">
+                                                <i class='bx bx-plus-circle'></i>
+                                            </button>
+                                        </div>
+                                        <div class="course_rubric_body" id="course_rubric_body">
+                                            <div id="course_rubric_rubric_rubric">
+
+                                            </div>
+                                            {% for rubric in course_rubric %}
+                                                <div class="course_rubric" id="course_rubric-{{ rubric.id }}">
+                                                    <table class="table rounded-corners text-white cust-tbl">
+                                                        <tr class="course_rubric">
+                                                            <th class="text-center" colspan="7">
+                                                                <span>{{ rubric.title }} </span>
+                                                                <button type="button" class="badge bg-primary rounded-pill border-0 add-rubric-item-btn"
+                                                                        data-rubric-id="{{ rubric.id }}" data-bs-toggle="modal" data-bs-target="#addCourseRubricItemmodal">
+                                                                    <i class='bx bx-plus-circle'></i> Add Rubric Item
+                                                                </button>
+                                                                <button type="button" class="badge bg-primary rounded-pill border-0" onClick="editCourseRubric({{ rubric.id }})" data-bs-toggle="modal" data-bs-target="#editCourseRubricmodal">
+                                                                    <i class='bx bx-edit-alt'></i>
+                                                                </button>
+                                                                <button class="badge bg-primary rounded-pill border-0" onClick="deleteCourseRubric({{ rubric.id }})">
+                                                                    <i class='bx bxs-trash'></i>
+                                                                </button>
+                                                                <button class="badge bg-primary rounded-pill border-0 ms-3"
+                                                                        id="regenerateCourseRubricBtn"
+                                                                        onclick="regenerateCourseRubric('{{ syllabus.id }}', '{{ syllabus.syllabus_ai_id.id }}', '{{ rubric.id }}')">
+                                                                    Regenerate
+                                                                    <i class='bx bx-refresh'></i>
+                                                                </button>
+                                                                <div class="ms-2 Spinner_for_CourseRubric visually-hidden" id="loading_for_CourseRubric-{{ rubric.id }}">
+                                                                    <div class="spinner-border spinner-border-sm" role="status">
+                                                                        <span class="visually-hidden">Loading...</span>
+                                                                    </div>
+                                                                    <span>Getting New Info</span>
+                                                                </div>
+                                                            </th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th class="text-start">Criteria</th>
+                                                            <th class="text-center">Beginner 1-2/5</th>
+                                                            <th class="text-center">Capable 3/5</th>
+                                                            <th class="text-center">Accomplished 4/5 </th>
+                                                            <th class="text-center">Expert 5/5</th>
+                                                            <th class="text-center">Edit</th>
+                                                        </tr>
+                                                        <tbody id="course_rubric_item_body-{{ rubric.id }}">
+                                                            {% for rubric_item in course_rubric_item %}
+                                                                {% if rubric_item.course_rubric_id == rubric %}
+                                                                    <tr id="course_rubric_item_body_row-{{ rubric_item.id }}">
+                                                                        <td class="text-start" id="criteria_row" style="border-top-color:white;">{{ rubric_item.criteria }}</td>
+                                                                        <td class="text-center" id="beginner_row" style="border-top-color:white;">{{ rubric_item.beginner }}</td>
+                                                                        <td class="text-center" id="capable_row" style="border-top-color:white;">{{ rubric_item.capable }}</td>
+                                                                        <td class="text-center" id="accomplished_row" style="border-top-color:white;">{{ rubric_item.accomplished }}</td>
+                                                                        <td class="text-center" id="expert_row" style="border-top-color:white;">{{ rubric_item.expert }}</td>
+                                                                        <td class="align-middle col-1" style="border-top-color:white;">
+                                                                            <div class="text-center">
+                                                                                <button type="button" class="badge bg-primary rounded-pill border-0"
+                                                                                    onClick="editCourseRubricItem({{ rubric_item.id }})" data-bs-toggle="modal" data-bs-target="#editCourseRubricItemModal">
+                                                                                    <i class='bx bx-edit-alt'></i>
+                                                                                </button>
+                                                                                <button class="badge bg-primary rounded-pill border-0" onClick="deleteCourseRubricItem({{ rubric_item.id }})">
+                                                                                    <i class='bx bxs-trash'></i>
+                                                                                </button>
+                                                                            </div>
+                                                                        </td>
+                                                                    </tr>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <div class="my-3">
+                                        <div class="cust-head d-flex align-items-center">
+                                            <h4>Course Outline</h4>
+                                            <button class="badge bg-primary rounded-pill border-0 ms-3" data-bs-toggle="modal" data-bs-target="#addCourseOutlinemodal">
+                                                <i class='bx bx-plus-circle'></i>
+                                            </button>
+                                        </div>
+                                        <br>
+                                        <div class="course-outline-body" id="course-outline-body">
+                                            {% for outline in course_outline %}
+                                            <div class="course_outline-{{ outline.id }}" id="course_outline-{{ outline.id }}">
+                                                <table class="table rounded-corners text-white cust-tbl">
+                                                    <tr class="text-center">
+                                                        <th>Time Frame</th>
+                                                        <th>COURSE CONTENT (No. of Hours/Topic)<br>
+                                                            <button class="badge bg-primary rounded-pill border-0 ms-3" data-bs-toggle="modal" onClick="addNewCourseContent({{ outline.id }})" data-bs-target="#add_new_CourseContent_modal">
+                                                                <i class='bx bx-plus-circle'></i>
+                                                            </button>
+                                                        </th>
+                                                        <th>DESIRED STUDENT LEARNING OUTCOMES/COMPETENCIES<br>
+                                                            <button class="badge bg-primary rounded-pill border-0 ms-3" data-bs-toggle="modal" onClick="addNewDSLO({{ outline.id }})" data-bs-target="#add_new_DSLO_modal">
+                                                                <i class='bx bx-plus-circle'></i>
+                                                            </button>
+                                                        </th>
+                                                        <th>OUTCOME-BASED (OBA) ACTIVITIES<br>
+                                                            <button class="badge bg-primary rounded-pill border-0 ms-3" data-bs-toggle="modal" onClick="addNewOBA({{ outline.id }})" data-bs-target="#add_new_OBA_modal">
+                                                                <i class='bx bx-plus-circle'></i>
+                                                            </button>
+                                                        </th>
+                                                        <th>EVIDENCE OF OUTCOMES<br>
+                                                            <button class="badge bg-primary rounded-pill border-0 ms-3" data-bs-toggle="modal" onClick="addNewEOO({{ outline.id }})" data-bs-target="#add_new_EOO_modal">
+                                                                <i class='bx bx-plus-circle'></i>
+                                                            </button>
+                                                        </th>
+                                                        <th>COURSE LEARNING OUTCOMES</th>
+                                                        <th>VALUES INTEGRATED<br>
+                                                            <button class="badge bg-primary rounded-pill border-0 ms-3" data-bs-toggle="modal" onClick="addNewValues({{ outline.id }})" data-bs-target="#add_new_Values_modal">
+                                                                <i class='bx bx-plus-circle'></i>
+                                                            </button>
+                                                        </th>
+                                                    </tr>
+                                                    <tr id="course_outline-{{ outline.id }}">
+                                                        <th class="text-center">
+                                                        </th>
+                                                        <th colspan="6"><span id="topic">{{ outline.topic }}</span>
+                                                            <button type="button" class="badge bg-primary rounded-pill border-0" onClick="editCourseOutline({{ outline.id }})" data-bs-toggle="modal" data-bs-target="#editCourseOutlineModal">
+                                                                <i class='bx bx-edit-alt'></i>
+                                                            </button>
+                                                            <button class="badge bg-primary rounded-pill border-0" onClick="deleteCourseOutline({{ outline.id }})">
+                                                                <i class='bx bxs-trash'></i>
+                                                            </button>
+                                                            <button class="badge bg-primary rounded-pill border-0 ms-3" id="regenerateCourseOutlineBtn"
+                                                            onclick="regenerateCourseOutline('{{ syllabus.id }}', '{{ syllabus.syllabus_ai_id.id }}', '{{ outline.id }}')">
+                                                                Regenerate
+                                                                <i class='bx bx-refresh'></i>
+                                                            </button>
+                                                            <div class="ms-2 Spinner_for_CourseOutline visually-hidden" id="loading_for_CourseOutline-{{ outline.id }}">
+                                                                <div class="spinner-border spinner-border-sm" role="status">
+                                                                    <span class="visually-hidden">Loading...</span>
+                                                                </div>
+                                                                <span>Getting New Info</span>
+                                                            </div>
+                                                        </th>
+                                                    </tr>
+                                                    <tr id="course_outline-{{ outline.id }}">
+                                                        <td class="text-center align-middle" id="week">{{ outline.week }}</td>
+                                                        <td class="course_content-section-{{ outline.id }}">
+                                                            <ul class="list-unstyled">
+                                                                {% for content in course_contents %}
+                                                                    {% if content.course_outline_id == outline %}
+                                                                        <li class="mb-2" data-id="{{ content.id }}">
+                                                                            {{ content.course_content }}
+                                                                        </li>
+                                                                    {% endif %}
+                                                                {% endfor %}
+                                                            </ul>
+                                                        </td>
+                                                        <td class="dslo-section-{{ outline.id }}">
+                                                            <ul class="list-unstyled">
+                                                                {% for dslo in dslos %}
+                                                                    {% if dslo.course_outline_id == outline %}
+                                                                        <li class="mb-2" data-id="{{ dslo.id }}">
+                                                                            {{ dslo.dslo }}
+                                                                        </li>
+                                                                    {% endif %}
+                                                                {% endfor %}
+                                                            </ul>
+                                                        </td>
+                                                        <td class="oba-section-{{ outline.id }}">
+                                                            <ul class="list-unstyled" >
+                                                                {% for oba in obas %}
+                                                                    {% if oba.course_outline_id == outline %}
+                                                                        <li class="mb-2" data-id="{{ oba.id }}">
+                                                                            {{ oba.oba }}
+                                                                        </li>
+                                                                    {% endif %}
+                                                                {% endfor %}
+                                                            </ul>
+                                                        </td>
+                                                        <td class="eoo-section-{{ outline.id }}">
+                                                            <ul class="list-unstyled" >
+                                                                {% for eoo in eoos %}
+                                                                    {% if eoo.course_outline_id == outline %}
+                                                                        <li class="mb-2" data-id="{{ eoo.id }}">
+                                                                            {{ eoo.eoo }}
+                                                                        </li>
+                                                                    {% endif %}
+                                                                {% endfor %}
+                                                            </ul>
+                                                        </td>
+                                                        <td class="text-center align-middle" id="course_learning_outcome">{{ outline.course_learning_outcomes }}</td>
+                                                        <td class="value-section-{{ outline.id }}">
+                                                            <ul class="list-unstyled" >
+                                                                {% for value in values %}
+                                                                    {% if value.course_outline_id == outline %}
+                                                                        <li class="mb-2" data-id="{{ value.id }}">
+                                                                            {{ value.values }}
+                                                                        </li>
+                                                                    {% endif %}
+                                                                {% endfor %}
+                                                            </ul>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="row d-flex justify-content-between mt-3">
+                                <div class="col-6 col-lg-auto">
+                                    <a href="{% url 'show_syllabus_first' syllabus.syllabus_ai_id.id %}" class="btn btn-primary" type="button" title="Prev">Back</a>
+                                </div>
+                                <div class="col-6 col-lg-auto">
+                                    <a href="#" class="btn btn-primary ml-auto" type="button" onclick="openInNewTab('{% url 'pdf' syllabus.id%}')">Finish</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Add Course Rubric Modal -->
+    <div class="modal fade text-light" id="addCourseRubricmodal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable text-light">
+            <div class="modal-content text-light" style="background-color: #202022">
+                <form id="addCourseRubricForm">
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5 text-light">Add Course Rubric</h1>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body overflow-auto text-light" style="max-height: 500px">
+                        <div class="form-group">
+                            <div class="row mb-2">
+                                <div class="col-lg-12">
+                                    <label for="title" class="form-label">Title</label>
+                                    <input type="text" class="form-control" id="rubric_title" name="rubric_title" placeholder="Enter Title of Rubric Here">
+                                </div>
+                            </div>
+                            <input type="hidden" name="syllabus_ai_id" value="{{ syllabus_ai.id }}">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" type="submit" >Add Course Rubric</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Edit Course Rubric Modal -->
+    <div class="modal fade text-light" id="editCourseRubricmodal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered  text-light">
+            <div class="modal-content text-light" style="background-color: #202022">
+                <form id="updateCourseRubricForm">
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5 text-light">Edit Course Rubric</h1>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body overflow-auto text-light" style="max-height: 500px">
+                        <div class="form-group">
+                            <div class="row mb-2">
+                                <div class="col-lg-12">
+                                    <label for="new_rubric_title" class="form-label">Title</label>
+                                    <input type="text" class="form-control" id="new_rubric_title" name="new_rubric_title" placeholder="Enter Title of Rubric Here">
+                                </div>
+                            </div>
+                            <input class="form-control" id="crID" type="hidden" name="crID"/>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" type="submit" >Save Changes</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Course Rubric Item Modal -->
+    <div class="modal fade text-light" id="addCourseRubricItemmodal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable text-light">
+            <div class="modal-content text-light" style="background-color: #202022">
+                <form id="addCourseRubricItemForm">
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5 text-light">Add Course Rubric Item</h1>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body overflow-auto text-light" style="max-height: 500px">
+                        <div class="form-group">
+                            <div class="row mb-2">
+                                <div class="col-lg-12">
+                                    <label for="criteria" class="form-label">Criteria</label>
+                                    <input type="text" class="form-control" id="criteria" name="criteria" placeholder="Enter Criteria">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="mb-2">
+                                        <label for="beginner" class="form-label">Beginner 1-2/5</label>
+                                        <textarea class="form-control" id="beginner" name="beginner" rows="2"></textarea>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label for="capable" class="form-label">Capable 3/5</label>
+                                        <textarea class="form-control" id="capable" name="capable" rows="2"></textarea>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="mb-2">
+                                        <label for="accomplished" class="form-label">Accomplished 4/5</label>
+                                        <textarea class="form-control" id="accomplished" name="accomplished" rows="2"></textarea>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label for="expert" class="form-label">Expert 5/5</label>
+                                        <textarea class="form-control" id="expert" name="expert" rows="2"></textarea>
+                                    </div>
+                                </div>
+                                <div class="col-6"></div>
+                            </div>
+                            <input type="hidden" name="course_rubric_id" value="{{ rubric.id }}">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" type="submit" >Add Rubric Item</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Course Rubric Item Modal -->
+    <div class="modal fade text-light" id="editCourseRubricItemModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable text-light">
+            <div class="modal-content text-light" style="background-color: #202022">
+                <form id="editCourseRubricItemForm">
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5 text-light">Edit Course Rubric Item</h1>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body overflow-auto text-light" style="max-height: 500px">
+                        <div class="form-group">
+                            <div class="row mb-2">
+                                <div class="col-lg-12">
+                                    <label for="editCriteria" class="form-label">Criteria</label>
+                                    <input type="text" class="form-control" id="editCriteria" name="editCriteria" placeholder="Enter Criteria">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="mb-2">
+                                        <label for="editBeginner" class="form-label">Beginner 1-2/5</label>
+                                        <textarea type="text" class="form-control" id="editBeginner" name="editBeginner" rows="2"></textarea>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label for="editCapable" class="form-label">Capable 3/5</label>
+                                        <textarea class="form-control" id="editCapable" name="editCapable" rows="2"></textarea>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="mb-2">
+                                        <label for="editAccomplished" class="form-label">Accomplished 4/5</label>
+                                        <textarea class="form-control" id="editAccomplished" name="editAccomplished" rows="2"></textarea>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label for="editExpert" class="form-label">Expert 5/5</label>
+                                        <textarea class="form-control" id="editExpert" name="editExpert" rows="2"></textarea>
+                                    </div>
+                                </div>
+                                <div class="col-6"></div>
+                            </div>
+                            <input type="hidden" name="editCourseRubricItemId" id="editCourseRubricItemId" value="">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" type="submit">Save Changes</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Course Outline Modal -->
+    <div class="modal fade text-light" id="addCourseOutlinemodal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable text-light">
+            <div class="modal-content text-light" style="background-color: #202022">
+                <form id="addCourseOutlineForm">
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5 text-light">Add Course Outline</h1>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body overflow-auto text-light" style="max-height: 500px">
+                        <div class="form-group">
+                            <div class="row mb-2">
+                                <div class="col-lg-6">
+                                    <label for="Topic" class="form-label">Topic</label>
+                                    <input type="text" class="form-control" id="Topic" name="Topic" placeholder="Enter Topic Here">
+                                </div>
+                                <div class="col-lg-2">
+                                    <label for="time_frame" class="form-label">Time Frame</label>
+                                    <input type="text" class="form-control" id="time_frame" name="time_frame" placeholder="Weeks">
+                                </div>
+                                <div class="col-lg-4">
+                                    <label for="clo" class="form-label">Course Learning Outcome</label>
+                                    <input type="text" class="form-control" id="clo" name="clo" placeholder="Course Learning Outcome">
+                                </div>
+                            </div>
+                            <div class="row my-2">
+                                <div class="col-lg-6">
+                                    <div class="mb-3 col-lg-12">
+                                        <div class="pb-1"><label class="me-3">Course Content</label></div>
+                                        <div class="CourseContent" id="courseContentContainer">
+                                          <!-- Initial input field -->
+                                          <div class="input-group pb-2">
+                                            <textarea class="form-control" rows="2" name="course_content"></textarea>
+                                            <button class="btn btn-danger remove-content" type="button"><i class='bx bx-minus-circle'></i></button>
+                                          </div>
+                                        </div>
+                                        <div class="col-12">
+                                          <button class="btn btn-success btn-sm add-content" type="button" >Add Course Content</button>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3 col-lg-12">
+                                        <div class="pb-1"><label class="me-3">Desired Student Learning Outcome</label></div>
+                                        <div class="desired-student-learning-outcome">
+                                            <div class="input-group pb-2">
+                                                <textarea class="form-control dslo-text" rows="2" name="dslo"></textarea>
+                                                <button class="btn btn-danger remove-dslo" type="button"><i class='bx bx-minus-circle'></i></button>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <button class="btn btn-success btn-sm add-dslo" type="button">Add DSLO</button>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3 col-lg-12">
+                                        <div class="pb-1"><label class="me-3">Outcome Based Activity</label></div>
+                                        <div class="outcome-based-activity">
+                                            <div class="input-group pb-2">
+                                                <textarea class="form-control oba-text" rows="2" name="oba"></textarea>
+                                                <button class="btn btn-danger remove-oba" type="button"><i class='bx bx-minus-circle'></i></button>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <button class="btn btn-success btn-sm add-oba" type="button">Add OBA</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="mb-3 col-lg-12">
+                                        <div class="pb-1"><label class="me-3">Evidence of Outcome</label></div>
+                                        <div class="evidence-of-outcome">
+                                            <div class="input-group pb-2">
+                                                <textarea class="form-control eoo-text" rows="2" name="eoo"></textarea>
+                                                <button class="btn btn-danger remove-eoo" type="button"><i class='bx bx-minus-circle'></i></button>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <button class="btn btn-success btn-sm add-eoo" type="button">Add EOO</button>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3 col-lg-12">
+                                        <div class="pb-1"><label class="me-3">Values Intended</label></div>
+                                        <div class="values-intended">
+                                            <div class="input-group pb-2">
+                                                <textarea class="form-control values-text" rows="2" name="values"></textarea>
+                                                <button class="btn btn-danger remove-values" type="button"><i class='bx bx-minus-circle'></i></button>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <button class="btn btn-success btn-sm add-values" type="button">Add Values</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="hidden" name="syllabus_ai_id" value="{{ syllabus_ai.id }}">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" type="submit" id="submitBtn">Add Course Outline</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Edit Course Outline Modal -->
+    <div class="modal fade text-light" id="editCourseOutlineModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable text-light">
+            <div class="modal-content text-light" style="background-color: #202022">
+                <form id="editCourseOutlineForm">
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5 text-light">Edit Course Outline</h1>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body overflow-auto text-light" style="max-height: 500px">
+                        <div class="form-group">
+                            <div class="row mb-2">
+                                <div class="col-lg-6">
+                                    <label for="EditTopic" class="form-label">Topic</label>
+                                    <input type="text" class="form-control" id="EditTopic" name="EditTopic" placeholder="Enter Topic Here">
+                                </div>
+                                <div class="col-lg-2">
+                                    <label for="EditTimeFrame" class="form-label">Time Frame</label>
+                                    <input type="text" class="form-control" id="EditTimeFrame" name="EditTimeFrame" placeholder="Weeks">
+                                </div>
+                                <div class="col-lg-4">
+                                    <label for="EditCLO" class="form-label">Course Learning Outcome</label>
+                                    <input type="text" class="form-control" id="EditCLO" name="EditCLO" placeholder="Course Learning Outcome">
+                                </div>
+                            </div>
+                            <div class="row my-2">
+                                <div class="col-lg-6">
+                                    <div class="mb-3">
+                                        <div class="pb-1"><label class="me-3">Course Content</label></div>
+                                        <div class="CourseContent" id="editCourseContentContainer">
+                                            <!-- Initial input field will be populated dynamically -->
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="pb-1"><label class="me-3">Desired Student Learning Outcome</label></div>
+                                        <div class="desired-student-learning-outcome" id="editDSLOContainer">
+                                            <!-- Initial input field will be populated dynamically -->
+                                        </div>
+                                    </div>
+                                    <!-- Outcome-Based Activity (OBA) -->
+                                    <div class="row my-2">
+                                        <div class="mb-3">
+                                            <div class="pb-1"><label class="me-3">Outcome-Based Activity</label></div>
+                                            <div class="outcome-based-activity" id="editOBAContainer">
+                                                <!-- Initial input field will be populated dynamically -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="mb-3">
+                                        <div class="pb-1"><label class="me-3">Evidence of Outcome</label></div>
+                                        <div class="evidence-of-outcome" id="editEOOContainer">
+                                            <!-- Initial input field will be populated dynamically -->
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="pb-1"><label class="me-3">Values Intended</label></div>
+                                        <div class="values-intended" id="editValuesContainer">
+                                            <!-- Initial input field will be populated dynamically -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <input class="form-control" id="EditOutlineId" type="hidden" name="EditOutline_Id"/>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" type="submit" id="editSubmitBtn">Save Changes</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Add Course Content Modal -->
+    <div class="modal fade" id="add_new_CourseContent_modal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="background-color: #202022">
+                <form id="addNewCourseContentForm">
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5 text-light">Add Course Content</h1>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <textarea class="form-control" rows="2" name="NewCourseContent" placeholder="Add New Course Content" required></textarea>
+                            <input type="hidden" name="course_outline_id" id="course_outline_id" value="">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" type="submit" id="submitBtn">Add Course Content</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Add DSLO Modal -->
+    <div class="modal fade" id="add_new_DSLO_modal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="background-color: #202022">
+                <form id="addNewDSLOForm">
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5 text-light">Add Desired Student Learning Outcome (DSLO)</h1>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <textarea class="form-control" rows="2" name="NewDSLO" placeholder="Add New DSLO" required></textarea>
+                            <input type="hidden" name="course_outline_id" id="dslo_course_outline_id" value="">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" type="submit" id="dslo_submitBtn">Add DSLO</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Add OBA Modal -->
+    <div class="modal fade" id="add_new_OBA_modal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="background-color: #202022">
+                <form id="addNewOBAForm">
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5 text-light">Add Outcome-Based Activity (OBA)</h1>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <textarea class="form-control" rows="2" name="NewOBA" placeholder="Add New OBA" required></textarea>
+                            <input type="hidden" name="course_outline_id" id="oba_course_outline_id" value="">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" type="submit" id="oba_submitBtn">Add OBA</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Add EOO Modal -->
+    <div class="modal fade" id="add_new_EOO_modal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="background-color: #202022">
+                <form id="addNewEOOForm">
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5 text-light">Add Evidence of Outcome (EOO)</h1>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <textarea class="form-control" rows="2" name="NewEOO" placeholder="Add New EOO" required></textarea>
+                            <input type="hidden" name="course_outline_id" id="eoo_course_outline_id" value="">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" type="submit" id="eoo_submitBtn">Add EOO</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Add Values Modal -->
+    <div class="modal fade" id="add_new_Values_modal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="background-color: #202022">
+                <form id="addNewValuesForm">
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5 text-light">Add Values Integrated</h1>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <textarea class="form-control" rows="2" name="NewValues" placeholder="Add New Values Intended" required></textarea>
+                            <input type="hidden" name="course_outline_id" id="values_course_outline_id" value="">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" type="submit" id="values_submitBtn">Add Values Intended</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Toaster -->
+    <div class="toast-container position-fixed top-0 end-0 p-3 text-light" >
+        <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" style="background-color:#373738;">
+          <div class="toast-header text-light" style="background-color:#212122;">
+            <img src="{% static 'images/logo.png' %}" class="rounded me-2" alt="..." style="width:20px;">
+            <strong class="me-auto text-light">Error Generating</strong>
+            <small>Just Now</small>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+          <div class="toast-body">
+          </div>
+        </div>
+    </div>
+</main>
+{% endblock %}
+{% block scripts %}
+<script>
+    function openInNewTab(url) {
+        window.open(url, '_blank');
+    }
+    function playAudio(audioPath) {
+        var audio = new Audio(staticAudioPath);
+        audio.play();
+    }
+
+    $(document).on('submit', 'form#addCourseRubricForm', function (event) {
+        event.preventDefault();
+        var rubricTitle = $(this).find('input[name="rubric_title"]').val().trim();
+        var syllabusAiId = $(this).find('input[name="syllabus_ai_id"]').val();
+    
+        if (rubricTitle) {
+            var csrftoken = $("[name=csrfmiddlewaretoken]").val();
+    
+            $.ajax({
+                type: "POST",
+                url: '{% url "add_course_rubric" %}',
+                data: {
+                    'rubric_title': rubricTitle,
+                    'syllabus_ai_id': syllabusAiId,
+                    csrfmiddlewaretoken: csrftoken,
+                },
+                dataType: 'json',
+                success: function (data) {
+                    if (data.id) {
+                        appendToRubricTable(data);
+                        // Close the modal after a successful submission
+                        $('#addCourseRubricmodal').modal('hide');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert("Error adding Course Rubric. Please try again.");
+                    console.error("AJAX error:", error);
+                }
+            });
+        } else {
+            alert("Rubric title is required.");
+        }
+    
+        $(this)[0].reset();
+    });
+    // Add this function to your JavaScript
+    function appendToRubricTable(data) {
+        // Assuming data contains the necessary information for the new course_rubric div
+        var newRubricDiv = `
+            <div class="course_rubric" id="course_rubric-${data.id}">
+                <table class="table rounded-corners text-white cust-tbl">
+                    <tr class="course_rubric">
+                        <th class="text-center" colspan="7">
+                            <span>${data.title} </span>
+                            <button type="button" class="badge bg-primary rounded-pill border-0 add-rubric-item-btn"
+                                    data-rubric-id="${data.id}" data-bs-toggle="modal" data-bs-target="#addCourseRubricItemmodal">
+                                <i class='bx bx-plus-circle'></i> Add Rubric Item
+                            </button>
+                            <button type="button" class="badge bg-primary rounded-pill border-0" onClick="editCourseRubric(${data.id})" data-bs-toggle="modal" data-bs-target="#">
+                                <i class='bx bx-edit-alt'></i>
+                            </button>
+                            <button class="badge bg-primary rounded-pill border-0" onClick="deleteCourseRubric(${data.id})">
+                                <i class='bx bxs-trash'></i>
+                            </button>
+                            <button class="badge bg-primary rounded-pill border-0 ms-3"
+                                    id="regenerateCourseRubricBtn"
+                                    onclick="regenerateCourseRubric('{{ syllabus.id }}', '{{ syllabus.syllabus_ai_id.id }}', '${data.id}')">
+                                Regenerate
+                                <i class='bx bx-refresh'></i>
+                            </button>
+                            <div class="ms-2 Spinner_for_CourseRubric visually-hidden" id="loading_for_CourseRubric-${data.id}">
+                                <div class="spinner-border spinner-border-sm" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <span>Getting New Info</span>
+                            </div>
+                        </th>
+                    </tr>
+                    <tr>
+                        <th class="text-start">Criteria</th>
+                        <th class="text-center">Beginner 1-2/5</th>
+                        <th class="text-center">Capable 3/5</th>
+                        <th class="text-center">Accomplished 4/5 </th>
+                        <th class="text-center">Expert 5/5</th>
+                        <th class="text-center">Edit</th>
+                    </tr>
+                    <tbody id="course_rubric_item_body-${data.id}">
+                    </tbody>
+                </table>
+            </div>
+        `;
+        // Append the newRubricDiv to the course_rubric_body
+        $('#course_rubric_body').append(newRubricDiv);
+    }
+
+    function deleteCourseRubric(rubricId) {
+        // Show a confirmation dialog before proceeding with deletion
+        var confirmDelete = confirm("Are you sure you want to delete this Course Rubric?");
+        
+        if (confirmDelete) {
+            var csrftoken = $("[name=csrfmiddlewaretoken]").val();
+    
+            $.ajax({
+                type: "GET",
+                url: '{% url "delete_course_rubric" %}',
+                data: {
+                    'rubric_id': rubricId,
+                    csrfmiddlewaretoken: csrftoken,
+                },
+                dataType: 'json',
+                success: function (data) {
+                    if (data.deleted) {
+                        // Perform any additional actions after successful deletion
+                        // For example, remove the corresponding HTML element
+                        $('#course_rubric-' + data.rubric_id).remove();
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert("Error deleting Course Rubric. Please try again.");
+                    console.error("AJAX error:", error);
+                }
+            });
+        }
+    }
+
+    // Check the flag in local storage and scroll if necessary
+    if (localStorage.getItem('scrollToCourseRubric') === 'true') {
+        scrollToCourseRubric(localStorage.getItem('courseRubricId'));
+        localStorage.removeItem('scrollToCourseRubric'); // Remove the flag
+    }
+
+    function scrollToCourseRubric(rubricId) {
+        var courseRubricElement = document.getElementById("course_rubric-" + rubricId);
+        if (courseRubricElement) {
+            courseRubricElement.scrollIntoView({ behavior: "smooth" });
+        }
+    }
+
+    function regenerateCourseRubric(syllabus, syllabusai, rubricId) {
+        // Set a flag in local storage to indicate that scrolling should occur
+        localStorage.setItem('scrollToCourseRubric', 'true');
+        // Store the rubricId in local storage for later use
+        localStorage.setItem('courseRubricId', rubricId);
+
+        // Hide the button and show the loading spinner
+        $('#regenerateCourseRubricBtn').addClass('visually-hidden');
+        $('#loading_for_CourseRubric-' + rubricId).removeClass('visually-hidden');
+
+        $.ajax({
+            type: "POST",
+            url: '{% url "regenerate_course_rubric" %}',
+            data: {
+                'syllabus': syllabus,
+                'syllabus_ai': syllabusai,
+                'rubric_id': rubricId,
+            },
+            headers: {
+                "X-CSRFToken": $("[name=csrfmiddlewaretoken]").val(),
+            },
+            dataType: 'json',
+            success: function (data) {
+                if (data.success) {
+                    playAudio();
+
+                    // Delay the page reload by 1 second
+                    setTimeout(function () {
+                        // Reload the page after processing
+                        location.reload();
+                    }, 1000);
+                } else {
+                    console.error("Regeneration failed. Please try again.");
+                    showToast('Error Generating', 'Regeneration failed. Please try again.');
+                }
+
+                // Handle the response data here
+                console.log('Response Data:', data);
+            },
+            error: function (xhr, status, error) {
+                console.error("AJAX error:", error);
+
+                // Hide the loading spinner and show the button
+                $('#loading_for_CourseRubric').addClass('visually-hidden');
+                $('#regenerateCourseRubricBtn').removeClass('visually-hidden');
+
+                // Display error toast
+                showToast('Error Generating', 'An error occurred during regeneration. Please try reloading the page');
+            },
+        });
+
+        function showToast(title, message) {
+            // Set title and message in the toast
+            $('#liveToast .toast-header strong').text(title);
+            $('#liveToast .toast-body').text(message);
+
+            // Show the toast
+            $('#liveToast').toast('show');
+        }
+    }
+    // Edit Course Rubric Modal Submission
+    $(document).on('submit', 'form#updateCourseRubricForm', function (event) {
+        event.preventDefault();
+
+        var rubricId = $(this).find('input[name="crID"]').val().trim();
+        var newRubricTitle = $(this).find('input[name="new_rubric_title"]').val().trim();
+
+        if (rubricId && newRubricTitle) {
+            var csrftoken = $("[name=csrfmiddlewaretoken]").val();
+
+            $.ajax({
+                type: "GET",
+                url: '{% url "update_course_rubric" %}',
+                data: {
+                    'rubric_id': rubricId,
+                    'new_rubric_title': newRubricTitle,
+                    csrfmiddlewaretoken: csrftoken,
+                },
+                dataType: 'json',
+                success: function (data) {
+                    if (data.rubric_id) {
+                        updateToRubricTable(data);
+                        $('#editCourseRubricmodal').modal('hide');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert("Error updating Course Rubric. Please try again.");
+                    console.error("AJAX error:", error);
+                }
+            });
+        } else {
+            alert("All fields must have a valid value.");
+        }
+
+        $(this)[0].reset();
+    });
+
+    function editCourseRubric(id) {
+        if (id) {
+            tr_id = "#course_rubric-" + id;
+            title = $(tr_id).find(".course_rubric th span:not(.Spinner_for_CourseRubric span)").text().trim();
+    
+            // Set the input field value in the modal
+            $('#new_rubric_title').val(title);
+            $('#crID').val(id);
+    
+            // Show the modal
+            $('#editCourseRubricmodal').modal('show');
+        }
+    }
+
+    // Function to update the Course Rubric title in the table
+    function updateToRubricTable(data) {
+        var rubricRow = $("#course_rubric_body #course_rubric-" + data.rubric_id);
+        rubricRow.find(".course_rubric th span").text(data.rubric_title);
+    }
+    // Assuming you have a button with the class 'add-rubric-item-btn'
+    $(document).on('click', '.add-rubric-item-btn', function () {
+        var rubricId = $(this).data('rubric-id');
+        // Set the course_rubric_id in the form
+        $('#addCourseRubricItemmodal').find('input[name="course_rubric_id"]').val(rubricId);
+
+        // Show the modal
+        $('#addCourseRubricItemmodal').modal('show');
+    });
+
+    // Assuming you have a form with the id 'addCourseRubricForm'
+    $(document).on('submit', 'form#addCourseRubricItemForm', function (event) {
+        event.preventDefault();
+
+        var criteria = $(this).find('input[name="criteria"]').val().trim();
+        var beginner = $(this).find('textarea[name="beginner"]').val().trim();
+        var capable = $(this).find('textarea[name="capable"]').val().trim();
+        var accomplished = $(this).find('textarea[name="accomplished"]').val().trim();
+        var expert = $(this).find('textarea[name="expert"]').val().trim();
+        var courseRubricId = $(this).find('input[name="course_rubric_id"]').val();
+        
+        console.log('criteria:', criteria);
+        console.log('beginner:', beginner);
+        console.log('capable:', capable);
+        console.log('accomplished:', accomplished);
+        console.log('expert:', expert);
+        console.log('courseRubricId:', courseRubricId);
+
+        if (criteria && beginner && capable && accomplished && expert && courseRubricId) {
+            var csrftoken = $("[name=csrfmiddlewaretoken]").val();
+
+            $.ajax({
+                type: "POST",
+                url: '{% url "add_course_rubric_item" %}',  // Replace with your actual URL for adding course rubric item
+                data: {
+                    'criteria': criteria,
+                    'beginner': beginner,
+                    'capable': capable,
+                    'accomplished': accomplished,
+                    'expert': expert,
+                    'course_rubric_id': courseRubricId,
+                    csrfmiddlewaretoken: csrftoken,
+                },
+                dataType: 'json',
+                success: function (data) {
+                    if (data.course_rubric_item_id) {
+                        console.log('Before appending to table');
+                        // For example, append the new rubric item to the table
+                        appendToRubricItemTable(data);
+                        console.log(data);
+                        console.log('After appending to table');
+                        $('#addCourseRubricItemmodal').modal('hide');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert("Error adding Course Rubric Item. Please try again.");
+                    console.error("AJAX error:", error);
+                }
+            });
+        } else {
+            alert("All fields must have a valid value.");
+        }
+
+        // Reset the form
+        $(this)[0].reset();
+    });
+    // Assuming you have a function to escape HTML characters (to prevent potential XSS attacks)
+    function escapeHTML(text) {
+        var div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function appendToRubricItemTable(data) {
+        // Find the specific course_rubric_item container based on data.course_rubric_id
+        console.log('Received data:', data);
+        var rubricItemContainer = $('#course_rubric_item_body-' + data.course_rubric_id);
+        
+        // Construct the row HTML with escapeHTML applied to each dynamic data
+        var newRow = `
+            <tr id="course_rubric_item_body_row-${data.course_rubric_item_id}">
+                <td class="text-start" id="criteria_row" style="border-top-color:white;">${escapeHTML(data.criteria)}</td>
+                <td class="text-center" id="beginner_row" style="border-top-color:white;">${escapeHTML(data.beginner)}</td>
+                <td class="text-center" id="capable_row" style="border-top-color:white;">${escapeHTML(data.capable)}</td>
+                <td class="text-center" id="accomplished_row" style="border-top-color:white;">${escapeHTML(data.accomplished)}</td>
+                <td class="text-center" id="expert_row" style="border-top-color:white;">${escapeHTML(data.expert)}</td>
+                <td class="align-middle col-1" style="border-top-color:white;">
+                    <div class="text-center">
+                        <button type="button" class="badge bg-primary rounded-pill border-0" 
+                            onClick="editCourseRubricItem(${data.course_rubric_item_id})" data-bs-toggle="modal" data-bs-target="#editCourseRubricItemModal">
+                            <i class="bx bx-edit-alt"></i>
+                        </button>
+                        <button class="badge bg-primary rounded-pill border-0" 
+                            onClick="deleteCourseRubricItem(${data.course_rubric_item_id})">
+                            <i class="bx bxs-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>`;
+    
+        // Append the row to the last-child of the tbody
+        rubricItemContainer.append(newRow);
+        console.log(rubricItemContainer);
+        // Optionally, you can highlight the new row or perform other actions here
+    }
+    // Function to handle deleting a course rubric item
+    function deleteCourseRubricItem(rubricItemId) {
+        if (confirm("Are you sure you want to delete this rubric item?")) {
+            var csrftoken = $("[name=csrfmiddlewaretoken]").val();
+
+            $.ajax({
+                type: "POST",
+                url: '{% url "delete_course_rubric_item" %}',  // Replace with your actual URL for deleting course rubric item
+                data: {
+                    'rubric_item_id': rubricItemId,
+                    csrfmiddlewaretoken: csrftoken,
+                },
+                dataType: 'json',
+                success: function (data) {
+                    if (data.success) {
+                        // Optionally, you can remove the deleted row from the table
+                        $('#course_rubric_item_body_row-' + rubricItemId).remove();
+                    } else {
+                        alert("Error deleting Course Rubric Item. Please try again.");
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert("Error deleting Course Rubric Item. Please try again.");
+                    console.error("AJAX error:", error);
+                }
+            });
+        }
+    }
+
+    // Edit Course Rubric Item Modal Submission
+    $(document).on('submit', 'form#editCourseRubricItemForm', function (event) {
+        event.preventDefault();
+
+        var rubricItemId = $(this).find('input[name="editCourseRubricItemId"]').val().trim();
+        var criteria = $(this).find('input[name="editCriteria"]').val().trim();
+        var beginner = $(this).find('textarea[name="editBeginner"]').val().trim();
+        var capable = $(this).find('textarea[name="editCapable"]').val().trim();
+        var accomplished = $(this).find('textarea[name="editAccomplished"]').val().trim();
+        var expert = $(this).find('textarea[name="editExpert"]').val().trim();
+
+        if (rubricItemId && criteria && beginner && capable && accomplished && expert) {
+            var csrftoken = $("[name=csrfmiddlewaretoken]").val();
+
+            $.ajax({
+                type: "POST",
+                url: '{% url "edit_course_rubric_item" %}',  // Replace with your actual URL for editing course rubric item
+                data: {
+                    'editCourseRubricItemId': rubricItemId,
+                    'editCriteria': criteria,
+                    'editBeginner': beginner,
+                    'editCapable': capable,
+                    'editAccomplished': accomplished,
+                    'editExpert': expert,
+                    csrfmiddlewaretoken: csrftoken,
+                },
+                dataType: 'json',
+                success: function (data) {
+                    console.log("Success function executed");
+                    if (data.course_rubric_item_id) {
+                        console.log("Updating table");
+                        updateToRubricItemTable(data);
+                        $('#editCourseRubricItemModal').modal('hide');
+                        console.log("Modal hidden");
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert("Error updating Course Rubric Item. Please try again.");
+                    console.error("AJAX error:", error);
+                }
+            });
+        } else {
+            alert("All fields must have a valid value.");
+        }
+
+        $(this)[0].reset();
+    });
+    // Function to update the Course Rubric Item data in the table
+    function updateToRubricItemTable(data) {
+        console.log(data);
+        var rubricItemRow = $('#course_rubric_item_body_row-' + data.course_rubric_item_id);
+    
+        if (rubricItemRow.length > 0) {
+            rubricItemRow.find("#criteria_row").text(data.criteria);
+            rubricItemRow.find("#beginner_row").text(data.beginner);
+            rubricItemRow.find("#capable_row").text(data.capable);
+            rubricItemRow.find("#accomplished_row").text(data.accomplished);
+            rubricItemRow.find("#expert_row").text(data.expert);
+        } else {
+            console.error('Rubric item row not found for ID: ' + data.course_rubric_item_id);
+        }
+    }
+
+    function editCourseRubricItem(id) {
+        if (id) {
+            var row = $("#course_rubric_item_body_row-" + id);
+            var criteria = row.find("#criteria_row").text().trim();
+            var beginner = row.find("#beginner_row").text().trim();
+            var capable = row.find("#capable_row").text().trim();
+            var accomplished = row.find("#accomplished_row").text().trim();
+            var expert = row.find("#expert_row").text().trim();
+    
+            // Set the input field values in the modal
+            $('#editCourseRubricItemForm input[name="editCourseRubricItemId"]').val(id);
+            $('#editCourseRubricItemForm input[name="editCriteria"]').val(criteria);
+            $('#editCourseRubricItemForm textarea[name="editBeginner"]').val(beginner);
+            $('#editCourseRubricItemForm textarea[name="editCapable"]').val(capable);
+            $('#editCourseRubricItemForm textarea[name="editAccomplished"]').val(accomplished);
+            $('#editCourseRubricItemForm textarea[name="editExpert"]').val(expert);
+    
+            // Show the modal
+            $('#editCourseRubricItemModal').modal('show');
+        }
+    }
+
+    function addNewCourseContent(outlineId) {
+        // Set the value of the hidden input
+        document.getElementById('course_outline_id').value = outlineId;
+    
+        // Show the modal
+        $('#add_new_CourseContent_modal').modal('show');
+    }
+    function appendToCourseContent(data) {
+        // Assuming data contains the necessary information like ID and content
+        var outlineId = data.course_outline_id;
+    
+        // Select the <ul> element in the corresponding table cell using outlineId
+        var courseContentList = $('.course_content-section-' + outlineId + ' ul');
+    
+        // Append the new course content to the <ul> element
+        var newCourseContentItem = $('<li class="mb-2" data-id="' + data.id + '">' + data.course_content + '</li>');
+        courseContentList.append(newCourseContentItem);
+    }
+    $(document).on('submit', 'form#addNewCourseContentForm', function (event) {
+        event.preventDefault();
+        var newCourseContent = $(this).find('textarea[name="NewCourseContent"]').val().trim();
+        var courseOutlineId = $(this).find('input[name="course_outline_id"]').val();
+    
+        if (newCourseContent && courseOutlineId) {
+            var csrftoken = $("[name=csrfmiddlewaretoken]").val();
+    
+            $.ajax({
+                type: "POST",
+                url: '{% url "add_course_content" %}',
+                data: {
+                    'course_content': newCourseContent,
+                    'course_outline_id': courseOutlineId,
+                    csrfmiddlewaretoken: csrftoken,
+                },
+                dataType: 'json',
+                success: function (data) {
+                    if (data.id) {
+                        // Perform any actions upon success
+                        appendToCourseContent(data);
+                        // For example, append the new content to a list or update the UI
+                        console.log('Course content added successfully:', data);
+    
+                        // Close the modal after a successful submission
+                        $('#add_new_CourseContent_modal').modal('hide');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert("Error adding Course Content. Please try again.");
+                    console.error("AJAX error:", error);
+                }
+            });
+        } else {
+            alert("Course Content is required.");
+        }
+    
+        $(this)[0].reset();
+    });
+
+    function addNewDSLO(outlineId) {
+        // Set the value of the hidden input
+        document.getElementById('dslo_course_outline_id').value = outlineId;
+    
+        // Show the modal
+        $('#add_new_DSLO_modal').modal('show');
+    }
+    
+    function appendToDSLO(data) {
+        // Assuming data contains the necessary information like ID and DSLO content
+        var outlineId = data.course_outline_id;
+    
+        // Select the <ul> element in the corresponding table cell using outlineId
+        var dsloList = $('.dslo-section-' + outlineId + ' ul');
+    
+        // Append the new DSLO to the <ul> element
+        var newDSLOItem = $('<li class="mb-2" data-id="' + data.id + '">' + data.dslo_content + '</li>');
+        dsloList.append(newDSLOItem);
+    }
+    $(document).on('submit', 'form#addNewDSLOForm', function (event) {
+        event.preventDefault();
+        var newDSLOContent = $(this).find('textarea[name="NewDSLO"]').val().trim();
+        var dsloOutlineId = $(this).find('input[name="course_outline_id"]').val();
+    
+        if (newDSLOContent && dsloOutlineId) {
+            var csrftoken = $("[name=csrfmiddlewaretoken]").val();
+    
+            $.ajax({
+                type: "POST",
+                url: '{% url "add_dslo" %}',
+                data: {
+                    'dslo_content': newDSLOContent,
+                    'course_outline_id': dsloOutlineId,
+                    csrfmiddlewaretoken: csrftoken,
+                },
+                dataType: 'json',
+                success: function (data) {
+                    if (data.id) {
+                        // Perform any actions upon success
+                        appendToDSLO(data);
+                        // For example, append the new content to a list or update the UI
+                        console.log('DSLO added successfully:', data);
+    
+                        // Close the modal after a successful submission
+                        $('#add_new_DSLO_modal').modal('hide');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert("Error adding DSLO. Please try again.");
+                    console.error("AJAX error:", error);
+                }
+            });
+        } else {
+            alert("DSLO is required.");
+        }
+    
+        $(this)[0].reset();
+    });
+
+    function addNewOBA(outlineId) {
+        // Set the value of the hidden input
+        document.getElementById('oba_course_outline_id').value = outlineId;
+    
+        // Show the modal
+        $('#add_new_OBA_modal').modal('show');
+    }
+
+    function appendToOBA(data) {
+        // Assuming data contains the necessary information like ID and OBA content
+        var outlineId = data.course_outline_id;
+    
+        // Select the <ul> element in the corresponding table cell using outlineId
+        var obaList = $('.oba-section-' + outlineId + ' ul');
+    
+        // Append the new OBA to the <ul> element
+        var newOBAItem = $('<li class="mb-2" data-id="' + data.id + '">' + data.oba_content + '</li>');
+        obaList.append(newOBAItem);
+    }
+
+    $(document).on('submit', 'form#addNewOBAForm', function (event) {
+        event.preventDefault();
+        var newOBAContent = $(this).find('textarea[name="NewOBA"]').val().trim();
+        var obaOutlineId = $(this).find('input[name="course_outline_id"]').val();
+    
+        if (newOBAContent && obaOutlineId) {
+            var csrftoken = $("[name=csrfmiddlewaretoken]").val();
+    
+            $.ajax({
+                type: "POST",
+                url: '{% url "add_oba" %}',
+                data: {
+                    'oba_content': newOBAContent,
+                    'course_outline_id': obaOutlineId,
+                    csrfmiddlewaretoken: csrftoken,
+                },
+                dataType: 'json',
+                success: function (data) {
+                    if (data.id) {
+                        // Perform any actions upon success
+                        appendToOBA(data);
+                        // For example, append the new content to a list or update the UI
+                        console.log('OBA added successfully:', data);
+    
+                        // Close the modal after a successful submission
+                        $('#add_new_OBA_modal').modal('hide');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert("Error adding OBA. Please try again.");
+                    console.error("AJAX error:", error);
+                }
+            });
+        } else {
+            alert("OBA is required.");
+        }
+    
+        $(this)[0].reset();
+    });
+
+    function addNewEOO(outlineId) {
+        // Set the value of the hidden input
+        document.getElementById('eoo_course_outline_id').value = outlineId;
+    
+        // Show the modal
+        $('#add_new_EOO_modal').modal('show');
+    }
+
+    function appendToEOO(data) {
+        // Assuming data contains the necessary information like ID and EOO content
+        var outlineId = data.course_outline_id;
+    
+        // Select the <ul> element in the corresponding table cell using outlineId
+        var eooList = $('.eoo-section-' + outlineId + ' ul');
+    
+        // Append the new EOO to the <ul> element
+        var newEOOItem = $('<li class="mb-2" data-id="' + data.id + '">' + data.eoo_content + '</li>');
+        eooList.append(newEOOItem);
+    }
+    function addNewValues(outlineId) {
+        // Set the value of the hidden input
+        document.getElementById('values_course_outline_id').value = outlineId;
+
+        // Show the modal
+        $('#add_new_Values_modal').modal('show');
+    }
+
+    function appendToValues(data) {
+        // Assuming data contains the necessary information like ID and Values content
+        var outlineId = data.course_outline_id;
+    
+        // Select the <ul> element in the corresponding table cell using outlineId
+        var valuesList = $('.value-section-' + outlineId + ' ul');
+    
+        // Append the new Values to the <ul> element
+        var newValuesItem = $('<li class="mb-2" data-id="' + data.id + '">' + data.values_content + '</li>');
+        valuesList.append(newValuesItem);
+    }
+
+    $(document).on('submit', 'form#addNewValuesForm', function (event) {
+        event.preventDefault();
+        var newValuesContent = $(this).find('textarea[name="NewValues"]').val().trim();
+        var valuesOutlineId = $(this).find('input[name="course_outline_id"]').val();
+    
+        if (newValuesContent && valuesOutlineId) {
+            var csrftoken = $("[name=csrfmiddlewaretoken]").val();
+    
+            $.ajax({
+                type: "POST",
+                url: '{% url "add_values" %}',
+                data: {
+                    'values_content': newValuesContent,
+                    'course_outline_id': valuesOutlineId,
+                    csrfmiddlewaretoken: csrftoken,
+                },
+                dataType: 'json',
+                success: function (data) {
+                    if (data.id) {
+                        // Perform any actions upon success
+                        appendToValues(data);
+                        // For example, append the new content to a list or update the UI
+                        console.log('Values added successfully:', data);
+    
+                        // Close the modal after a successful submission
+                        $('#add_new_Values_modal').modal('hide');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert("Error adding Values Intended. Please try again.");
+                    console.error("AJAX error:", error);
+                }
+            });
+        } else {
+            alert("Values Intended is required.");
+        }
+    
+        $(this)[0].reset();
+    });
+
+    $(document).on('submit', 'form#addNewEOOForm', function (event) {
+        event.preventDefault();
+        var newEOOContent = $(this).find('textarea[name="NewEOO"]').val().trim();
+        var eooOutlineId = $(this).find('input[name="course_outline_id"]').val();
+    
+        if (newEOOContent && eooOutlineId) {
+            var csrftoken = $("[name=csrfmiddlewaretoken]").val();
+    
+            $.ajax({
+                type: "POST",
+                url: '{% url "add_eoo" %}',
+                data: {
+                    'eoo_content': newEOOContent,
+                    'course_outline_id': eooOutlineId,
+                    csrfmiddlewaretoken: csrftoken,
+                },
+                dataType: 'json',
+                success: function (data) {
+                    if (data.id) {
+                        // Perform any actions upon success
+                        appendToEOO(data);
+                        // For example, append the new content to a list or update the UI
+                        console.log('EOO added successfully:', data);
+    
+                        // Close the modal after a successful submission
+                        $('#add_new_EOO_modal').modal('hide');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert("Error adding EOO. Please try again.");
+                    console.error("AJAX error:", error);
+                }
+            });
+        } else {
+            alert("EOO is required.");
+        }
+    
+        $(this)[0].reset();
+    });
+
+
+    $(document).on('submit', 'form#addCourseOutlineForm', function(event) {
+        event.preventDefault();
+
+        // Collect form data
+        var formData = new FormData(this);
+
+        // Add missing fields
+        formData.append('topic', $('#Topic').val());
+        formData.append('time_frame', $('#time_frame').val());
+        formData.append('clo', $('#clo').val());
+        formData.append('syllabus_ai_id', $('[name="syllabus_ai_id"]').val());
+
+        // Process dynamic fields
+        var dynamicFields = ['course_content','dslo', 'oba', 'eoo', 'values'];
+        dynamicFields.forEach(function(field) {
+            var fieldData = [];
+            $('.' + field + ' .input-group textarea').each(function() {
+                var value = $(this).val().trim(); // Trim whitespace from the value
+                if (value !== '') { // Check if the value is not empty
+                    fieldData.push(value);
+                }
+            });
+            if (fieldData.length > 0) { // Check if the array is not empty before appending
+                formData.append(field, fieldData.join(',')); // Join the array into a comma-separated string
+            }
+        });
+
+        // Print form data to the console
+        for (var pair of formData.entries()) {
+            console.log(pair[0] + ': ' + pair[1]);
+        }
+    
+        $.ajax({
+            type: "POST",
+            url: '{% url "Add_CourseOutline" %}',  // Replace with the actual URL
+            data: formData,
+            contentType: false,
+            processData: false,
+            dataType: 'json',
+            success: function(data) {
+                // Handle success, you can show an alert or update the UI
+                if (data.success) {
+                    alert("Course Outline added successfully!");
+                    $('#addCourseOutlinemodal').modal('hide');
+                    
+                    // Append the new course outline to the table
+                    appendCourseOutline(data);
+                } else {
+                    alert("Error adding Course Outline. Please check the provided data.");
+                }
+            },
+            error: function(xhr, status, error) {
+                // Handle error, show an alert or log the error
+                alert("Error adding Course Outline. Please try again.");
+                console.error("AJAX error:", error);
+            }
+        });
+    
+        // Reset the form
+        $(this)[0].reset();
+    });
+
+
+    function deleteCourseOutline(outlineId) {
+        var confirmation = confirm("Are you sure you want to delete this course outline?");
+        if (confirmation) {
+            $.ajax({
+                type: 'GET',
+                url: '{% url "delete_course_outline" %}',  // Replace with the actual URL
+                data: { 'outline_id': outlineId },
+                dataType: 'json',
+                success: function (data) {
+                    if (data.deleted) {
+                        // Remove the corresponding course outline div from the DOM
+                        $('#course_outline-' + outlineId).remove();
+                        alert('Course outline deleted successfully!');
+                    } else {
+                        alert('Error deleting course outline.');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert('Error deleting course outline. Please try again.');
+                    console.error('AJAX error:', error);
+                }
+            });
+        }
+    }
+
+    function appendCourseOutline(data) {
+        console.log("Received data:", data); // Log the data to the console
+        // Assuming your table has an ID 'courseOutlineTableBody'
+        $("#course-outline-body").append(`
+            <div class="course_outline-${data.course_outline_id}" id="course_outline-${data.course_outline_id}">
+                <table class="table rounded-corners text-white cust-tbl">
+                    <tr class="text-center">
+                        <th>Time Frame</th>
+                        <th>COURSE CONTENT (No. of Hours/Topic)<br>
+                            <button class="badge bg-primary rounded-pill border-0 ms-3" data-bs-toggle="modal" onClick="addNewCourseContent(${data.course_outline_id})" data-bs-target="#add_new_CourseContent_modal">
+                                <i class='bx bx-plus-circle'></i>
+                            </button>
+                        </th>
+                        <th>DESIRED STUDENT LEARNING OUTCOMES/COMPETENCIES<br>
+                            <button class="badge bg-primary rounded-pill border-0 ms-3" data-bs-toggle="modal" onClick="addNewDSLO(${data.course_outline_id})" data-bs-target="#add_new_DSLO_modal">
+                                <i class='bx bx-plus-circle'></i>
+                            </button></th>
+                        <th>OUTCOME-BASED (OBA) ACTIVITIES<br>
+                            <button class="badge bg-primary rounded-pill border-0 ms-3" data-bs-toggle="modal" onClick="addNewOBA(${data.course_outline_id})" data-bs-target="#add_new_OBA_modal">
+                                <i class='bx bx-plus-circle'></i>
+                            </button></th>
+                        <th>EVIDENCE OF OUTCOMES<br>
+                            <button class="badge bg-primary rounded-pill border-0 ms-3" data-bs-toggle="modal" onClick="addNewEOO(${data.course_outline_id})" data-bs-target="#add_new_EOO_modal">
+                                <i class='bx bx-plus-circle'></i>
+                            </button></th>
+                        <th>COURSE LEARNING OUTCOMES</th>
+                        <th>VALUES INTENDED<br>
+                            <button class="badge bg-primary rounded-pill border-0 ms-3" data-bs-toggle="modal" onClick="addNewValues(${data.course_outline_id})" data-bs-target="#add_new_Values_modal">
+                                <i class='bx bx-plus-circle'></i>
+                            </button></th>
+                    </tr>
+                    <tr id="course_outline-${data.course_outline_id}">
+                        <th class="text-center">
+                        </th>
+                        <th colspan="6"><span id="topic">${data.topic}</span>
+                            <button type="button" class="badge bg-primary rounded-pill border-0" onClick="editCourseOutline(${data.course_outline_id})" data-bs-toggle="modal" data-bs-target="#editCourseOutlineModal">
+                                <i class='bx bx-edit-alt'></i>
+                            </button>
+                            <button class="badge bg-primary rounded-pill border-0" onClick="deleteCourseOutline(${data.course_outline_id})">
+                                <i class='bx bxs-trash'></i>
+                            </button>
+                            <div class="ms-2 Spinner_for_CourseOutline visually-hidden" id="loading_for_CourseOutline">
+                                <div class="spinner-border spinner-border-sm" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <span>Getting New Info</span>
+                            </div>
+                            <button class="badge bg-primary rounded-pill border-0 ms-3" id="regenerateCourseOutlineBtn">
+                                Regenerate
+                                <i class='bx bx-refresh'></i>
+                            </button>
+                        </th>
+                    </tr>
+                    <tr id="course_outline-${data.course_outline_id}">
+                        <td class="text-center align-middle" id="week">${data.week}</td>
+                        <td class="course_content-section-${data.course_outline_id}">
+                            <ul class="list-unstyled">
+                                ${data.course_content.map(content => `<li class="mb-2" data-id="${content.id}">${content.content}</li>`).join('')}
+                            </ul>
+                        </td>
+                        <td class="dslo-section-${data.course_outline_id}">
+                            <ul class="list-unstyled">
+                                ${data.dslo.map(dslo => `<li class="mb-2" data-id="${dslo.id}">${dslo.content}</li>`).join('')}
+                            </ul>
+                        </td>
+                        <td class="oba-section-${data.course_outline_id}">
+                            <ul class="list-unstyled">
+                                ${data.oba.map(oba => `<li class="mb-2" data-id="${oba.id}">${oba.content}</li>`).join('')}
+                            </ul>
+                        </td>
+                        <td class="eoo-section-${data.course_outline_id}">
+                            <ul class="list-unstyled">
+                                ${data.eoo.map(eoo => `<li class="mb-2" data-id="${eoo.id}">${eoo.content}</li>`).join('')}
+                            </ul>
+                        </td>
+                        <td class="text-center align-middle" id="course_learning_outcome">${data.course_learning_outcomes}</td>
+                        <td class="value-section-${data.course_outline_id}">
+                            <ul class="list-unstyled">
+                                ${data.values.map(value => `<li class="mb-2" data-id="${value.id}">${value.content}</li>`).join('')}
+                            </ul>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        `);
+        // Scroll to the newly added course outline
+        scrollToAddCourseOutline(data.course_outline_id);
+    }
+
+    function scrollToAddCourseOutline(courseOutlineId) {
+        var courseOutlineElement = document.getElementById("course_outline-" + courseOutlineId);
+        if (courseOutlineElement) {
+            courseOutlineElement.scrollIntoView({ behavior: "smooth" });
+        }
+    }
+
+
+    // Create Ajax Call for Editing Course Outline
+    $("form#editCourseOutlineForm").submit(function () {
+        var outlineIdInput = $('input#EditOutlineId').val().trim();
+        var topicInput = $('input#EditTopic').val().trim();
+        var weekInput = $('input#EditTimeFrame').val().trim();
+        var cloInput = $('input#EditCLO').val().trim();
+
+        // Get the updated course content data
+        var courseContentData = [];
+        $('textarea[name^="new-course_content"]').each(function () {
+            courseContentData.push({
+                id: $(this).data('id'),
+                content: $(this).val().trim()
+            });
+        });
+
+        // Get the IDs of removed course content items
+        var deletedCourseContentIds = [];
+        $('input[name^="deleted-course_content"]').each(function () {
+            deletedCourseContentIds.push($(this).data('id'));
+        });
+
+        // Get the updated dslo data
+        var dsloData = [];
+        $('textarea[name^="new-dslo"]').each(function () {
+            dsloData.push({
+                id: $(this).data('id'),
+                content: $(this).val().trim()
+            });
+        });
+
+        // Get the IDs of removed dslo items
+        var deleteddsloIds = [];
+        $('input[name^="deleted-dslo"]').each(function () {
+            deleteddsloIds.push($(this).data('id'));
+        });
+
+        // Get the updated oba data
+        var obaData = [];
+        $('textarea[name^="new-oba"]').each(function () {
+            obaData.push({
+                id: $(this).data('id'),
+                content: $(this).val().trim()
+            });
+        });
+
+        // Get the IDs of oba items
+        var deletedobaIds = [];
+        $('input[name^="deleted-oba"]').each(function () {
+            deletedobaIds.push($(this).data('id'));
+        });
+
+        // Get the updated eoo data
+        var eooData = [];
+        $('textarea[name^="new-eoo"]').each(function () {
+            eooData.push({
+                id: $(this).data('id'),
+                content: $(this).val().trim()
+            });
+        });
+
+        // Get the IDs of eoo items
+        var deletedeooIds = [];
+        $('input[name^="deleted-eoo"]').each(function () {
+            deletedeooIds.push($(this).data('id'));
+        });
+
+        // Get the updated value data
+        var valueData = [];
+        $('textarea[name^="new-value"]').each(function () {
+            valueData.push({
+                id: $(this).data('id'),
+                content: $(this).val().trim()
+            });
+        });
+
+        // Get the IDs of value items
+        var deletedvalueIds = [];
+        $('input[name^="deleted-value"]').each(function () {
+            deletedvalueIds.push($(this).data('id'));
+        });
+
+        // Log data to console for debugging
+        console.log("Outline ID:", outlineIdInput);
+        console.log("Topic:", topicInput);
+        console.log("Week:", weekInput);
+        console.log("CLO:", cloInput);
+        console.log("Course Content Data:", courseContentData);
+        console.log("Deleted Course Content IDs:", deletedCourseContentIds);
+
+        if (outlineIdInput && topicInput && weekInput && cloInput) {
+            // Get CSRF token from the cookie
+            var csrftoken = $("[name=csrfmiddlewaretoken]").val();
+        
+            // Create Ajax Call with CSRF token
+            $.ajax({
+                url: '{% url "update_course_outline" %}',
+                method: 'POST',
+                headers: {
+                    "X-CSRFToken": csrftoken
+                },
+                data: {
+                    'outline_id': outlineIdInput,
+                    'new_topic': topicInput,
+                    'new_week': weekInput,
+                    'new_clo': cloInput,
+                    'new-course_content': JSON.stringify(courseContentData),
+                    'deleted-course_content_ids': JSON.stringify(deletedCourseContentIds),
+                    'new-dslo': JSON.stringify(dsloData),
+                    'deleted-dslo_ids': JSON.stringify(deleteddsloIds),
+                    'new-oba': JSON.stringify(obaData),
+                    'deleted-oba_ids': JSON.stringify(deletedobaIds),
+                    'new-eoo': JSON.stringify(eooData),
+                    'deleted-eoo_ids': JSON.stringify(deletedeooIds),
+                    'new-value': JSON.stringify(valueData),
+                    'deleted-value_ids': JSON.stringify(deletedvalueIds),
+                    // Add additional parameters if needed
+                },
+                dataType: 'json',
+                success: function (data) {
+                    console.log(data);
+                    if (data.outline_id) {
+                        updateToCourseOutlineTable(data);
+                        $('#editCourseOutlineModal').modal('hide');
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.error("AJAX Error:", textStatus, errorThrown);
+                }
+            });
+        } else {
+            alert("All fields must have a valid value.");
+        }
+
+        $('form#editCourseOutlineForm').trigger("reset");
+        return false;
+    });
+
+
+    // Function to populate the edit form with course outline details
+    function editCourseOutline(outlineId) {
+        if (outlineId) {
+            trId = "#course_outline-" + outlineId;
+
+            topic = $(trId).find("#topic").text().trim();
+            week = $(trId).find("#week").text().trim();
+            clo = $(trId).find("#course_learning_outcome").text().trim();
+
+            // Log to check the values
+            console.log(trId);
+            console.log(topic);
+            console.log(week);
+            console.log(clo);
+
+            $('#EditOutlineId').val(outlineId);
+            $('#EditTopic').val(topic);
+            $('#EditTimeFrame').val(week);
+            $('#EditCLO').val(clo);
+
+            // Extract and set values for additional sections
+            setSectionValuesFromTable(outlineId, 'course_content', 'editCourseContentContainer', 'course_content');
+            setSectionValuesFromTable(outlineId, 'dslo', 'editDSLOContainer', 'dslo');
+            setSectionValuesFromTable(outlineId, 'oba', 'editOBAContainer', 'oba');
+            setSectionValuesFromTable(outlineId, 'eoo', 'editEOOContainer', 'eoo');
+            setSectionValuesFromTable(outlineId, 'value', 'editValuesContainer', 'value');
+
+            // Show the modal
+            $('#editCourseOutlineModal').modal('show');
+        }
+    }
+
+    function setSectionValuesFromTable(outlineId, property, containerId, modelProperty, delimiter = ',') {
+        var container = $('#' + containerId);
+        container.empty();
+
+        // Select the specific row for the course outline
+        var outlineRow = $("#course_outline-" + outlineId);
+
+        // Check if the row exists
+        if (outlineRow.length > 0) {
+            // Select the specific cell for the property
+            var sectionCell = outlineRow.find("." + property + "-section-" + outlineId);
+
+            // Check if cell for the property exists
+            if (sectionCell.length > 0) {
+                // Select each list item within the cell
+                sectionCell.find("ul li").each(function () {
+                    // Create an input group with the existing content
+                    var inputGroup = $('<div class="input-group pb-2"></div>');
+    
+                    // Access the content in the list item
+                    var content = $(this).text().trim();
+    
+                    // Extract the ID from the li element
+                    var itemId = $(this).data('id');
+    
+                    // Create individual input fields for each item with the data-id attribute
+                    var textArea = $('<textarea class="form-control" rows="2" name="new-' + modelProperty + '[]" data-id="' + itemId + '">' + content + '</textarea>');
+                    var removeButton = $('<button class="btn btn-danger edit-remove-' +modelProperty+ '" type="button"><i class="bx bx-minus-circle"></i></button>');
+    
+                    // Append text area and remove button to the input group
+                    inputGroup.append(textArea);
+                    inputGroup.append(removeButton);
+    
+                    // Append the input group to the container
+                    container.append(inputGroup);
+
+                    // Attach the remove function to the remove button
+                    removeButton.on('click', function () {
+                        removeSectionItem(itemId, modelProperty, containerId);
+                    });
+                });
+            }
+        }
+    }
+
+    function removeSectionItem(itemId, modelProperty, containerId) {
+        // Add your remove functionality here
+        console.log('Remove item with ID ' + itemId + ' for ' + modelProperty);
+
+        // Add hidden input for deleted item
+        var deletedInput = $('<input type="hidden" name="deleted-' + modelProperty + '[]" data-id="' + itemId + '">');
+        $('form#editCourseOutlineForm').append(deletedInput);
+
+        // Remove the section from the modal
+        $('#' + containerId).find('[data-id="' + itemId + '"]').closest('.input-group').remove();
+    }
+
+    // Function to update the Course Outline details in the table
+    function updateToCourseOutlineTable(data) {
+        var outlineRow = $("#course-outline-body #course_outline-" + data.outline_id);
+        outlineRow.find("#topic").text(data.topic);
+        outlineRow.find("#week").text(data.week);
+        outlineRow.find("#course_learning_outcome").text(data.course_learning_outcomes);
+        // Update additional fields if needed
+
+        // Update sections individually
+        updateSection(outlineRow, "course_content-section-", data.outline_id, data.course_content, "course_content");
+        updateSection(outlineRow, "dslo-section-", data.outline_id, data.dslo, "dslo");
+        updateSection(outlineRow, "oba-section-", data.outline_id, data.oba, "oba");
+        updateSection(outlineRow, "eoo-section-", data.outline_id, data.eoo, "eoo");
+        updateSection(outlineRow, "value-section-", data.outline_id, data.values, "values");
+    }
+
+    function updateSection(outlineRow, sectionClass, outline_id, sectionData, modelProperty) {
+        var section = outlineRow.find("." + sectionClass + outline_id + " ul");
+        section.empty(); // Clear existing content
+
+        if (sectionData && sectionData.length) {
+            sectionData.forEach(function (contentItem) {
+                var listItem = $('<li class="mb-2" data-id="' + contentItem.id + '">' + contentItem[modelProperty] + '</li>');
+                section.append(listItem);
+            });
+        } else {
+            console.error("Invalid or missing data for section: " + sectionClass);
+        }
+    }
+    // Check the flag in local storage and scroll if necessary
+    if (localStorage.getItem('scrollToCourseOutline') === 'true') {
+        scrollToCourseOutline(localStorage.getItem('courseOutlineId'));
+        localStorage.removeItem('scrollToCourseOutline'); // Remove the flag
+    }
+
+    function scrollToCourseOutline(outlineId) {
+        var courseOutlineElement = document.getElementById("course_outline-" + outlineId); // Update the ID accordingly
+        if (courseOutlineElement) {
+            courseOutlineElement.scrollIntoView({ behavior: "smooth" });
+        }
+    }
+
+    function regenerateCourseOutline(syllabus, syllabusai, outlineId) {
+        // Set a flag in local storage to indicate that scrolling should occur
+        localStorage.setItem('scrollToCourseOutline', 'true');
+        // Store the outlineId in local storage for later use
+        localStorage.setItem('courseOutlineId', outlineId);
+
+        // Hide the button and show the loading spinner
+        $('#regenerateCourseOutlineBtn').addClass('visually-hidden');
+        $('#loading_for_CourseOutline-' + outlineId).removeClass('visually-hidden');
+
+        $.ajax({
+            type: "POST",
+            url: '{% url "regenerate_course_outline" %}',
+            data: {
+                'syllabus': syllabus,
+                'syllabus_ai': syllabusai,
+                'outline_id': outlineId,
+            },
+            headers: {
+                "X-CSRFToken": $("[name=csrfmiddlewaretoken]").val(),
+            },
+            dataType: 'json',
+            success: function (data) {
+                if (data.success) {
+                    playAudio();
+
+                    // Delay the page reload by 1 second
+                    setTimeout(function () {
+                        // Reload the page after processing
+                        location.reload();
+                    }, 1000);
+                } else {
+                    console.error("Regeneration failed. Please try again.");
+                    showToast('Error Regenerating', 'Regeneration failed. Please try again.');
+                }
+
+                // Handle the response data here
+                console.log('Response Data:', data);
+            },
+            error: function (xhr, status, error) {
+                console.error("AJAX error:", error);
+
+                // Hide the loading spinner and show the button
+                $('#loading_for_CourseOutline-' + outlineId).addClass('visually-hidden');
+                $('#regenerateCourseOutlineBtn').removeClass('visually-hidden');
+
+                // Display error toast
+                showToast('AJAX Error', 'An error occurred during regeneration. Please try reloading the page.');
+            },
+        });
+
+        function showToast(title, message) {
+            // Set title and message in the toast
+            $('#liveToast .toast-header strong').text(title);
+            $('#liveToast .toast-body').text(message);
+
+            // Show the toast
+            $('#liveToast').toast('show');
+        }
+    }
+
+</script>
+{% endblock scripts %}

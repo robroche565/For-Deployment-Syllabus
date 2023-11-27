@@ -1,0 +1,108 @@
+{% extends '../base/base.html' %}
+{% load static %}
+{% block content %}
+<div class="d-flex justify-content-center align-items-center mt-5" style="padding-bottom: 40px;">
+    <div class="container">
+        <div class="row d-flex justify-content-center">
+            <div class="col-lg-5">
+                <div class="card">
+                <div class="card-body">
+                    <div class="text-center mb-2"><img src="{% static 'images/logo.png' %}" class="img-fluid" style="width:90px"></div>
+                    <h5 class="card-title text-center">Create Account</h5>
+                    {% if error_messages.general %}
+                        <div class="alert alert-danger text-danger fw-bold" role="alert">{{ error_message.general }}</div>
+                    {% endif %}
+                    <form class="row g-3" method="POST" enctype="multipart/form-data" action="{% url 'signup' %}">
+                        {% csrf_token %}
+                        <div class="col-md-12 form-floating mb-0">
+                            <input type="text" class="form-control" id="username" name="username" placeholder="User Name" required>
+                            <label for="username" class="ms-2">Username</label>
+                        </div>
+                        {% if error_messages.username %}
+                            <div class="text-danger mb-0 mt-0" style="font-size: 14px;">
+                                <i class='bx bx-error-circle' style="font-size:16px;vertical-align: middle;"></i>
+                                <span style="vertical-align: middle;">{{ error_messages.username }}</span>
+                            </div>
+                        {% endif %}
+                        <div class="col-md-6 form-floating mb-0">
+                            <input type="text" class="form-control" id="first_name" name="first_name" placeholder="First Name" required>
+                            <label for="first_name" class="ms-2">First Name</label>
+                        </div>
+                        <div class="col-md-6 form-floating mb-0">
+                            <input type="text" class="form-control" id="middle_name" name="middle_name" placeholder="Middle Name">
+                            <label for="mid_name" class="ms-2">Middle Name</label>
+                        </div>
+                        <div class="col-md-12 form-floating mb-0">
+                            <input type="text" class="form-control" id="last_name" name="last_name" placeholder="Last Name" required>
+                            <label for="lst_name" class="ms-2">Last Name</label>
+                        </div>
+                        {% if error_messages.name_format %}
+                            <div class="text-danger mb-0 mt-0" style="font-size: 14px;">
+                                <i class='bx bx-error-circle' style="font-size:16px;vertical-align: middle;"></i>
+                                <span style="vertical-align: middle;">{{ error_messages.name_format }}</span>
+                            </div>
+                        {% endif %}
+                        <div class="col-md-12 form-floating mb-0">
+                            <input type="email" class="form-control" id="email" name="email" placeholder="Email" required>
+                            <label for="email" class="ms-2">WMSU E-mail Account</label>
+                        </div>
+                        {% if error_messages.email_ends %}
+                            <div class="text-danger mb-0 mt-0" style="font-size: 14px;">
+                                <i class='bx bx-error-circle' style="font-size:16px;vertical-align: middle;"></i>
+                                <span style="vertical-align: middle;">{{ error_messages.email_ends }}</span>
+                            </div>
+                        {% endif %}
+                        {% if error_messages.email_checker %}
+                            <div class="text-danger mb-0 mt-0" style="font-size: 14px;">
+                                <i class='bx bx-error-circle' style="font-size:16px;vertical-align: middle;"></i>
+                                <span style="vertical-align: middle;">{{ error_messages.email_checker }}</span>
+                            </div>
+                        {% endif %}
+                        <div class="col-md-12 form-floating">
+                            <input type="password" class="form-control" id="password1" name="password1" placeholder="Password" required>
+                            <label for="password1" class="ms-2">Password</label>
+                        </div>
+                        {% if error_messages.password_complexity %}
+                            <div class="text-danger mb-0 mt-0" style="font-size: 14px;">
+                                <i class='bx bx-error-circle' style="font-size:16px;vertical-align: middle;"></i>
+                                <span style="vertical-align: middle;">{{ error_messages.password_complexity }}</span>
+                            </div>
+                        {% endif %}
+                        <div class="col-md-12 form-floating">
+                            <input type="password" class="form-control" id="password2" name="password2" placeholder="Confirm Password" required>
+                            <label for="password2" class="ms-2">Confirm Password</label>
+                        </div>
+                        {% if error_messages.password %}
+                            <div class="text-danger mb-0 mt-0" style="font-size: 14px;">
+                                <i class='bx bx-error-circle' style="font-size:16px;vertical-align: middle;"></i>
+                                <span style="vertical-align: middle;">{{ error_messages.password }}</span>
+                            </div>
+                        {% endif %}
+                        <div class="col-12">
+                            <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="" id="invalidCheck" required>
+                            <label class="form-check-label" for="invalidCheck">
+                                Agree to terms and conditions
+                            </label>
+                            </div>
+                        </div>
+                        {% comment %} <div class="mb-3">
+                            <div class="col-12">
+                              <div class="g-recaptcha" data-sitekey="{{ RECAPTCHA_PUBLIC_KEY }}"></div>
+                            </div>
+                            {% if error_messages and 'recaptcha' in error_messages %}
+                            <p class="text-danger">{{ error_messages.recaptcha }}</p>
+                            {% endif %}
+                          </div> {% endcomment %}
+                        <div class="d-grid col-12">
+                            <button class="btn btn-primary" type="submit">Sign Up</button>
+                        </div>
+                        <p class="text-center">Already Have An Account? <a href="{% url 'login' %}" class="text-decoration-none fw-bold" style="color: #d24d57 !important;">Log In</a></p>
+                    </form>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

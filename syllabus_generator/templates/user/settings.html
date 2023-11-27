@@ -1,0 +1,114 @@
+{% extends '../base/base_userpage.html' %}
+{% load static %}
+
+{% block title %}Settings{% endblock %}
+{% block content %}
+<main class="col-md-9 ms-sm-auto col-lg-9 col-xl-10 p-md-4" >
+    <div class="multisteps-form__form">
+        <!--single form panel-->
+        <div class="multisteps-form__panel shadow p-4 rounded background-color-custom js-active text-light" style="min-height: calc(100vh - 3rem);">
+            <h3>Account Settings</h3>
+            <hr>
+            <h4>Password</h4>
+            <form class="row" id="passwordChangeForm" method="post" data-url="{% url 'custom_password_change' %}">
+                {% csrf_token %}
+                <div class="col-lg-4">
+                    <label for="currentPassword" class="form-label">Current Password</label>
+                    <div class="input-group">
+                        <input type="password" class="form-control" id="currentPassword" name="current_password">
+                        <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('currentPassword')"><i class='bx bx-low-vision'></i></button>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <label for="newPassword1" class="form-label">New Password</label>
+                    <div class="input-group">
+                        <input type="password" class="form-control" id="newPassword1" name="new_password1">
+                        <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('newPassword1')"><i class='bx bx-low-vision'></i></button>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <label for="newPassword2" class="form-label">Confirm New Password</label>
+                    <div class="input-group">
+                        <input type="password" class="form-control" id="newPassword2" name="new_password2">
+                        <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('newPassword2')"><i class='bx bx-low-vision'></i></button>
+                    </div>
+                </div>
+                <div class="d-flex flex-row-reverse">
+                    <div class="mt-2"><button type="button" class="btn btn-primary" onclick="changePassword()">Change Password</button></div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- Add the toast container to your HTML, make sure it's placed in a suitable location -->
+    <div class="toast-container position-fixed top-0 end-0 p-3 text-light">
+        <div id="successToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" style="background-color:#373738;">
+            <div class="toast-header text-light" style="background-color:#28a745;">
+                <img src="{% static 'images/logo.png' %}" class="rounded me-2" alt="..." style="width:20px;">
+                <strong class="me-auto text-light">Success</strong>
+                <small>Just Now</small>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                Password changed successfully!
+            </div>
+        </div>
+        <div id="errorToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" style="background-color:#373738;">
+            <div class="toast-header text-light" style="background-color:#d9534f;">
+                <img src="{% static 'images/logo.png' %}" class="rounded me-2" alt="..." style="width:20px;">
+                <strong class="me-auto text-light">Error</strong>
+                <small>Just Now</small>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                Error changing password. Please check your input.
+            </div>
+        </div>
+    </div>
+</main>
+
+{% endblock %}
+{% block scripts %}
+<script>
+    
+    function togglePassword(inputId) {
+        var input = document.getElementById(inputId);
+        var button = input.nextElementSibling;
+        if (input.type === "password") {
+            input.type = "text";
+            button.innerHTML = "<i class='bx bx-low-vision'></i>"; // change to the low vision icon
+        } else {
+            input.type = "password";
+            button.innerHTML = "<i class='bx bx-low-vision'></i>"; // change to the low vision icon
+        }
+    }
+    function showToast(type) {
+        var toastId = type === 'success' ? '#successToast' : '#errorToast';
+        var toast = new bootstrap.Toast(document.querySelector(toastId));
+        toast.show();
+    }
+
+    function changePassword() {
+        var form = $('#passwordChangeForm');
+        var url = form.data('url');
+        var formData = form.serialize();
+
+        $.ajax({
+            type: 'POST',
+            url: url,
+            data: formData,
+            success: function (data) {
+                if (data.success) {
+                    showToast('success');
+                } else {
+                    showToast('error');
+                    // Handle form validation errors here if needed
+                    console.log(data.errors);
+                }
+            },
+            error: function () {
+                showToast('error');
+            }
+        });
+    }
+</script>
+{% endblock %}

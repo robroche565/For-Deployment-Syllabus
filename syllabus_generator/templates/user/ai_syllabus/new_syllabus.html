@@ -1,0 +1,442 @@
+{% extends '../../base/base_userpage.html' %}
+
+{% load static %}
+
+{% block title %}New Syllabus{% endblock %}
+{% block content %}
+<main class="col-md-9 ms-sm-auto col-lg-9 col-xl-10 p-md-4 create-syllabus" >
+    <div class="w-100 text-light">
+        <div class="multisteps-form">
+            <!--progress bar-->
+            <div class="row d-none">
+                <div class="col-12 col-lg-8 ml-auto mr-auto mb-4">
+                <div class="multisteps-form__progress">
+                    <button class="multisteps-form__progress-btn js-active" type="button" title="User Info">User Info</button>
+                    <button class="multisteps-form__progress-btn" type="button" title="Address">Address</button>
+                    <button class="multisteps-form__progress-btn" type="button" title="Order Info">Order Info</button>
+                    <button class="multisteps-form__progress-btn" type="button" title="Comments">Comments</button>
+                </div>
+                </div>
+            </div>
+            <!--form panels-->
+            <div class="row mt-3 px-3 mt-lg-0 px-lg-0">
+                <div class="col-12 col-lg-12 m-auto">
+                    <div class="multisteps-form__form">
+                        <form class="formTest" method="POST" enctype="multipart/form-data">
+                            {%csrf_token%}
+                            <!--single form panel-->
+                            <div class="multisteps-form__panel shadow p-4 rounded background-color-custom js-active" data-animation="fadeIn">
+                                <h3 class="multisteps-form__title">Create New Syllabus</h3>
+                                <div class="multisteps-form__content ">
+                                    <h4>First Part</h4>
+                                    <div class="container-fluid scroll overflow-auto">
+                                        <div class="row">
+                                            <div class="mb-3 col-lg-6">
+                                                <label for="syllabus-name" class="form-label">Name of Syllabus</label>
+                                                <input type="text" class="form-control med-input" id="syllabus-name" name="syllabus-name" placeholder="Insert name of syllabus here">
+                                            </div>
+                                            <div class="mb-3 col-lg-6">
+                                                <label for="language" class="form-label">Language</label>
+                                                <select class="form-select mb-3 med-input" id="language" name="language">
+                                                    <option value="English" selected>English</option>
+                                                    <option value="Filipino">Filipino</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-lg-6">
+                                                <label for="template" class="mb-2">Template</label>
+                                                <select class="form-select mb-3 med-input" id="template" name="template">
+                                                    {% for syllabus_template in syllabus_templates %}
+                                                    <option value="{{ syllabus_template.id }}">{{ syllabus_template.name }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <label for="time-frame" class="form-label">Time Frame (weeks)</label>
+                                                <input type="number" class="form-control med-input" id="time-frame" name="time-frame" placeholder="18" value="18">
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="mb-3 col-lg-4">
+                                                <label for="college" class="form-label">College</label>
+                                                <input type="text" class="form-control med-input" id="college" name="college" placeholder="College of Computing Studies">
+                                            </div>
+                                            <div class="mb-3 col-lg-4">
+                                                <label for="department" class="form-label">Department</label>
+                                                <input type="text" class="form-control med-input" id="department" name="department" placeholder="Computer Science">
+                                            </div>
+                                            <div class="mb-3 col-lg-4">
+                                                <label for="bachelor" class="form-label">Bachelor</label>
+                                                <input type="text" class="form-control med-input" id="bachelor" name="bachelor" placeholder="Bachelor of .....">
+                                            </div>
+                                        </div>
+
+                                        <hr>
+
+                                        <div class="row">
+                                            <div class="mb-3 col-lg-4">
+                                                <label for="course-code" class="form-label">Course Code</label>
+                                                <input type="text" class="form-control med-input" id="course-code" name="course-code" placeholder="CS 137">
+                                            </div>
+                                            <div class="mb-3 col-lg-8">
+                                                <label for="course-name" class="form-label">Course Name</label>
+                                                <input type="text" class="form-control med-input" id="course-name" name="course-name" placeholder="Software Engineering 1">
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="mb-3 col-lg-4">
+                                                <label for="course-credit" class="form-label">Course Credit</label>
+                                                <input type="number" class="form-control med-input" id="course-credit" name="course-credit" placeholder="3.0">
+                                            </div>
+                                            <div class="mb-3 col-lg-8">
+                                                <label for="course_credit_description" class="form-label">Course Credit Description</label>
+                                                <input type="text" class="form-control med-input" id="course_credit_description" name="course_credit_description" placeholder=" (2 Units Lecture and 1 Unit Laboratory/2hrs. Lecture + 3hrs. Laboratory = 5hrs/week)">
+                                            </div>
+                                        </div>
+                                        <div class="row" id="preriquisite-cont">
+                                            <div class="mb-3 col-lg-6">
+                                                <label for="preriquisite" class="mb-1">Preriquisite</label>
+                                                <div class="mid-term-inputs list-input-container">
+                                                    <div class="input-group mt-1">
+                                                        <input type="text" class="form-control med-input" name="preriquisite" placeholder="CC 104 - Information Management">
+                                                        <button class="btn btn-danger remove-input" type="button"><i class='bx bx-minus-circle'></i></button>
+                                                    </div>
+                                                </div>
+                                                <div class="mt-2">
+                                                    <button class="btn btn-success btn-sm add-input" id="add-preriquisite" type="button">Add more</button>
+                                                </div>
+                                            </div>
+                                            <div class="mb-3 col-lg-6">
+                                                <label for="course-description" class="form-label">Course Description</label>
+                                                <textarea row="3" class="form-control big-input" id="course-description" name="course-description" placeholder="Enter Your Course Description Here."></textarea>
+                                            </div>
+                                        </div>
+
+                                        <hr>
+
+                                        <h4>Grading System</h4>
+                                        <div class="form-group radio-buttons">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="grading_system_option" id="use-template" value="use-template" checked>
+                                                <label class="form-check-label" for="use-template">Use From Template</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="grading_system_option" id="create-new" value="create-new">
+                                                <label class="form-check-label" for="create-new">Create New</label>
+                                            </div>
+                                        </div>
+                                        <div id="additional_info_inputs" style="display: none;">
+                                            <div class="form-group radio-buttons">
+                                                <label class="type-label">Type :</label>
+                                                <div class="form-check form-check-inline">
+                                                    <!---------- the input value has 'only' after the initial value, this is will be use for later prompting in creating syllabus ---------->
+                                                    <input class="form-check-input" id="lecture" type="radio" name="grading_system_type" value="lecture only" checked>
+                                                    <label class="form-check-label" for="lecture">Lecture</label>
+                                                </div>
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" id="laboratory" type="radio" name="grading_system_type" value="laboratory only">
+                                                    <label class="form-check-label" for="laboratory">Laboratory</label>
+                                                </div>
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" id="both" type="radio" name="grading_system_type" value="laboratory & lecture">
+                                                    <label class="form-check-label" for="both">Both</label>
+                                                </div>
+                                            </div>
+                                            <div class="row terms-cont" id="midterm-cont">
+                                                <div class="mb-3 col-lg-6">
+                                                    <label for="" class="form-label">Mid Term Grade</label>
+                                                    <input type="number" class="form-control med-input" name="midterm-grade" placeholder="percentage">
+                                                </div>
+                                                <div class="term-description-cont lecture-cont" id="midterm-lecture">
+                                                    <div class="mb-3 col-lg-6">
+                                                        <label for="" class="form-label">Lecture Grade</label>
+                                                        <input type="number" class="form-control med-input" name="midterm-lecture-grade" placeholder="percentage">
+                                                    </div>
+                                                    <div class="col-lg-6">
+                                                        <label class="form-label">Description and Percent</label>
+                                                        <div class="list-input-container">
+                                                            <div class="input-group mb-2">
+                                                                <input type="text" class="form-control med-input" name="midterm-lecture-description" placeholder="Attendance">
+                                                                <input type="number" aria-label="First name" class="form-control med-input" name="midterm-lecture-percentage" placeholder="Percentage">
+                                                                <button class="btn btn-danger remove-input" type="button"><i class='bx bx-minus-circle'></i></button>
+                                                            </div>
+                                                        </div>
+                                                        <div class="mt-2">
+                                                            <button class="btn btn-success btn-sm mb-2 add-input" id="add-midterm-lecture" type="button">Add more</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="term-description-cont laboratory-cont" id="midterm-laboratory">
+                                                    <div class="mb-3 col-lg-6">
+                                                        <label for="" class="form-label">Laboratory Grade</label>
+                                                        <input type="number" class="form-control med-input" name="midterm-laboratory-grade" placeholder="percentage">
+                                                    </div>
+                                                    <div class="col-lg-6">
+                                                        <label class="form-label">Description and Percent</label>
+                                                        <div class="list-input-container">
+                                                            <div class="input-group mb-2">
+                                                                <input type="text" class="form-control med-input" name="midterm-laboratory-description" placeholder="Attendance">
+                                                                <input type="number" aria-label="First name" class="form-control med-input" name="midterm-laboratory-percentage" placeholder="Percentage">
+                                                                <button class="btn btn-danger remove-input" type="button"><i class='bx bx-minus-circle'></i></button>
+                                                            </div>
+                                                        </div>
+                                                        <div class="mt-2">
+                                                            <button class="btn btn-success btn-sm mb-2 add-input" id="add-midterm-laboratory" type="button">Add more</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row terms-cont" id="finalterm-cont">
+                                                <div class="mb-3 col-lg-6">
+                                                    <label for="" class="form-label">Final Term Grade</label>
+                                                    <input type="number" class="form-control med-input" name="finalterm-grade" placeholder="percentage">
+                                                </div>
+                                                <div class="term-description-cont lecture-cont" id="finalterm-lecture">
+                                                    <div class="mb-3 col-lg-6">
+                                                        <label for="" class="form-label">Lecture Grade</label>
+                                                        <input type="number" class="form-control med-input" name="finalterm-lecture-grade" placeholder="percentage">
+                                                    </div>
+                                                    <div class="col-lg-6">
+                                                        <label class="form-label">Description and Percent</label>
+                                                        <div class="list-input-container">
+                                                            <div class="input-group mb-2">
+                                                                <input type="text" class="form-control med-input" name="finalterm-lecture-description" placeholder="Attendance">
+                                                                <input type="number" aria-label="First name" class="form-control med-input" name="finalterm-lecture-percentage" placeholder="Percentage">
+                                                                <button class="btn btn-danger remove-input" type="button"><i class='bx bx-minus-circle'></i></button>
+                                                            </div>
+                                                        </div>
+                                                        <div class="mt-2">
+                                                            <button class="btn btn-success btn-sm mb-2 add-input" id="add-finalterm-lecture" type="button">Add more</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="term-description-cont laboratory-cont" id="finalterm-laboratory">
+                                                    <div class="mb-3 col-lg-6">
+                                                        <label for="" class="form-label">Laboratory Grade</label>
+                                                        <input type="number" class="form-control med-input" name="finalterm-laboratory-grade" placeholder="percentage">
+                                                    </div>
+                                                    <div class="col-lg-6">
+                                                        <label class="form-label">Description and Percent</label>
+                                                        <div class="list-input-container">
+                                                            <div class="input-group mb-2">
+                                                                <input type="text" class="form-control med-input" name="finalterm-laboratory-description" placeholder="Attendance">
+                                                                <input type="number" aria-label="First name" class="form-control med-input" name="finalterm-laboratory-percentage" placeholder="Percentage">
+                                                                <button class="btn btn-danger remove-input" type="button"><i class='bx bx-minus-circle'></i></button>
+                                                            </div>
+                                                        </div>
+                                                        <div class="mt-2">
+                                                            <button class="btn btn-success btn-sm mb-2 add-input" id="add-finalterm-laboratory" type="button">Add more</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row" id="range-cont">
+                                                <label>Percentage Grade Range</label>
+                                                <div class="col-lg-12">
+                                                    <div class="list-input-container">
+                                                        {% if percentage_grade_ranges|length < 1 %}
+                                                        <div class="input-group mt-2">
+                                                            <span class="input-group-text">Enter Range Here</span>
+                                                            <input type="number" name="min-range" class="form-control med-input" placeholder="96">
+                                                            <input type="number" name="max-range" class="form-control med-input" placeholder="100">
+                                                            <span class="input-group-text">Enter Grade Here</span>
+                                                            <input type="text" name="grade" class="form-control med-input" placeholder="1.0">
+                                                            <button class="btn btn-danger remove-input" type="button"><i class='bx bx-minus-circle'></i></button>
+                                                        </div>
+                                                        {% endif %}
+                                                        
+                                                        {% for percentage_grade_range in percentage_grade_ranges %}
+                                                        <div class="input-group mt-2">
+                                                            <span class="input-group-text">Enter Range Here</span>
+                                                            <input type="number" name="min-range" class="form-control med-input" placeholder="96" value="{{ percentage_grade_range.min_range }}">
+                                                            <input type="number" name="max-range" class="form-control med-input" placeholder="100" value="{{ percentage_grade_range.max_range }}">
+                                                            <span class="input-group-text">Enter Grade Here</span>
+                                                            <input type="text" name="grade" class="form-control med-input" placeholder="1.0"  value="{{ percentage_grade_range.grade }}">
+                                                            <button class="btn btn-danger remove-input" type="button"><i class='bx bx-minus-circle'></i></button>
+                                                        </div>
+                                                        {% endfor %}
+                                                    </div>
+                                                    <div class="mt-2">
+                                                        <button class="btn btn-success btn-sm add-input" id="add-range" type="button">Add Grade Range</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <div class="d-flex justify-content-end mt-4">
+                                        <button class="btn btn-primary ml-auto js-btn-next" type="button" title="Next">Next</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--single form panel-->
+                            <div class="multisteps-form__panel shadow p-4 rounded background-color-custom" data-animation="fadeIn">
+                                <h3 class="multisteps-form__title">Create New Syllabus</h3>
+                                <div class="multisteps-form__content ">
+                                    <h4>Second Part</h4>
+                                    <div class="container-fluid scroll overflow-auto">
+                                        <div class="form-group mt-2 radio-buttons">
+                                            <h5>Type of Information Syllabus Source (References)</h5>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="syllabus-source-type" id="auto" value="auto" checked>
+                                                <label class="form-check-label" for="auto">Auto-Generated</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="syllabus-source-type" id="specific" value="specific">
+                                                <label class="form-check-label" for="specific">Specific Sources</label>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-lg-12">
+                                                <div id="source-input-container" style="display: none;">
+                                                    <!-- Initial source input field -->
+                                                    <div class="input-group mb-2 mt-1">
+                                                        <input type="text" class="form-control" name="source[]" placeholder="Enter Source Here">
+                                                        <button class="btn btn-danger remove-source" type="button"><i class='bx bx-minus-circle'></i></button>
+                                                    </div>
+                                                </div>
+                                                <button type="button" class="btn btn-success btn-sm mt-2" id="add-source" style="display: none;">Add Source</button>
+                                            </div>
+                                        </div>
+                                        <hr>
+
+                                        <div class="row">
+                                            <div class="col-lg-4" style="flex-direction: column; width: 30%;">
+                                                <div>
+                                                    <label for="semester" class="form-label" style="margin-bottom: 0.28rem">Semester</label>
+                                                    <select class="form-select mb-3 med-input" id="semester" name="semester">
+                                                        <option value="1st">1st Semester</option>
+                                                        <option value="2nd">2nd Semester</option>
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label for="school-year" class="form-label">School Year</label>
+                                                    <input type="text" class="form-control med-input" id="school-year" name="school-year" placeholder="2023-2024">
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-8" id="requirements-cont" style="width: 70%; height: fit-content;">
+                                                <label for="course-requirements">Course Requirements</label>
+                                                <div class="mid-term-inputs list-input-container">
+                                                    <div class="input-group mt-1">
+                                                        <input type="text" class="form-control med-input" id="course-requirements" name="course-requirements" placeholder="Assignments, Quizes, etc.">
+                                                        <button class="btn btn-danger remove-input" type="button"><i class='bx bx-minus-circle'></i></button>
+                                                    </div>
+                                                </div>
+                                                <div class="mt-2">
+                                                    <button class="btn btn-success btn-sm add-input" id="add-requirements" type="button">Add more</button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <hr>
+
+                                        <h5>Personels</h5>
+                                        <div class="row" id="prepared-cont">
+                                            <label class="form-label">Prepared by</label>
+                                            <div class="list-input-container">
+                                                <div class="input-group mb-1">
+                                                    <input type="text" class="form-control med-input" name="prepared-name" placeholder="Fullname">
+                                                    <button class="btn btn-danger remove-input" type="button"><i class='bx bx-minus-circle'></i></button>
+                                                </div>
+                                            </div>
+                                            <div class="mt-2">
+                                                <button class="btn btn-success btn-sm mb-2 add-input" id="add-prepared" type="button">Add more</button>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <label class="form-label">Recommending approval by</label>
+                                            <div class="list-input-container">
+                                                <div class="input-group mb-1">
+                                                    <input type="text" class="form-control med-input" name="recommending-approval-name" placeholder="Fullname">
+                                                    <input type="text" aria-label="First name" class="form-control med-input" name="recommending-approval-position" placeholder="Position">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <label class="form-label">Concured by</label>
+                                            <div class="list-input-container">
+                                                <div class="input-group mb-1">
+                                                    <input type="text" class="form-control med-input" name="concured-name" placeholder="Fullname">
+                                                    <input type="text" aria-label="First name" class="form-control med-input" name="concured-position" placeholder="Position">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <label class="form-label">Approved by</label>
+                                            <div class="list-input-container">
+                                                <div class="input-group mb-1">
+                                                    <input type="text" class="form-control med-input" name="approved-name" placeholder="Fullname">
+                                                    <input type="text" aria-label="First name" class="form-control med-input" name="approved-position" placeholder="Position">
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <hr>
+                                        
+                                        <h4>Footer</h4>
+                                        
+                                        <div class="row">
+                                            <div class="mb-3 col-lg-6">
+                                                <label>Effective Number </label>
+                                                <input type="text" class="form-control med-input" placeholder="WMSU-VPAA-FR-032.00" id="footer_info" name="footer-info">
+                                            </div>
+                                            <div class="mb-3 col-lg-6">
+                                                <label>Effective Date</label>
+                                                <input type="date" class="form-control med-input" id="effective_date" name="effective-date">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row pt-3">
+                                        <hr>
+                                        <div class="col d-flex justify-content-start">
+                                            <button class="btn btn-primary js-btn-prev" type="button" title="Prev">Back</button>
+                                        </div>
+                                        <div class="col d-flex justify-content-end">
+                                            <button class="btn btn-primary ml-auto save-info" type="button" title="Save">Save</button>
+                                
+                                            <!---------- MODAL ---------->
+                                            <div class="confirmation-modal-edit">
+                                                <p>Are you sure you want to confirm <br> on creating this new Syllabus?</p>
+                                                <div class="action-cont">
+                                                    <button type="button" class="btn btn-secondary">Cancel</button>
+                                                    <button type="submit" class="btn btn-primary js-btn-next">Confirm</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!---------- OVERLAY ---------->
+                            <span class="overlay"></span>
+                        </form>
+
+                        <!---------- LOADING SCREEN ---------->
+                        <div class="multisteps-form__panel shadow p-4 rounded background-color-custom last-content" data-animation="fadeIn">
+                            <div class="wait-cont">
+                                <h3 class="multisteps-form__title mb-3">Generating information of Syllabus</h3>
+                                <div class="multisteps-form__content">
+                                    <div class="spinner-wrapper">
+                                        <div class="d-flex justify-content-center mt-2">
+                                            <div class="spinner-border" role="status">
+                                                <span class="visually-hidden">Loading...</span>
+                                            </div>
+                                        </div>
+                                        <div class="text-center mt-3">
+                                            <span id="words">Uploading data</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="{% static 'js/multi_form.js' %}"></script>
+{% endblock %}

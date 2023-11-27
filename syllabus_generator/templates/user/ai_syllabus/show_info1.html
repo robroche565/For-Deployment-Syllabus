@@ -1,0 +1,1295 @@
+{% extends '../../base/base_userpage.html' %}
+
+{% load static %}
+
+{% block title %}Generated Info{% endblock %}
+{% block content %}
+<main class="col-md-9 ms-sm-auto col-lg-9 col-xl-10 p-md-4" >
+    <div class="w-100 text-light">
+        <div class="multisteps-form">
+            <!--progress bar-->
+            <div class="row d-none">
+                <div class="col-12 col-lg-8 ml-auto mr-auto mb-4">
+                <div class="multisteps-form__progress">
+                    <button class="multisteps-form__progress-btn js-active" type="button" title="User Info">User Info</button>
+                    <button class="multisteps-form__progress-btn" type="button" title="Address">Address</button>
+                    <button class="multisteps-form__progress-btn" type="button" title="Order Info">Order Info</button>
+                    <button class="multisteps-form__progress-btn" type="button" title="Comments">Comments</button>
+                </div>
+                </div>
+            </div>
+            <!--form panels-->
+            <div class="row mt-2 px-3 mt-lg-0 px-lg-0">
+                <div class="col-12 col-lg-12 m-auto">
+                    <div class="multisteps-form__form">
+                        <!--single form panel-->
+                        <div class="multisteps-form__panel shadow p-4 rounded background-color-custom js-active" data-animation="fadeIn">
+                            <div class="d-flex">
+                                <div class="flex-grow-1"><h3 class="multisteps-form__title">Generated Information</h3></div>
+                            </div>
+                            <hr>
+                            <div class="multisteps-form__content ">
+                                <div class="container-fluid scroll overflow-auto">
+                                    <div class="mb-4" id="references_source">
+                                        <div class="cust-head d-flex align-items-center">
+                                            <h4>References/Sources</h4>
+                                            <button class="badge bg-primary rounded-pill border-0 ms-3" data-bs-toggle="modal" data-bs-target="#create_reference_modal">
+                                                <i class='bx bx-plus-circle'></i>
+                                            </button>
+                                            <button class="badge bg-primary rounded-pill border-0 ms-3" id="removeReferencesBtn">
+                                                Remove Selected References/Sources
+                                                <i class='bx bx-layer-minus'></i>
+                                            </button>
+                                            <button class="badge bg-primary rounded-pill border-0 ms-3" id="regenerateReferenceBtn">
+                                                Regenerate
+                                                <i class='bx bx-refresh'></i>
+                                            </button>
+                                            <div class="ms-2 Spinner_for_references visually-hidden" id="loading_for_references">
+                                                <div class="spinner-border spinner-border-sm" role="status">
+                                                    <span class="visually-hidden">Loading...</span>
+                                                </div>
+                                                <span>Getting New Info</span>
+                                            </div>
+                                        </div>
+                                        <table id="ReferenceTable" class="table rounded-corners text-white cust-tbl">
+                                            {% for reference in references %}
+                                            <tr id="reference-{{ reference.id }}">
+                                                <td class="reference">
+                                                    <input class="form-check-input me-1 referenceCheckbox" type="checkbox" value="{{ reference.id }}" aria-label="...">
+                                                    <span>{{ reference.reference }}</span>
+                                                    <button type="button" class="badge bg-primary rounded-pill border-0" onClick="editReference({{ reference.id }})" data-bs-toggle="modal" data-bs-target="#editReferenceModal">
+                                                        <i class='bx bx-edit-alt'></i>
+                                                    </button>
+                                                    <button class="badge bg-primary rounded-pill border-0" onClick="deleteReference({{ reference.id }})">
+                                                        <i class='bx bxs-trash'></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </table>
+                                    </div>
+                                    <!-- Add Reference Modal -->
+                                    <div class="modal fade" id="create_reference_modal" tabindex="-1">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content" style="background-color: #202022">
+                                                <form id="addReferenceForm">
+                                                    {% csrf_token %}
+                                                    <div class="modal-header">
+                                                        <h1 class="modal-title fs-5">Add Reference</h1>
+                                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <div class="form-group">
+                                                            <input class="form-control" type="text" name="reference" placeholder="Add Reference/Source Name" required>
+                                                            <input type="hidden" name="syllabus_ai_id" value="{{ syllabus_ai.id }}">
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button class="btn btn-primary" type="submit" id="submitBtn">Add Reference</button>
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Edit Reference Modal -->
+                                    <div class="modal fade" id="editReferenceModal" tabindex="-1">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content" style="background-color: #202022">
+                                                <div class="modal-header">
+                                                    <h1 class="modal-title fs-5">Edit Reference</h1>
+                                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <form id="updateReferenceForm">
+                                                    <div class="modal-body">
+                                                        <input class="form-control" id="referenceId" type="hidden" name="reference_id"/>
+                                                        <label for="reference" class="mb-2">Enter New Updated Reference</label>
+                                                        <input class="form-control" id="referenceName" type="text" name="new_reference_name"/>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="submit" class="btn btn-primary">Save changes</button>
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Topic -->
+                                    <div class="mb-4" id="topics_section">
+                                        <div class="cust-head d-flex align-items-center">
+                                            <h4>Topics</h4>
+                                            <button class="badge bg-primary rounded-pill border-0 ms-3" data-bs-toggle="modal" data-bs-target="#create_topic_modal">
+                                                <i class='bx bx-plus-circle'></i>
+                                            </button>
+                                            <button class="badge bg-primary rounded-pill border-0 ms-3" id="removeTopicsBtn">
+                                                Remove Selected Topics
+                                                <i class='bx bx-layer-minus'></i>
+                                            </button>
+                                            <button class="badge bg-primary rounded-pill border-0 ms-3" id="regenerateTopicBtn">
+                                                Regenerate
+                                                <i class='bx bx-refresh'></i>
+                                            </button>
+                                            <div class="ms-2 Spinner_for_topics visually-hidden" id="loading_for_topics">
+                                                <div class="spinner-border spinner-border-sm" role="status">
+                                                    <span class="visually-hidden">Loading...</span>
+                                                </div>
+                                                <span>Getting New Info</span>
+                                            </div>
+                                        </div>
+                                        <table id="TopicTable" class="table rounded-corners text-white cust-tbl">
+                                            {% for topic in topics %}
+                                            <tr id="topic-{{ topic.id }}">
+                                                <td class="topic">
+                                                    <input class="form-check-input me-1 topicCheckbox" type="checkbox" value="{{ topic.id }}" aria-label="...">
+                                                    <span>{{ topic.topic_name }}</span>
+                                                    <button type="button" class="badge bg-primary rounded-pill border-0" onClick="editTopic({{ topic.id }})" data-bs-toggle="modal" data-bs-target="#editTopicModal">
+                                                        <i class='bx bx-edit-alt'></i>
+                                                    </button>
+                                                    <button class="badge bg-primary rounded-pill border-0" onClick="deleteTopic({{ topic.id }})">
+                                                        <i class='bx bxs-trash'></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </table>
+                                    </div>
+                                    <!-- Add Topic Modal -->
+                                    <div class="modal fade" id="create_topic_modal" tabindex="-1">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content" style="background-color: #202022">
+                                                <form id="addTopicForm">
+                                                    {% csrf_token %}
+                                                    <div class="modal-header">
+                                                        <h1 class="modal-title fs-5">Add Topic</h1>
+                                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <div class="form-group">
+                                                            <input class="form-control" type="text" name="topic" placeholder="Add Topic Name" required>
+                                                            <input type="hidden" name="syllabus_ai_id" value="{{ syllabus_ai.id }}">
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button class="btn btn-primary" type="submit" id="submitTopicBtn">Add Topic</button>
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Edit Topic Modal -->
+                                    <div class="modal fade" id="editTopicModal" tabindex="-1">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content" style="background-color: #202022">
+                                                <div class="modal-header">
+                                                    <h1 class="modal-title fs-5">Edit Topic</h1>
+                                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <form id="updateTopicForm">
+                                                    <div class="modal-body">
+                                                        <input class="form-control" id="topicId" type="hidden" name="topic_id"/>
+                                                        <label for="topic" class="mb-2">Enter New Updated Topic</label>
+                                                        <input class="form-control" id="topicName" type="text" name="new_topic_name"/>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="submit" class="btn btn-primary">Save changes</button>
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Course Learning Outcome -->
+                                    <div class="mb-4" id="course_learning_outcome_section">
+                                        <div class="cust-head d-flex align-items-center">
+                                            <h4>Course Learning Outcome</h4>
+                                            <button class="badge bg-primary rounded-pill border-0 ms-3" data-bs-toggle="modal" data-bs-target="#create_clo_modal">
+                                                <i class='bx bx-plus-circle'></i>
+                                            </button>
+                                            <button class="badge bg-primary rounded-pill border-0 ms-3" id="removeCLOBtn">
+                                                Remove Selected CLO
+                                                <i class='bx bx-layer-minus'></i>
+                                            </button>
+                                            <button class="badge bg-primary rounded-pill border-0 ms-3" id="regenerateCLOBtn">
+                                                Regenerate
+                                                <i class='bx bx-refresh'></i>
+                                            </button>
+                                            <div class="ms-2 Spinner_for_clo visually-hidden" id="loading_for_clo">
+                                                <div class="spinner-border spinner-border-sm" role="status">
+                                                    <span class="visually-hidden">Loading...</span>
+                                                </div>
+                                                <span>Getting New Info</span>
+                                            </div>
+                                        </div>
+                                        <table id="CLOTable" class="table rounded-corners text-white cust-tbl">
+                                            {% for clo in course_learning_outcomes %}
+                                            <tr id="clo-{{ clo.id }}">
+                                                <td class="clo">
+                                                    <input class="form-check-input me-1 cloCheckbox" type="checkbox" value="{{ clo.id }}" aria-label="...">
+                                                    <span>{{ clo.course_learning_outcome }}</span>
+                                                    <button type="button" class="badge bg-primary rounded-pill border-0" onClick="editCLO({{ clo.id }})" data-bs-toggle="modal" data-bs-target="#editCLOModal">
+                                                        <i class='bx bx-edit-alt'></i>
+                                                    </button>
+                                                    <button class="badge bg-primary rounded-pill border-0" onClick="deleteCLO({{ clo.id }})">
+                                                        <i class='bx bxs-trash'></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </table>
+                                    </div>
+
+                                    <!-- Add CLO Modal -->
+                                    <div class="modal fade" id="create_clo_modal" tabindex="-1">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content" style="background-color: #202022">
+                                                <form id="addCLOForm">
+                                                    {% csrf_token %}
+                                                    <div class="modal-header">
+                                                        <h1 class="modal-title fs-5">Add Course Learning Outcome</h1>
+                                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <div class="form-group">
+                                                            <textarea class="form-control" name="clo" placeholder="Add Course Learning Outcome" required></textarea>
+                                                            <input type="hidden" name="syllabus_ai_id" value="{{ syllabus_ai.id }}">
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button class="btn btn-primary" type="submit" id="submitCLOBtn">Add CLO</button>
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Edit CLO Modal -->
+                                    <div class="modal fade" id="editCLOModal" tabindex="-1">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content" style="background-color: #202022">
+                                                <div class="modal-header">
+                                                    <h1 class="modal-title fs-5">Edit Course Learning Outcome</h1>
+                                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <form id="updateCLOForm">
+                                                    <div class="modal-body">
+                                                        <input class="form-control" id="cloId" type="hidden" name="clo_id"/>
+                                                        <label for="clo" class="mb-2">Enter New Updated Course Learning Outcome</label>
+                                                        <textarea class="form-control" id="cloName" name="new_clo_name" required></textarea>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="submit" class="btn btn-primary">Save changes</button>
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="row d-flex justify-content-between mt-3">
+                                <div class="col-6 col-lg-auto">
+                                    <a href="{% url 'edit_syllabus' syllabus.id %}" class="btn btn-primary" type="button" title="Prev">Back</a>
+                                </div>
+                                {% if syllabus_ai.first_time_processing == 'Yes' %}
+                                    <div class="col-6 col-lg-auto">
+                                        <button class="btn btn-primary ml-auto" type="button" title="Next" data-bs-toggle="modal" data-bs-target="#confrim_prev_modal">Next</button>
+                                    </div>
+                                {% else %}
+                                    <div class="col-6 col-lg-auto">
+                                        <button class="btn btn-primary ml-auto" type="button" title="Next" data-bs-toggle="modal" data-bs-target="#choose">Next</button>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Confirm Modal -->
+    <div class="modal fade" id="confrim_prev_modal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="background-color: #202022">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5 text-light">Confirmation</h1>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-light">
+                    Are you sure on the Generated Information Here? <br>
+                    This will generate the Course Rubrics and Outline.
+                </div>
+                <div class="modal-footer">
+                    <a href="#" class="btn btn-primary" onclick="handleProceedClick({{ syllabus.syllabus_ai_id.id }}, {{ syllabus.id }})">Proceed</a>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Choose Modal -->
+    <div class="modal fade" id="choose" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="background-color: #202022">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5 text-light">Choose</h1>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-light">
+                    Choose on the following options:
+                    <div class="d-flex row px-3 pt-2">
+                        <a href="#" onclick="proceed({{ syllabus.syllabus_ai_id.id }}, {{ syllabus.id }})" class="btn btn-outline-primary btn-sm mb-2">Proceed to Course Rubric and Outline</a>
+                        <a href="#" class="btn btn-outline-primary btn-sm mb-2" onclick="handleProceedClick({{ syllabus.syllabus_ai_id.id }}, {{ syllabus.id }})">Generate Course Rubric and Outline</a>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+<!-- Loading overlay -->
+<div id="loading-overlay" class="loading-overlay">
+    <div class="spinner-container text-center">
+        <div class="spinner-border text-danger" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+    <div class="loading-text">Generating Course Rubric and Outline. Please Wait...</div>
+</div>
+<div class="toast-container position-fixed top-0 end-0 p-3 text-light" >
+    <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" style="background-color:#373738;">
+      <div class="toast-header text-light" style="background-color:#212122;">
+        <img src="{% static 'images/logo.png' %}" class="rounded me-2" alt="..." style="width:20px;">
+        <strong class="me-auto text-light">Error Generating</strong>
+        <small>Just Now</small>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+      <div class="toast-body">
+        Error Generating Course Rubric and Outline. Please Try Again.
+      </div>
+    </div>
+</div>
+
+</main>
+{% endblock %}
+{% block scripts %}
+<script src="{% static 'js/multi_form.js' %}"></script>
+<script>
+    // Function to handle the click event on the "Proceed" button
+    function proceed(syllabusAiId, syllabusId) {
+
+        // Send an AJAX request to the Django view
+        $.ajax({
+            type: 'POST',
+            url: `/proceed_and_redirect/${syllabusAiId}/`,
+            data: {
+                syllabusId: syllabusId  // Pass syllabusId as data to the view
+            },
+            headers: {
+                'X-CSRFToken': $("[name=csrfmiddlewaretoken]").val(),
+            },
+            dataType: 'json',
+            success: function (data) {
+
+                if (data.success) {
+                    window.location.href = data.redirect_url;
+                } else {
+                    console.error('Error proceeding and redirecting:', data.message);
+                    // Show error toast
+                    showToast('Error Generating', 'Error');
+                }
+            },
+            error: function (xhr, status, error) {
+
+                console.error('AJAX error:', error);
+                // Show error toast
+                showToast('Error Proceeding', 'Error Proceeding');
+            }
+        });
+    }
+    
+    // Function to handle the click event on the "Proceed" button
+    function handleProceedClick(syllabusAiId, syllabusId) {
+        // Show loading overlay
+        $('#loading-overlay').css('display', 'flex');
+
+        // Send an AJAX request to the Django view
+        $.ajax({
+            type: 'POST',
+            url: `/process_and_redirect/${syllabusAiId}/`,
+            data: {
+                syllabusId: syllabusId  // Pass syllabusId as data to the view
+            },
+            headers: {
+                'X-CSRFToken': $("[name=csrfmiddlewaretoken]").val(),
+            },
+            dataType: 'json',
+            success: function (data) {
+                // Hide loading overlay on success
+                $('#loading-overlay').hide();
+
+                if (data.success) {
+                    // Play audio after a delay of 1 second
+                    setTimeout(function () {
+                        playAudio();
+                    }, 1000);
+
+                    // Redirect to the specified URL after another 1 second delay
+                    setTimeout(function () {
+                        window.location.href = data.redirect_url;
+                    }, 2000);
+                } else {
+                    console.error('Error processing and redirecting:', data.message);
+                    // Show error toast
+                    showToast('Error Generating', 'Error Generating Course Rubric and Outline. Please Try Again.');
+                }
+            },
+            error: function (xhr, status, error) {
+                // Hide loading overlay on error
+                $('#loading-overlay').hide();
+
+                console.error('AJAX error:', error);
+                // Show error toast
+                showToast('Error Generating', 'Error Generating Course Rubric and Outline. Please Try Again.');
+            }
+        });
+    }
+
+    // Function to show the toast message
+    function showToast(title, message) {
+        // Update toast content
+        $('#liveToast .toast-header strong').text(title);
+        $('#liveToast .toast-body').text(message);
+
+        // Play audio
+        playAudio();
+        // Show the toast
+        var toast = new bootstrap.Toast($('#liveToast'));
+        toast.show();
+    }
+
+    function playAudio(audioPath) {
+        var audio = new Audio(staticAudioPath);
+        audio.play();
+    }
+    function checkReferenceRowCount() {
+        var rowCount = $("#ReferenceTable tr").length - 1;
+        if (rowCount >= 4) {
+            alert("You can only add 5 Sources/References.");
+            return false;
+        }
+        return true;
+    }
+
+    $(document).on('submit', 'form#addReferenceForm', function(event) {
+        event.preventDefault();
+        var reference = $(this).find('input[name="reference"]').val().trim();
+        var syllabusAiId = $(this).find('input[name="syllabus_ai_id"]').val();
+    
+        if (reference) {
+            if (checkReferenceRowCount()) {
+                var csrftoken = $("[name=csrfmiddlewaretoken]").val();
+    
+                $.ajax({
+                    type: "POST",
+                    url: '{% url "add_reference" %}',
+                    data: {
+                        'reference': reference,
+                        'syllabus_ai_id': syllabusAiId,
+                        csrfmiddlewaretoken: csrftoken,
+                    },
+                    dataType: 'json',
+                    success: function(data) {
+                        if (data.id) {
+                            appendToReferenceTable(data);
+                            $('#create_reference_modal').modal('hide');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        alert("Error adding reference. Please try again.");
+                        console.error("AJAX error:", error);
+                    }
+                });
+            }
+        } else {
+            alert("Reference is required.");
+        }
+    
+        $(this)[0].reset();
+    });
+    
+    function appendToReferenceTable(data) {
+        $("#ReferenceTable > tbody:last-child").append(`
+            <tr id="reference-${data.id}">
+                <td class="reference">
+                    <input class="form-check-input me-1 referenceCheckbox" type="checkbox" value="${data.id}" aria-label="...">
+                    <span>${data.reference}</span>
+                    <button type="button" class="badge bg-primary rounded-pill border-0" onClick="editReference(${data.id})" data-bs-toggle="modal" data-bs-target="#editReferenceModal">
+                        <i class='bx bx-edit-alt'></i>
+                    </button>
+                    <button class="badge bg-primary rounded-pill border-0" onClick="deleteReference(${data.id})">
+                        <i class='bx bxs-trash'></i>
+                    </button>
+                </td>
+            </tr>
+        `);
+    }
+    // Create Django Ajax Call for Editing Reference
+    $("form#updateReferenceForm").submit(function() {
+        var referenceIdInput = $('input#referenceId').val().trim();
+        var referenceNameInput = $('input#referenceName').val().trim();
+
+        if (referenceIdInput && referenceNameInput) {
+            // Create Ajax Call
+            $.ajax({
+                url: '{% url "update_reference" %}',  // Update with your actual URL name for updating references
+                data: {
+                    'reference_id': referenceIdInput,
+                    'new_reference_name': referenceNameInput
+                },
+                dataType: 'json',
+                success: function (data) {
+                    if (data.reference_id) {
+                        updateToReferenceTable(data);
+                        $('#editReferenceModal').modal('hide');
+                    }
+                }
+            });
+        } else {
+            alert("All fields must have a valid value.");
+        }
+
+        $('form#updateReferenceForm').trigger("reset");
+        return false;
+    });
+
+    // Function to populate the edit form with reference details
+    function editReference(id) {
+        if (id) {
+            tr_id = "#reference-" + id;
+            name = $(tr_id).find(".reference span").text().trim();
+            $('#referenceId').val(id);
+            $('#referenceName').val(name);
+        }
+    }
+
+    // Function to update the Reference name in the table
+    function updateToReferenceTable(data) {
+        var referenceRow = $("#ReferenceTable #reference-" + data.reference_id);
+        referenceRow.find(".reference span").text(data.reference);
+    }
+
+    // Create Django Ajax Call for Deleting Reference
+    function deleteReference(id) {
+        var action = confirm("Are you sure you want to delete this reference?");
+        if (action != false) {
+            var referenceTable = $("#ReferenceTable");
+            var rowCount = referenceTable.find("tr").length;
+
+            if (rowCount > 1) {
+                $.ajax({
+                    url: '{% url "delete_reference" %}',  // Update with your actual URL name for deleting references
+                    data: {
+                        'reference_id': id,
+                    },
+                    dataType: 'json',
+                    success: function (data) {
+                        if (data.deleted) {
+                            $("#ReferenceTable #reference-" + id).remove();
+                        }
+                    }
+                });
+            } else {
+                alert("You need to have at least 1 reference left.");
+            }
+        }
+    }
+    // Function to remove selected References
+    function removeSelectedReferences() {
+        var selectedReferences = $("#ReferenceTable input[type='checkbox']:checked");
+
+        if (selectedReferences.length > 0) {
+            var referenceIds = [];
+            selectedReferences.each(function () {
+                var row = $(this).closest("tr");
+                var referenceId = row.attr("id").split("-")[1];  // Update index to 1
+                referenceIds.push(referenceId);
+            });
+
+            // Constructing the confirmation message with the list of selected References
+            var confirmationMessage = "Are you sure you want to remove the selected references?\n\n";
+            referenceIds.forEach(function(referenceId) {
+                var referenceName = $("#ReferenceTable #reference-" + referenceId + " .reference span").text().trim();
+                confirmationMessage += "- " + referenceName + "\n";
+            });
+
+            // Display the confirmation alert
+            var action = confirm(confirmationMessage);
+
+            if (action != false) {
+                // Make a single AJAX call to delete multiple References
+                $.ajax({
+                    type: "POST",
+                    url: '{% url "remove_selected_references" %}',  // Update with your URL name
+                    data: {
+                        'reference_ids': referenceIds,
+                    },
+                    headers: {
+                        "X-CSRFToken": $("[name=csrfmiddlewaretoken]").val(),
+                    },
+                    dataType: 'json',
+                    success: function(data) {
+                        if (data.removed) {
+                            // Remove selected References from the table
+                            referenceIds.forEach(function(referenceId) {
+                                $("#ReferenceTable #reference-" + referenceId).remove();
+                            });
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("AJAX error:", error);
+                    }
+                });
+            }
+        } else {
+            alert("Please select at least one reference to remove.");
+        }
+    }
+
+    // Bind the removeSelectedReferences function to the "Remove" button click event
+    $(document).on('click', '#removeReferencesBtn', function() {
+        removeSelectedReferences();
+    });
+
+    // Function to scroll to the element with id "references_source"
+    function scrollToReferencesSource() {
+        var referencesSource = document.getElementById("references_source");
+        if (referencesSource) {
+            referencesSource.scrollIntoView({ behavior: "smooth" });
+        }
+    }
+
+    function regenerateReferences(syllabusId, syllabusAiId) {
+        // Show the loading spinner
+        $('#loading_for_references').removeClass('visually-hidden');
+
+        // Set a flag in local storage to indicate that scrolling should occur
+        localStorage.setItem('scrollToReferencesSource', 'true');
+
+        $.ajax({
+            type: "POST",
+            url: '{% url "regenerate_references" %}',
+            data: {
+                'syllabus_id': syllabusId,
+                'syllabus_ai_id': syllabusAiId,
+            },
+            headers: {
+                "X-CSRFToken": $("[name=csrfmiddlewaretoken]").val(),
+            },
+            dataType: 'json',
+            success: function (data) {
+                if (data.success) {
+                    playAudio();
+
+                    // Delay the page reload by 1 second
+                    setTimeout(function () {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    console.error("Regeneration failed. Please try again.");
+                    alert("Regeneration failed. Please try again.");
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("AJAX error:", error);
+            },
+            complete: function () {
+                // Hide the loading_for_references div after data has been processed
+                $('#loading_for_references').addClass('visually-hidden');
+
+                // Show the regenerate button
+                $('#regenerateReferenceBtn').removeClass('visually-hidden');
+            }
+        });
+    }
+
+    // Check the flag in local storage and scroll if necessary
+    if (localStorage.getItem('scrollToReferencesSource') === 'true') {
+        scrollToReferencesSource();
+        localStorage.removeItem('scrollToReferencesSource'); // Remove the flag
+    }
+
+    $(document).ready(function () {
+        // Hide the spinner initially
+        $('#loading_for_references').addClass('visually-hidden');
+
+        // Bind the regenerateReferences function to the "Regenerate" button click event
+        $('#regenerateReferenceBtn').on('click', function () {
+            var syllabusId = {{ syllabus.id }};
+            var syllabusAiId = {{ syllabus_ai.id }};
+
+            // Hide the regenerate button
+            $(this).addClass('visually-hidden');
+
+            // Show the spinner for references
+            $('#loading_for_references').removeClass('visually-hidden');
+
+            // Call the regenerateReferences function with the syllabus ID and AI ID
+            regenerateReferences(syllabusId, syllabusAiId);
+        });
+    });
+
+    //-----------------------------------topics ----------------------------------------------------------------
+
+    function checkTopicRowCount() {
+        var rowCount = $("#TopicTable tr").length - 1;
+        if (rowCount >= 17) {
+            alert("You can only add 18 Topics.");
+            return false;
+        }
+        return true;
+    }
+    
+    $(document).on('submit', 'form#addTopicForm', function(event) {
+        event.preventDefault();
+        var topicName = $(this).find('input[name="topic"]').val().trim();
+        var syllabusAiId = $(this).find('input[name="syllabus_ai_id"]').val();
+    
+        if (topicName) {
+            if (checkTopicRowCount()) {
+                var csrftoken = $("[name=csrfmiddlewaretoken]").val();
+    
+                $.ajax({
+                    type: "POST",
+                    url: '{% url "add_topic" %}',
+                    data: {
+                        'topic_name': topicName,
+                        'syllabus_ai_id': syllabusAiId,
+                        csrfmiddlewaretoken: csrftoken,
+                    },
+                    dataType: 'json',
+                    success: function(data) {
+                        if (data.id) {
+                            appendToTopicTable(data);
+                            $('#create_topic_modal').modal('hide');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        alert("Error adding topic. Please try again.");
+                        console.error("AJAX error:", error);
+                    }
+                });
+            }
+        } else {
+            alert("Topic is required.");
+        }
+    
+        $(this)[0].reset();
+    });
+    
+    function appendToTopicTable(data) {
+        $("#TopicTable > tbody:last-child").append(`
+            <tr id="topic-${data.id}">
+                <td class="topic">
+                    <input class="form-check-input me-1 topicCheckbox" type="checkbox" value="${data.id}" aria-label="...">
+                    <span>${data.topic_name}</span>
+                    <button type="button" class="badge bg-primary rounded-pill border-0" onClick="editTopic(${data.id})" data-bs-toggle="modal" data-bs-target="#editTopicModal">
+                        <i class='bx bx-edit-alt'></i>
+                    </button>
+                    <button class="badge bg-primary rounded-pill border-0" onClick="deleteTopic(${data.id})">
+                        <i class='bx bxs-trash'></i>
+                    </button>
+                </td>
+            </tr>
+        `);
+    }
+    
+    // Create Django Ajax Call for Editing Topic
+    $("form#updateTopicForm").submit(function() {
+        var topicIdInput = $('input#topicId').val().trim();
+        var topicNameInput = $('input#topicName').val().trim();
+    
+        if (topicIdInput && topicNameInput) {
+            // Create Ajax Call
+            $.ajax({
+                url: '{% url "update_topic" %}',  // Update with your actual URL name for updating topics
+                data: {
+                    'topic_id': topicIdInput,
+                    'new_topic_name': topicNameInput
+                },
+                dataType: 'json',
+                success: function (data) {
+                    if (data.topic_id) {
+                        updateToTopicTable(data);
+                        $('#editTopicModal').modal('hide');
+                    }
+                }
+            });
+        } else {
+            alert("All fields must have a valid value.");
+        }
+    
+        $('form#updateTopicForm').trigger("reset");
+        return false;
+    });
+    
+    // Function to populate the edit form with topic details
+    function editTopic(id) {
+        if (id) {
+            tr_id = "#topic-" + id;
+            name = $(tr_id).find(".topic span").text().trim();
+            $('#topicId').val(id);
+            $('#topicName').val(name);
+        }
+    }
+    
+    // Function to update the Topic name in the table
+    function updateToTopicTable(data) {
+        var topicRow = $("#TopicTable #topic-" + data.topic_id);
+        topicRow.find(".topic span").text(data.topic_name);
+    }
+    
+    // Create Django Ajax Call for Deleting Topic
+    function deleteTopic(id) {
+        var action = confirm("Are you sure you want to delete this topic?");
+        if (action != false) {
+            var topicTable = $("#TopicTable");
+            var rowCount = topicTable.find("tr").length;
+    
+            if (rowCount > 1) {
+                $.ajax({
+                    url: '{% url "delete_topic" %}',  // Update with your actual URL name for deleting topics
+                    data: {
+                        'topic_id': id,
+                    },
+                    dataType: 'json',
+                    success: function (data) {
+                        if (data.deleted) {
+                            $("#TopicTable #topic-" + id).remove();
+                        }
+                    }
+                });
+            } else {
+                alert("You need to have at least 1 topic left.");
+            }
+        }
+    }
+    // Bind the removeSelectedTopics function to the "Remove" button click event for Topics
+    $(document).on('click', '#removeTopicsBtn', function() {
+        removeSelectedTopics();
+    });
+    
+    // Function to remove selected Topics
+    function removeSelectedTopics() {
+        var selectedTopics = $("#TopicTable input[type='checkbox']:checked");
+    
+        if (selectedTopics.length > 0) {
+            var topicIds = [];
+            selectedTopics.each(function () {
+                var row = $(this).closest("tr");
+                var topicId = row.attr("id").split("-")[1];  // Update index to 1
+                topicIds.push(topicId);
+            });
+    
+            // Constructing the confirmation message with the list of selected Topics
+            var confirmationMessage = "Are you sure you want to remove the selected topics?\n\n";
+            topicIds.forEach(function(topicId) {
+                var topicName = $("#TopicTable #topic-" + topicId + " .topic span").text().trim();
+                confirmationMessage += "- " + topicName + "\n";
+            });
+    
+            // Display the confirmation alert
+            var action = confirm(confirmationMessage);
+    
+            if (action != false) {
+                // Make a single AJAX call to delete multiple Topics
+                $.ajax({
+                    type: "POST",
+                    url: '{% url "remove_selected_topics" %}',  // Update with your URL name
+                    data: {
+                        'topic_ids': topicIds,
+                    },
+                    headers: {
+                        "X-CSRFToken": $("[name=csrfmiddlewaretoken]").val(),
+                    },
+                    dataType: 'json',
+                    success: function(data) {
+                        if (data.removed) {
+                            // Remove selected Topics from the table
+                            topicIds.forEach(function(topicId) {
+                                $("#TopicTable #topic-" + topicId).remove();
+                            });
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("AJAX error:", error);
+                    }
+                });
+            }
+        } else {
+            alert("Please select at least one topic to remove.");
+        }
+    }
+    // Function to scroll to the element with id "topics_section"
+    function scrollToTopicsSection() {
+        var topicsSection = document.getElementById("topics_section");
+        if (topicsSection) {
+            topicsSection.scrollIntoView({ behavior: "smooth" });
+        }
+    }
+
+    function regenerateTopics(syllabusId, syllabusAiId) {
+        // Show the loading spinner
+        $('#loading_for_topics').removeClass('visually-hidden');
+    
+        // Set a flag in local storage to indicate that scrolling should occur
+        localStorage.setItem('scrollToTopicsSection', 'true');
+    
+        $.ajax({
+            type: "POST",
+            url: '{% url "regenerate_topics" %}',
+            data: {
+                'syllabus_id': syllabusId,
+                'syllabus_ai_id': syllabusAiId,
+            },
+            headers: {
+                "X-CSRFToken": $("[name=csrfmiddlewaretoken]").val(),
+            },
+            dataType: 'json',
+            success: function (data) {
+                if (data.success) {
+                    playAudio();  // Call the playAudio function
+    
+                    // Handle success, update your topics table or perform other actions
+                    console.log("Topics regenerated successfully");
+    
+                    // Delay the page reload by 1 second
+                    setTimeout(function () {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    // Handle failure, show an alert or perform other error handling
+                    console.error("Error regenerating topics:", data.message);
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("AJAX error:", error);
+            },
+            complete: function () {
+                // Hide the loading_for_topics div after data has been processed
+                $('#loading_for_topics').addClass('visually-hidden');
+    
+                // Show the regenerate button
+                $('#regenerateTopicBtn').removeClass('visually-hidden');
+            }
+        });
+    }
+
+    // Check the flag in local storage and scroll if necessary
+    if (localStorage.getItem('scrollToTopicsSection') === 'true') {
+        scrollToTopicsSection();
+        localStorage.removeItem('scrollToTopicsSection'); // Remove the flag
+    }
+
+    $(document).ready(function () {
+        // Hide the spinner initially
+        $('#loading_for_topics').addClass('visually-hidden');
+
+        // Bind the regenerateTopics function to the "Regenerate" button click event
+        $('#regenerateTopicBtn').on('click', function () {
+            var syllabusId = {{ syllabus.id }};
+            var syllabusAiId = {{ syllabus_ai.id }};
+
+            // Hide the regenerate button
+            $(this).addClass('visually-hidden');
+
+            // Show the spinner for topics
+            $('#loading_for_topics').removeClass('visually-hidden');
+
+            // Call the regenerateTopics function with the syllabus ID and AI ID
+            regenerateTopics(syllabusId, syllabusAiId);
+        });
+    });
+
+    //-------------------- CLO ----------------------------------------------------------------
+
+    function checkCLORowCount() {
+        var rowCount = $("#CLOTable tr").length - 1;
+        if (rowCount >= 9) {
+            alert("You can only add 10 Course Learning Outcomes.");
+            return false;
+        }
+        return true;
+    }
+
+    // Function to add a new Course Learning Outcome
+    $(document).on('submit', 'form#addCLOForm', function(event) {
+        event.preventDefault();
+        var outcomeText = $(this).find('textarea[name="clo"]').val().trim();
+        var syllabusAiId = $(this).find('input[name="syllabus_ai_id"]').val();
+
+        if (outcomeText) {
+            if (checkCLORowCount()) {
+                var csrftoken = $("[name=csrfmiddlewaretoken]").val();
+
+                $.ajax({
+                    type: "POST",
+                    url: '{% url "add_course_learning_outcome" %}',
+                    data: {
+                        'course_learning_outcome': outcomeText,
+                        'syllabus_ai_id': syllabusAiId,
+                        csrfmiddlewaretoken: csrftoken,
+                    },
+                    dataType: 'json',
+                    success: function(data) {
+                        if (data.id) {
+                            appendToCLOTable(data);
+                            $('#create_clo_modal').modal('hide');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        alert("Error adding Course Learning Outcome. Please try again.");
+                        console.error("AJAX error:", error);
+                    }
+                });
+            }
+        } else {
+            alert("Course Learning Outcome is required.");
+        }
+
+        $(this)[0].reset();
+    });
+
+    // Function to append a new Course Learning Outcome to the table
+    function appendToCLOTable(data) {
+        $("#CLOTable > tbody:last-child").append(`
+            <tr id="clo-${data.id}">
+                <td class="clo">
+                    <input class="form-check-input me-1 cloCheckbox" type="checkbox" value="${data.id}" aria-label="...">
+                    <span>${data.course_learning_outcome}</span>
+                    <button type="button" class="badge bg-primary rounded-pill border-0" onClick="editCLO(${data.id})" data-bs-toggle="modal" data-bs-target="#editCLOModal">
+                        <i class='bx bx-edit-alt'></i>
+                    </button>
+                    <button class="badge bg-primary rounded-pill border-0" onClick="deleteCLO(${data.id})">
+                        <i class='bx bxs-trash'></i>
+                    </button>
+                </td>
+            </tr>
+        `);
+    }
+
+    // Create Django Ajax Call for Editing Course Learning Outcome
+    $("form#updateCLOForm").submit(function() {
+        var outcomeIdInput = $('input#cloId').val().trim();
+        var outcomeTextInput = $('textarea#cloName').val().trim();
+
+        if (outcomeIdInput && outcomeTextInput) {
+            // Create Ajax Call
+            $.ajax({
+                url: '{% url "update_course_learning_outcome" %}',  // Update with your actual URL name for updating CLO
+                data: {
+                    'outcome_id': outcomeIdInput,
+                    'new_outcome_text': outcomeTextInput
+                },
+                dataType: 'json',
+                success: function (data) {
+                    if (data.outcome_id) {
+                        updateToCLOTable(data);
+                        $('#editCLOModal').modal('hide');
+                    }
+                }
+            });
+        } else {
+            alert("All fields must have a valid value.");
+        }
+
+        $('form#updateCLOForm').trigger("reset");
+        return false;
+    });
+
+    // Function to populate the edit form with Course Learning Outcome details
+    function editCLO(id) {
+        if (id) {
+            tr_id = "#clo-" + id;
+            text = $(tr_id).find(".clo span").text().trim();
+            $('#cloId').val(id);
+            $('#cloName').val(text);
+        }
+    }
+
+    // Function to update the Course Learning Outcome text in the table
+    function updateToCLOTable(data) {
+        var cloRow = $("#CLOTable #clo-" + data.outcome_id);
+        cloRow.find(".clo span").text(data.course_learning_outcome);
+    }
+
+    // Create Django Ajax Call for Deleting Course Learning Outcome
+    function deleteCLO(id) {
+        var action = confirm("Are you sure you want to delete this Course Learning Outcome?");
+        if (action != false) {
+            var cloTable = $("#CLOTable");
+            var rowCount = cloTable.find("tr").length;
+
+            if (rowCount > 1) {
+                $.ajax({
+                    url: '{% url "delete_course_learning_outcome" %}',  // Update with your actual URL name for deleting CLO
+                    data: {
+                        'outcome_id': id,
+                    },
+                    dataType: 'json',
+                    success: function (data) {
+                        if (data.deleted) {
+                            $("#CLOTable #clo-" + id).remove();
+                        }
+                    }
+                });
+            } else {
+                alert("You need to have at least 1 Course Learning Outcome left.");
+            }
+        }
+    }
+    
+    // Bind the removeSelectedCLOs function to the "Remove" button click event for CLOs
+    $(document).on('click', '#removeCLOBtn', function() {
+        removeSelectedCLOs();
+    });
+
+    // Function to remove selected CLOs
+    function removeSelectedCLOs() {
+        var selectedCLOs = $("#CLOTable input[type='checkbox']:checked");
+
+        if (selectedCLOs.length > 0) {
+            var cloIds = [];
+            selectedCLOs.each(function () {
+                var row = $(this).closest("tr");
+                var cloId = row.attr("id").split("-")[1];  // Update index to 1
+                cloIds.push(cloId);
+            });
+
+            // Constructing the confirmation message with the list of selected CLOs
+            var confirmationMessage = "Are you sure you want to remove the selected CLOs?\n\n";
+            cloIds.forEach(function(cloId) {
+                var cloText = $("#CLOTable #clo-" + cloId + " .clo span").text().trim();
+                confirmationMessage += "- " + cloText + "\n";
+            });
+
+            // Display the confirmation alert
+            var action = confirm(confirmationMessage);
+
+            if (action != false) {
+                // Make a single AJAX call to delete multiple CLOs
+                $.ajax({
+                    type: "POST",
+                    url: '{% url "remove_selected_clos" %}',  // Update with your URL name
+                    data: {
+                        'clo_ids': cloIds,
+                    },
+                    headers: {
+                        "X-CSRFToken": $("[name=csrfmiddlewaretoken]").val(),
+                    },
+                    dataType: 'json',
+                    success: function(data) {
+                        if (data.removed) {
+                            // Remove selected CLOs from the table
+                            cloIds.forEach(function(cloId) {
+                                $("#CLOTable #clo-" + cloId).remove();
+                            });
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("AJAX error:", error);
+                    }
+                });
+            }
+        } else {
+            alert("Please select at least one CLO to remove.");
+        }
+    }
+
+    // Function to scroll to the element with id "course_learning_outcome_section"
+    function scrollToCLOSection() {
+        var cloSection = document.getElementById("course_learning_outcome_section");
+        if (cloSection) {
+            cloSection.scrollIntoView({ behavior: "smooth" });
+        }
+    }
+
+    function regenerateCLO(syllabusId, syllabusAiId) {
+        // Show the loading spinner
+        $('#loading_for_clo').removeClass('visually-hidden');
+
+        // Set a flag in local storage to indicate that scrolling should occur
+        localStorage.setItem('scrollToCLOSection', 'true');
+
+        $.ajax({
+            type: "POST",
+            url: '{% url "regenerate_clo" %}',
+            data: {
+                'syllabus_id': syllabusId,
+                'syllabus_ai_id': syllabusAiId,
+            },
+            headers: {
+                "X-CSRFToken": $("[name=csrfmiddlewaretoken]").val(),
+            },
+            dataType: 'json',
+            success: function (data) {
+                if (data.success) {
+                    playAudio();  // Call the playAudio function
+
+                    // Handle success, update your CLO table or perform other actions
+                    console.log("CLOs regenerated successfully");
+
+                    // Delay the page reload by 1 second
+                    setTimeout(function () {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    // Handle failure, show an alert or perform other error handling
+                    console.error("Error regenerating CLOs:", data.message);
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("AJAX error:", error);
+            },
+            complete: function () {
+                // Hide the loading_for_clo div after data has been processed
+                $('#loading_for_clo').addClass('visually-hidden');
+
+                // Show the regenerate button
+                $('#regenerateCLOBtn').removeClass('visually-hidden');
+            }
+        });
+    }
+
+    // Check the flag in local storage and scroll if necessary
+    if (localStorage.getItem('scrollToCLOSection') === 'true') {
+        scrollToCLOSection();
+        localStorage.removeItem('scrollToCLOSection'); // Remove the flag
+    }
+
+    $(document).ready(function () {
+        // Hide the spinner initially
+        $('#loading_for_clo').addClass('visually-hidden');
+
+        // Bind the regenerateCLO function to the "Regenerate" button click event
+        $('#regenerateCLOBtn').on('click', function () {
+            var syllabusId = {{ syllabus.id }};
+            var syllabusAiId = {{ syllabus_ai.id }};
+
+            // Hide the regenerate button
+            $(this).addClass('visually-hidden');
+
+            // Show the spinner for CLOs
+            $('#loading_for_clo').removeClass('visually-hidden');
+
+            // Call the regenerateCLO function with the syllabus ID and AI ID
+            regenerateCLO(syllabusId, syllabusAiId);
+        });
+    });
+</script>
+{% endblock scripts %}
