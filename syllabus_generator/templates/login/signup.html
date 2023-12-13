@@ -1,4 +1,5 @@
 {% extends '../base/base.html' %}
+{% block title %}Sign Up{% endblock %}
 {% load static %}
 {% block content %}
 <div class="d-flex justify-content-center align-items-center mt-5" style="padding-bottom: 40px;">
@@ -10,7 +11,7 @@
                     <div class="text-center mb-2"><img src="{% static 'images/logo.png' %}" class="img-fluid" style="width:90px"></div>
                     <h5 class="card-title text-center">Create Account</h5>
                     {% if error_messages.general %}
-                        <div class="alert alert-danger text-danger fw-bold" role="alert">{{ error_message.general }}</div>
+                        <div class="alert alert-danger text-danger fw-bold" role="alert">{{ error_messages.general }}</div>
                     {% endif %}
                     <form class="row g-3" method="POST" enctype="multipart/form-data" action="{% url 'signup' %}">
                         {% csrf_token %}
@@ -30,7 +31,7 @@
                         </div>
                         <div class="col-md-6 form-floating mb-0">
                             <input type="text" class="form-control" id="middle_name" name="middle_name" placeholder="Middle Name">
-                            <label for="mid_name" class="ms-2">Middle Name</label>
+                            <label for="middle_name" class="ms-2">Middle Name</label>
                         </div>
                         <div class="col-md-12 form-floating mb-0">
                             <input type="text" class="form-control" id="last_name" name="last_name" placeholder="Last Name" required>
@@ -58,42 +59,40 @@
                                 <span style="vertical-align: middle;">{{ error_messages.email_checker }}</span>
                             </div>
                         {% endif %}
-                        <div class="col-md-12 form-floating">
-                            <input type="password" class="form-control" id="password1" name="password1" placeholder="Password" required>
-                            <label for="password1" class="ms-2">Password</label>
-                        </div>
-                        {% if error_messages.password_complexity %}
-                            <div class="text-danger mb-0 mt-0" style="font-size: 14px;">
-                                <i class='bx bx-error-circle' style="font-size:16px;vertical-align: middle;"></i>
-                                <span style="vertical-align: middle;">{{ error_messages.password_complexity }}</span>
+                        <div class="col-md-12 input-group">
+                            <div class="form-floating">
+                                <input type="password" class="form-control" id="password1" name="password1" placeholder="Password" required>
+                                <label for="password1" class="ms-2">Password</label>
                             </div>
-                        {% endif %}
-                        <div class="col-md-12 form-floating">
-                            <input type="password" class="form-control" id="password2" name="password2" placeholder="Confirm Password" required>
-                            <label for="password2" class="ms-2">Confirm Password</label>
+                            <span class="input-group-text toggle-password"><i class='bx bx-low-vision'></i></span>
                         </div>
-                        {% if error_messages.password %}
-                            <div class="text-danger mb-0 mt-0" style="font-size: 14px;">
-                                <i class='bx bx-error-circle' style="font-size:16px;vertical-align: middle;"></i>
-                                <span style="vertical-align: middle;">{{ error_messages.password }}</span>
+                        <div class="text-danger mb-0 mt-0" style="font-size: 14px; display: none;" id="Password_Complexity">
+                            <i class='bx bx-error-circle' style="font-size:16px;vertical-align: middle;"></i>
+                            <span style="vertical-align: middle;"></span>
+                        </div>
+                        <div class="col-md-12 input-group">
+                            <div class="form-floating">
+                                <input type="password" class="form-control" id="password2" name="password2" placeholder="Confirm Password" required>
+                                <label for="password2" class="ms-2">Confirm Password</label>
                             </div>
-                        {% endif %}
-                        <div class="col-12">
+                            <span class="input-group-text toggle-password"><i class='bx bx-low-vision'></i></span>
+                        </div>
+                        <div class="text-danger mb-0 mt-0" style="font-size: 14px;display: none;" id="Password_Match">
+                            <i class='bx bx-error-circle' style="font-size:16px;vertical-align: middle; "></i>
+                            <span style="vertical-align: middle;"></span>
+                        </div>
+                        <div class="col-12 d-flex align-items-center">
                             <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="" id="invalidCheck" required>
-                            <label class="form-check-label" for="invalidCheck">
-                                Agree to terms and conditions
-                            </label>
+                                <input class="form-check-input" type="checkbox" value="" id="invalidCheck" required>
+                                <label class="form-check-label" for="invalidCheck">
+                                    Agree to terms and conditions
+                                </label>
+                                <button type="button" data-bs-toggle="modal" data-bs-target="#terms_and_conditions" style="background: transparent; border: none;">
+                                    <i class='bx bxs-info-circle' style="font-size: 20px"></i>
+                                </button>
                             </div>
                         </div>
-                        {% comment %} <div class="mb-3">
-                            <div class="col-12">
-                              <div class="g-recaptcha" data-sitekey="{{ RECAPTCHA_PUBLIC_KEY }}"></div>
-                            </div>
-                            {% if error_messages and 'recaptcha' in error_messages %}
-                            <p class="text-danger">{{ error_messages.recaptcha }}</p>
-                            {% endif %}
-                          </div> {% endcomment %}
+
                         <div class="d-grid col-12">
                             <button class="btn btn-primary" type="submit">Sign Up</button>
                         </div>
@@ -105,4 +104,138 @@
         </div>
     </div>
 </div>
+<!-- Modal -->
+<div class="modal fade" id="terms_and_conditions" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Terms and Conditions</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <h2 class="mb-4">Terms and Conditions</h2>
+        
+            <p>
+                Welcome to Our System! These terms and conditions outline the rules and regulations for the use of our services.
+                By accessing this system, we assume you accept these terms and conditions.
+                Do not continue to use the system if you do not agree to all of the terms and conditions stated on this page.
+            </p>
+        
+            <h3 class="mt-4">1. Information Accuracy</h3>
+            <p>
+                The information provided on this system, including responses generated by ChatGPT,
+                is based on data available up to September 2021. It may not reflect the latest developments.
+                Users are encouraged to verify critical information independently.
+            </p>
+        
+            <h3 class="mt-4">2. Server Overload</h3>
+            <p>
+                Please note that our server may experience overload at times, leading to delays or interruptions in service.
+                We appreciate your understanding and patience during such instances.
+            </p>
+        
+            <h3 class="mt-4">3. Privacy</h3>
+            <p>
+                We are committed to protecting your privacy. This Privacy Policy outlines how your personal information is collected, used, and shared when you use our services.
+            </p>
+        
+            <h4 class="mt-3">3.1 Information We Collect</h4>
+            <p>
+                We may collect personal information that you provide, including but not limited to, your name, email address, and any messages or data you submit.
+            </p>
+        
+            <h4 class="mt-3">3.2 How We Use Your Information</h4>
+            <p>
+                We use the information collected to provide and improve our services, respond to your inquiries, and communicate with you.
+            </p>
+        
+            <h4 class="mt-3">3.3 Sharing Your Information</h4>
+            <p>
+                We do not sell or share your personal information with third parties without your consent, except as required by law.
+            </p>
+        
+            <h4 class="mt-3">3.4 Security</h4>
+            <p>
+                We take reasonable measures to protect your personal information from unauthorized access or disclosure.
+            </p>
+        
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+    // JavaScript
+    document.addEventListener('DOMContentLoaded', function() {
+        const togglePasswordButtons = document.querySelectorAll('.toggle-password');
+
+        togglePasswordButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const passwordInput = this.previousElementSibling.querySelector('input');
+                const type = passwordInput.type === 'password' ? 'text' : 'password';
+                passwordInput.type = type;
+            });
+        });
+    });
+    document.addEventListener('DOMContentLoaded', function() {
+        const newPasswordInput = document.getElementById('password1');
+        const confirmNewPasswordInput = document.getElementById('password2');
+        const complexityErrorDiv = document.getElementById('Password_Complexity');
+        const matchErrorDiv = document.getElementById('Password_Match');
+    
+        const updateError = (errorDiv, message) => {
+            errorDiv.querySelector('span').textContent = message;
+            errorDiv.style.display = message ? 'block' : 'none';
+        };
+    
+        const validatePassword = () => {
+            const newPassword = newPasswordInput.value;
+            const confirmPassword = confirmNewPasswordInput.value;
+    
+            // Password length validation
+            if (newPassword.length < 8) {
+                updateError(complexityErrorDiv, 'Password should be at least 8 characters.');
+                return;
+            }
+    
+            // Uppercase letter validation
+            const uppercaseLetterRegex = /[A-Z]/;
+            if (!uppercaseLetterRegex.test(newPassword)) {
+                updateError(complexityErrorDiv, 'Password must contain at least 1 uppercase letter.');
+                return;
+            }
+    
+            // Special character validation
+            const specialCharacterRegex = /[!@#$%^&*(),.?":{}|<>_]/;
+            if (!specialCharacterRegex.test(newPassword)) {
+                updateError(complexityErrorDiv, 'Password must contain at least 1 special character.');
+                return;
+            }
+    
+            // Numerical number validation
+            const numericalNumberRegex = /\d/;
+            if (!numericalNumberRegex.test(newPassword)) {
+                updateError(complexityErrorDiv, 'Password must contain at least 1 numerical number.');
+                return;
+            }
+    
+            // Password match validation
+            if (newPassword !== confirmPassword) {
+                updateError(matchErrorDiv, 'Passwords do not match.');
+                return;
+            }
+    
+            // All validations passed
+            updateError(complexityErrorDiv, '');  // Clear complexity error
+            updateError(matchErrorDiv, '');       // Clear match error
+        };
+    
+        newPasswordInput.addEventListener('input', validatePassword);
+        confirmNewPasswordInput.addEventListener('input', validatePassword);
+    });
+</script>
 {% endblock %}

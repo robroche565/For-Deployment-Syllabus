@@ -1,0 +1,539 @@
+@page {
+  size: A4 landscape;
+  margin: 0.9in 0.92in 0.9in 0.9in;
+  @bottom-left {
+    content: "WMSU-VPAA-FR-032.00 | Effective Date: 24-JUN-2020";
+    font-size: 12px;
+  }
+  @bottom-right {
+    content: counter(page) " of " counter(pages);
+    font-size: 12px;
+  }
+}
+@page :first {
+  @top-right {
+    content: none;
+  }
+}
+* {
+  margin: 0;
+  padding: 0;
+  text-decoration: none;
+  list-style: none;
+  box-sizing: border-box;
+}
+
+.title {
+  font-weight: 600;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+table thead {
+  background: rgb(240, 240, 240);
+}
+table thead th {
+  padding: 3px 6px;
+}
+table thead .subcolumn th {
+  padding: 3px 16.5px;
+}
+table tbody td {
+  padding: 4px;
+}
+table th, table td {
+  border: 0.2px solid #000;
+}
+table .center {
+  text-align: center;
+}
+
+.section_1 .top_content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.section_1 .top_content .cont {
+  display: flex;
+}
+.section_1 .top_content .cont img {
+  height: 0.79in;
+  min-width: 0.79in;
+}
+.section_1 .top_content .cont div p {
+  font-size: 13px;
+  white-space: nowrap;
+}
+.section_1 .top_content .cont .logo1,
+.section_1 .top_content .cont .logo2 {
+  margin-right: 1.15in;
+}
+.section_1 .top_content .cont .logo2 {
+  margin-left: 1.3in;
+  margin-right: 2.5in;
+}
+.section_1 .top_content .info-cont {
+  border: 0.02cm solid black;
+  padding: 0 30px 2px 6px;
+  word-wrap: none;
+  width: 245px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  line-height: 12.5px;
+}
+.section_1 .top_content .info-cont .labels p,
+.section_1 .top_content .info-cont .infos p {
+  font-size: 10px;
+}
+.section_1 .title_cont {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  white-space: nowrap;
+  margin: 28px 0 30px 0;
+}
+.section_1 .title_cont h4,
+.section_1 .title_cont p {
+  font-size: 13.5px;
+}
+.section_1 .uni-cont {
+  display: flex;
+  justify-content: space-between;
+}
+.section_1 .uni-cont p {
+  font-size: 13.4px;
+  margin-bottom: 15px;
+  text-align: justify;
+}
+.section_1 .uni-cont .uni-info,
+.section_1 .uni-cont .college-info {
+  width: 52%;
+}
+.section_1 .uni-cont .uni-info {
+  width: 55%;
+  margin-right: 35px;
+}
+.section_1 .uni-cont .uni-info li {
+  list-style: disc;
+}
+.section_1 .uni-cont .college-info li {
+  list-style: lower-alpha;
+  font-size: 13.4px;
+}
+.section_1 .uni-cont li {
+  margin-left: 32px;
+}
+.section_1 .uni-cont li p {
+  margin: 0;
+  margin-left: 12px;
+  padding-top: 2px;
+}
+
+.section_2 {
+  page-break-before: always;
+  font-size: 13.4px;
+}
+.section_2 .subject-description {
+  display: flex;
+  margin: 15px 0;
+}
+.section_2 .subject-description .label {
+  width: 15.5%;
+}
+.section_2 .subject-description .info {
+  width: 84.5%;
+}
+.section_2 .subject-description p {
+  margin-bottom: 2px;
+  text-align: justify;
+}
+.section_2 .references {
+  margin-bottom: 15px;
+}
+.section_2 .references thead {
+  background: none;
+}
+.section_2 .references thead th {
+  width: 15%;
+}
+.section_2 .references thead th:last-child {
+  width: 85%;
+  font-weight: 400;
+}
+.section_2 .grading-system {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+}
+.section_2 .grading-system .term-container {
+  width: 35%;
+}
+.section_2 .grading-system .term-container p {
+  margin-bottom: 3px;
+}
+.section_2 .grading-system .term-container .terms {
+  margin-bottom: 5px;
+}
+.section_2 .grading-system .term-container .terms .content {
+  display: flex;
+}
+.section_2 .grading-system .term-container .terms .content .label {
+  width: 46%;
+}
+.section_2 .grading-system .term-container .final-rate {
+  margin-top: 15px;
+}
+.section_2 .grading-system .term-container .final-rate .all-term {
+  width: 55%;
+}
+.section_2 .grading-system .term-container .final-rate .all-term div {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+}
+.section_2 .grading-system .term-container .final-rate .all-term div p:last-child {
+  width: 40%;
+}
+.section_2 .grading-system .rating-container {
+  width: 59.5%;
+}
+.section_2 .grading-system .rating-container .table2 {
+  text-align: center;
+  margin-bottom: 40px;
+}
+.section_2 .grading-system .rating-container .table2 thead {
+  background: none;
+}
+.section_2 .grading-system .rating-container .table2 thead th:last-child {
+  width: 35%;
+}
+.section_2 .course-requirements {
+  page-break-before: always;
+}
+.section_2 .course-requirements li {
+  margin-left: 32px;
+  list-style: disc;
+}
+.section_2 .course-requirements li p {
+  margin: 0;
+  margin-left: 12px;
+  padding-top: 2px;
+}
+.section_2 .class-policy {
+  margin-top: 15px;
+}
+.section_2 .class-policy td {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+.section_2 .class-policy li {
+  margin-left: 32px;
+  list-style: disc;
+}
+.section_2 .class-policy li p {
+  margin: 0;
+  margin-left: 12px;
+  padding-top: 2px;
+}
+
+.section_3 {
+  margin-top: 20px;
+  font-size: 13.4px;
+  page-break-after: always;
+}
+.section_3 table {
+  margin: 15px 0;
+  text-align: center;
+}
+.section_3 table thead {
+  background: none;
+}
+.section_3 table thead th {
+  padding: 6px;
+}
+.section_3 .course-outline {
+  page-break-before: always;
+  margin-bottom: 40px;
+}
+.section_3 .course-outline table thead th {
+  font-weight: 400;
+}
+.section_3 .course-outline table tbody .title {
+  text-align: left;
+}
+.section_3 .course-outline table tbody td {
+  padding: 5px 10px;
+}
+.section_3 .course-outline table tbody td p {
+  margin-bottom: 15px;
+  text-align: left;
+}
+.section_3 .course-outline table tbody .baseline {
+  vertical-align: baseline;
+}
+.section_3 .below-info table thead {
+  font-weight: 400;
+  text-align: start;
+}
+.section_3 .below-info table .personel td {
+  padding-top: 50px;
+}
+
+.templates-list {
+  position: relative;
+}
+.templates-list .templates {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 25px 30px !important;
+  margin-bottom: 8px;
+}
+.templates-list .templates p {
+  margin: 0;
+}
+.templates-list .empty {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.top-action {
+  border-bottom: 1px solid grey;
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+}
+
+.edit-template .row .big-input,
+.create-template .row .big-input,
+.create-syllabus .row .big-input {
+  min-height: 80px;
+  resize: none;
+}
+.edit-template .row .big-input::-webkit-scrollbar,
+.create-template .row .big-input::-webkit-scrollbar,
+.create-syllabus .row .big-input::-webkit-scrollbar {
+  display: none;
+}
+.edit-template .row .med-input,
+.create-template .row .med-input,
+.create-syllabus .row .med-input {
+  min-height: 45px;
+}
+.edit-template .radio-buttons,
+.create-template .radio-buttons,
+.create-syllabus .radio-buttons {
+  margin: 15px 0;
+  align-items: center;
+}
+.edit-template .radio-buttons input,
+.edit-template .radio-buttons label,
+.create-template .radio-buttons input,
+.create-template .radio-buttons label,
+.create-syllabus .radio-buttons input,
+.create-syllabus .radio-buttons label {
+  cursor: pointer;
+  font-size: 18px;
+}
+.edit-template .radio-buttons .type-label,
+.create-template .radio-buttons .type-label,
+.create-syllabus .radio-buttons .type-label {
+  margin-right: 20px;
+}
+.edit-template .term-description-cont,
+.create-template .term-description-cont,
+.create-syllabus .term-description-cont {
+  display: flex;
+  justify-content: space-between;
+  overflow: hidden;
+  transition: all 200ms ease-in-out;
+}
+.edit-template .term-description-cont .col-lg-6,
+.create-template .term-description-cont .col-lg-6,
+.create-syllabus .term-description-cont .col-lg-6 {
+  width: 48.5%;
+}
+.edit-template .terms-cont,
+.create-template .terms-cont,
+.create-syllabus .terms-cont {
+  margin: 5px 0 10px;
+}
+.edit-template .terms-cont.lecture .laboratory-cont,
+.create-template .terms-cont.lecture .laboratory-cont,
+.create-syllabus .terms-cont.lecture .laboratory-cont {
+  height: 0;
+}
+.edit-template .terms-cont.laboratory .lecture-cont,
+.create-template .terms-cont.laboratory .lecture-cont,
+.create-syllabus .terms-cont.laboratory .lecture-cont {
+  height: 0;
+}
+.edit-template .last-content,
+.create-template .last-content,
+.create-syllabus .last-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  min-height: calc(100vh - 3rem);
+}
+
+.edit-template,
+.create-syllabus {
+  position: relative;
+  overflow: hidden;
+  min-height: 100vh;
+}
+.edit-template form .top-content,
+.create-syllabus form .top-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.edit-template form .top-content .delete-btn,
+.create-syllabus form .top-content .delete-btn {
+  text-decoration: none;
+  color: #d8d8d8;
+  border: 1px solid #d8d8d8;
+  padding: 8px 15px;
+  border-radius: 5px;
+  background: transparent;
+  transition: 0.05s;
+}
+.edit-template form .top-content .delete-btn:hover,
+.create-syllabus form .top-content .delete-btn:hover {
+  color: #F8F9FA;
+  border-color: #F8F9FA;
+  background: #2c2e30;
+}
+.edit-template form .confirmation-modal-delete,
+.create-syllabus form .confirmation-modal-delete {
+  background: #373a3d;
+  position: fixed;
+  z-index: 3;
+  width: -moz-fit-content;
+  width: fit-content;
+  left: 50%;
+  top: 50%;
+  transform: translate(-30%, -50%);
+  padding: 18px 25px;
+  border-radius: 10px;
+  opacity: 0;
+  pointer-events: none;
+  transition: 0.1s ease;
+}
+.edit-template form .confirmation-modal-delete p,
+.create-syllabus form .confirmation-modal-delete p {
+  font-size: 18px;
+  margin-bottom: 22px;
+}
+.edit-template form .confirmation-modal-delete .action-cont,
+.create-syllabus form .confirmation-modal-delete .action-cont {
+  display: flex;
+  gap: 20px;
+  margin-left: auto;
+  justify-content: end;
+}
+.edit-template form .confirmation-modal-edit,
+.create-syllabus form .confirmation-modal-edit {
+  background: #373a3d;
+  position: fixed;
+  z-index: 3;
+  width: -moz-fit-content;
+  width: fit-content;
+  left: 50%;
+  top: 50%;
+  transform: translate(-30%, -50%);
+  padding: 18px 25px;
+  border-radius: 10px;
+  opacity: 0;
+  pointer-events: none;
+  transition: 0.1s ease;
+}
+.edit-template form .confirmation-modal-edit p,
+.create-syllabus form .confirmation-modal-edit p {
+  font-size: 18px;
+  margin-bottom: 22px;
+}
+.edit-template form .confirmation-modal-edit .action-cont,
+.create-syllabus form .confirmation-modal-edit .action-cont {
+  display: flex;
+  gap: 20px;
+  margin-left: auto;
+  justify-content: end;
+}
+.edit-template form .overlay,
+.create-syllabus form .overlay {
+  background: rgba(0, 0, 0, 0.3);
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: 0.1s ease;
+  z-index: 2;
+}
+.edit-template form .upload-container,
+.create-syllabus form .upload-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+.edit-template form .upload-container .items,
+.create-syllabus form .upload-container .items {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+}
+.edit-template form .upload-container .items .images-cont,
+.create-syllabus form .upload-container .items .images-cont {
+  border: 1px solid grey;
+  border-radius: 5px;
+  height: 200px;
+  width: 75%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.edit-template form .upload-container .items .images-cont img,
+.create-syllabus form .upload-container .items .images-cont img {
+  width: 100%;
+  height: 100%;
+  -o-object-fit: cover;
+     object-fit: cover;
+}
+.edit-template form.active-delete .confirmation-modal-delete,
+.create-syllabus form.active-delete .confirmation-modal-delete {
+  opacity: 1;
+  pointer-events: auto;
+}
+.edit-template form.active-delete .overlay,
+.create-syllabus form.active-delete .overlay {
+  opacity: 1;
+  pointer-events: auto;
+}
+.edit-template form.active-edit .confirmation-modal-edit,
+.create-syllabus form.active-edit .confirmation-modal-edit {
+  opacity: 1;
+  pointer-events: auto;
+}
+.edit-template form.active-edit .overlay,
+.create-syllabus form.active-edit .overlay {
+  opacity: 1;
+  pointer-events: auto;
+}/*# sourceMappingURL=app.css.map */

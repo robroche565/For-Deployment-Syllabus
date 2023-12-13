@@ -29,7 +29,7 @@
                                 <div class="d-flex top-content">
                                     <div class="flex-grow-1"><h3 class="multisteps-form__title">Edit Syllabus</h3></div>
                                     <div>
-                                        <a href="{% url 'pdf' syllabus.id%}" class="btn btn-outline-light me-2">Go to PDF <i class='bx bxs-file-pdf' style="font-size:20px; vertical-align: middle;"></i></a>
+                                        <a href="#" class="btn btn-outline-light me-2" type="button" onclick="openInNewTab('{% url 'pdf' syllabus.id%}')" >Go to PDF <i class='bx bxs-file-pdf' style="font-size:20px; vertical-align: middle;"></i></a>
                                     </div>
                                     <div>
                                         <a href="{% url 'show_syllabus_first' syllabus.syllabus_ai_id.id %}" class="btn btn-outline-success text-decoration-none me-2">Edit AI Generated Info <i class='bx bx-bot' style="font-size:20px; vertical-align: middle;"></i></a>
@@ -86,7 +86,7 @@
                                         </div>
 
                                         <hr>
-                                        
+
                                         <div class="row">
                                             <div class="mb-3 col-lg-4">
                                                 <label for="course-code" class="form-label">Course Code</label>
@@ -321,7 +321,7 @@
                                 <div class="d-flex top-content">
                                     <div class="flex-grow-1"><h3 class="multisteps-form__title">Edit Syllabus</h3></div>
                                     <div>
-                                        <button class="btn btn-outline-light me-2">Go to PDF <i class='bx bxs-file-pdf' style="font-size:20px; vertical-align: middle;"></i></button>
+                                        <a href="#" class="btn btn-outline-light me-2" type="button" onclick="openInNewTab('{% url 'pdf' syllabus.id%}')" >Go to PDF <i class='bx bxs-file-pdf' style="font-size:20px; vertical-align: middle;"></i></a>
                                     </div>
                                     <div>
                                         <a href="{% url 'show_syllabus_first' syllabus.syllabus_ai_id.id %}" class="btn btn-outline-success text-decoration-none me-2">Edit AI Generated Info <i class='bx bx-bot' style="font-size:20px; vertical-align: middle;"></i></a>
@@ -474,7 +474,7 @@
                                     <button type="button" class="btn btn-secondary">Cancel</button>
                                 </div>
                             </div>
-                        
+
                             <span class="overlay"></span>
 
                         </form>
@@ -489,4 +489,10 @@
 <script src="{% static 'js/multi_form.js' %}"></script>
 {% endblock %}
 {% block scripts %}
+<script>
+ function openInNewTab(url) {
+        window.open(url, '_blank');
+    }
+</script>
+
 {% endblock scripts %}

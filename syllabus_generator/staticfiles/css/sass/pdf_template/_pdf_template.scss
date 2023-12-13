@@ -1,0 +1,335 @@
+@page {
+  size: A4 landscape;
+  margin: 0.9in 0.92in 0.9in 0.9in;
+
+  // @top-right {
+  //   content: "Syllabus in "{{ syllabus.course_code|upper }} " " {{ syllabus.course_name|upper }};
+  //   font-size: 12px;
+  // }
+
+  @bottom-left {
+    content: "WMSU-VPAA-FR-032.00 | Effective Date: 24-JUN-2020";
+    font-size: 12px;
+  }
+
+  @bottom-right {
+    content: counter(page) " of " counter(pages);
+    font-size: 12px;
+  }
+}
+
+@page :first {
+  @top-right {
+    content: none;
+  }
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  text-decoration: none;
+  list-style: none;
+  box-sizing: border-box;
+}
+
+.title {
+  font-weight: 600;
+}
+
+@include table;
+
+.section_1 {
+  .top_content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+
+    .cont {
+      display: flex;
+
+      img {
+        height: 0.79in;
+        min-width: 0.79in;
+      }
+
+      div {
+        p {
+          font-size: 13px;
+          white-space: nowrap;
+          // margin-right: 1in;
+        }
+      }
+
+      .logo1,
+      .logo2 {
+        margin-right: 1.15in;
+      }
+
+      .logo2 {
+        margin-left: 1.3in;
+        margin-right: 2.5in;
+      }
+    }
+
+    .info-cont {
+      border: 0.02cm solid black;
+      padding: 0 30px 2px 6px;
+      word-wrap: none;
+      width: 245px;
+      @include flex(4);
+      line-height: 12.5px;
+
+      .labels,
+      .infos {
+        p {
+          font-size: 10px;
+        }
+      }
+    }
+  }
+
+  .title_cont {
+    @include flex(1);
+    flex-direction: column;
+    white-space: nowrap;
+    margin: 28px 0 30px 0;
+
+    h4,
+    p {
+      font-size: 13.5px;
+    }
+  }
+
+  .uni-cont {
+    display: flex;
+    justify-content: space-between;
+
+    p {
+      font-size: 13.4px;
+      margin-bottom: 15px;
+      text-align: justify;
+    }
+
+    .uni-info,
+    .college-info {
+      width: 52%;
+    }
+
+    .uni-info {
+      width: 55%;
+      margin-right: 35px;
+
+      li {
+        list-style: disc;
+      }
+    }
+
+    .college-info {
+      li {
+        list-style: lower-alpha;
+        font-size: 13.4px;
+      }
+    }
+
+    li {
+      @include list;
+    }
+  }
+}
+
+.section_2 {
+  page-break-before: always;
+  font-size: 13.4px;
+
+  .subject-description {
+    display: flex;
+    margin: 15px 0;
+
+    .label {
+      width: 15.5%;
+    }
+
+    .info {
+      width: 84.5%;
+    }
+
+    p {
+      margin-bottom: 2px;
+      text-align: justify;
+    }
+  }
+
+  .references {
+    margin-bottom: 15px;
+
+    thead {
+      background: none;
+
+      th {
+        width: 15%;
+
+        &:last-child {
+          width: 85%;
+          font-weight: 400;
+        }
+      }
+    }
+  }
+
+  .grading-system {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+
+    .term-container {
+      width: 35%;
+      // background: lightpink;
+
+      p {
+        margin-bottom: 3px;
+      }
+
+      .terms {
+        margin-bottom: 5px;
+
+        .content {
+          display: flex;
+
+          .label {
+            width: 46%;
+          }
+        }
+      }
+
+      .final-rate {
+        margin-top: 15px;
+
+        .all-term {
+          width: 55%;
+
+          div {
+            display: flex;
+            width: 100%;
+            justify-content: space-between;
+
+            p {
+              &:last-child {
+                width: 40%;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    .rating-container {
+      width: 59.5%;
+
+      .table2 {
+        text-align: center;
+        margin-bottom: 40px;
+
+        thead {
+          background: none;
+
+          th {
+            &:last-child {
+              width: 35%;
+            }
+          }
+        }
+      }
+    }
+
+  }
+
+  .course-requirements {
+    page-break-before: always;
+
+    li {
+      @include list;
+      list-style: disc;
+    }
+  }
+
+  .class-policy {
+    margin-top: 15px;
+
+    td {
+      padding-top: 8px;
+      padding-bottom: 8px;
+    }
+
+    li {
+      @include list;
+      list-style: disc;
+    }
+  }
+}
+
+.section_3 {
+  margin-top: 20px;
+  font-size: 13.4px;
+  page-break-after: always;
+
+  table {
+    margin: 15px 0;
+    text-align: center;
+
+    thead {
+      background: none;
+
+      th {
+        padding: 6px;
+      }
+    }
+  }
+
+  .course-outline {
+    page-break-before: always;
+    margin-bottom: 40px;
+
+    table {
+
+      thead {
+        th {
+          font-weight: 400;
+        }
+      }
+
+      tbody {
+        .title {
+          text-align: left;
+        }
+
+        td {
+          padding: 5px 10px;
+
+          p {
+            margin-bottom: 15px;
+            text-align: left;
+          }
+        }
+
+        .baseline {
+          vertical-align: baseline;
+        }
+      }
+    }
+  }
+
+  .below-info {
+    table {
+      thead {
+        font-weight: 400;
+        text-align: start;
+      }
+
+      .personel {
+        td {
+          padding-top: 50px;
+        }
+      }
+    }
+  }
+}

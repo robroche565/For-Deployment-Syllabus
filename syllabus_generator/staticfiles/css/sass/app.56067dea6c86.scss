@@ -1,0 +1,199 @@
+@import './global/variable';
+@import './global/mixin';
+
+// ---------- PDF TEMPLATE ----------
+@import './pdf_template/pdf_template';
+
+
+.templates-list {
+    position: relative;
+
+    .templates {
+        width: 100%;
+        @include flex(4);
+        padding: 25px 30px !important;
+        margin-bottom: 8px;
+
+        p {
+            margin: 0;
+        }
+    }
+
+    .empty {
+        position: absolute;
+        @include transform(3);
+        @include flex(2);
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
+// ---------- TOP ACTION DIV FOR ALL TEMPLATE FORM ----------
+
+.top-action {
+    border-bottom: 1px solid grey;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+}
+
+// ---------- EDIT AND CREATE SYLLABUS TEMPLATE ----------
+
+.edit-template,
+.create-template,
+.create-syllabus {
+    .row {
+        .big-input {
+            min-height: 80px;
+            resize: none;
+
+            &::-webkit-scrollbar {
+                display: none;
+            }
+        }
+
+        .med-input {
+            min-height: 45px;
+        }
+    }
+
+    .radio-buttons {
+        margin: 15px 0;
+        align-items: center;
+
+        input,
+        label {
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .type-label {
+            margin-right: 20px;
+        }
+    }
+
+    .term-description-cont {
+        display: flex;
+        justify-content: space-between;
+        overflow: hidden;
+        transition: all 200ms ease-in-out;
+
+        .col-lg-6 {
+            width: 48.5%;
+        }
+    }
+
+    .terms-cont {
+        margin: 5px 0 10px;
+    }
+
+    // ----- Grading System Toggle -----
+    .terms-cont.lecture {
+        .laboratory-cont {
+            height: 0;
+        }
+    }
+
+    .terms-cont.laboratory {
+        .lecture-cont {
+            height: 0;
+        }
+    }
+
+    .last-content {
+        @include flex(1);
+        flex-direction: column;
+        min-height: calc(100vh - 3rem);
+    }
+
+    // .multisteps-form__panel {
+    // }
+}
+
+.edit-template,
+.create-syllabus {
+    position: relative;
+    overflow: hidden;
+    min-height: 100vh;
+
+    form {
+        .top-content {
+            @include flex(4);
+
+            .delete-btn {
+                text-decoration: none;
+                color: $text-color2;
+                border: 1px solid $text-color2;
+                padding: 8px 15px;
+                border-radius: 5px;
+                background: transparent;
+                transition: 0.05s;
+
+                &:hover {
+                    color: $text-color1;
+                    border-color: $text-color1;
+                    @include lighten('background', $background-color);
+                }
+            }
+        }
+
+        .confirmation-modal-delete {
+            @include inactive-modal;
+        }
+
+        .confirmation-modal-edit {
+            @include inactive-modal;
+        }
+
+        .overlay {
+            @include inactive-overlay;
+        }
+
+        .upload-container {
+            @include flex(4);
+            gap: 20px;
+
+            .items {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                align-items: center;
+
+                .images-cont {
+                    border: 1px solid grey;
+                    border-radius: 5px;
+                    height: 200px;
+                    width: 75%;
+                    overflow: hidden;
+                    @include flex(1);
+
+                    img {
+                        width: 100%;
+                        height: 100%;
+                        object-fit: cover;
+                    }
+                }
+            }
+        }
+    }
+
+    // activate modal
+    form.active-delete {
+        .confirmation-modal-delete {
+            @include active-modal;
+        }
+
+        .overlay {
+            @include active-modal;
+        }
+    }
+
+    form.active-edit {
+        .confirmation-modal-edit {
+            @include active-modal;
+        }
+
+        .overlay {
+            @include active-modal;
+        }
+    }
+}

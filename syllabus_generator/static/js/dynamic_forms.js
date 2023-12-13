@@ -380,6 +380,23 @@ $(document).ready(function () {
         }
     })
 
+    function setupImagePreview(inputSelector, previewSelector) {
+        const img_input = $(inputSelector);
+        const img_preview = $(previewSelector)[0]; // Use [0] to get the actual DOM element
+
+        img_input.on("change", function () {
+            const files = this.files; // Use "this" to refer to the input element
+            if (files.length > 0) {
+                img_preview.src = URL.createObjectURL(files[0]);
+            }
+        });
+    }
+
+    // Set up image previews for different elements
+    setupImagePreview("#id_course_logo", "#course_logo");
+    setupImagePreview("#id_wmsu_logo", "#wmsu_logo");
+    setupImagePreview("#id_iso_logo", "#iso_logo");
+
     // ---------- RADIO BUTTONS ----------
     // ----- Syllabus Template -----
     // ----- Grading System Type -----

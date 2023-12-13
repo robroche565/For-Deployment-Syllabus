@@ -152,7 +152,7 @@
                                                             </button>
                                                         </th>
                                                         <th>COURSE LEARNING OUTCOMES</th>
-                                                        <th>VALUES INTEGRATED<br>
+                                                        <th>VALUES INTEGRATION<br>
                                                             <button class="badge bg-primary rounded-pill border-0 ms-3" data-bs-toggle="modal" onClick="addNewValues({{ outline.id }})" data-bs-target="#add_new_Values_modal">
                                                                 <i class='bx bx-plus-circle'></i>
                                                             </button>
@@ -507,7 +507,7 @@
                                         </div>
                                     </div>
                                     <div class="mb-3 col-lg-12">
-                                        <div class="pb-1"><label class="me-3">Values Intended</label></div>
+                                        <div class="pb-1"><label class="me-3">Values Integration</label></div>
                                         <div class="values-intended">
                                             <div class="input-group pb-2">
                                                 <textarea class="form-control values-text" rows="2" name="values"></textarea>
@@ -589,7 +589,7 @@
                                         </div>
                                     </div>
                                     <div class="mb-3">
-                                        <div class="pb-1"><label class="me-3">Values Intended</label></div>
+                                        <div class="pb-1"><label class="me-3">Values Integration</label></div>
                                         <div class="values-intended" id="editValuesContainer">
                                             <!-- Initial input field will be populated dynamically -->
                                         </div>
@@ -710,17 +710,17 @@
                 <form id="addNewValuesForm">
                     {% csrf_token %}
                     <div class="modal-header">
-                        <h1 class="modal-title fs-5 text-light">Add Values Integrated</h1>
+                        <h1 class="modal-title fs-5 text-light">Add Values Integration</h1>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <div class="form-group">
-                            <textarea class="form-control" rows="2" name="NewValues" placeholder="Add New Values Intended" required></textarea>
+                            <textarea class="form-control" rows="2" name="NewValues" placeholder="Add New Values Integration" required></textarea>
                             <input type="hidden" name="course_outline_id" id="values_course_outline_id" value="">
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button class="btn btn-primary" type="submit" id="values_submitBtn">Add Values Intended</button>
+                        <button class="btn btn-primary" type="submit" id="values_submitBtn">Add Values Integration</button>
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                     </div>
                 </form>
@@ -756,10 +756,10 @@
         event.preventDefault();
         var rubricTitle = $(this).find('input[name="rubric_title"]').val().trim();
         var syllabusAiId = $(this).find('input[name="syllabus_ai_id"]').val();
-    
+
         if (rubricTitle) {
             var csrftoken = $("[name=csrfmiddlewaretoken]").val();
-    
+
             $.ajax({
                 type: "POST",
                 url: '{% url "add_course_rubric" %}',
@@ -784,7 +784,7 @@
         } else {
             alert("Rubric title is required.");
         }
-    
+
         $(this)[0].reset();
     });
     // Add this function to your JavaScript
@@ -840,10 +840,10 @@
     function deleteCourseRubric(rubricId) {
         // Show a confirmation dialog before proceeding with deletion
         var confirmDelete = confirm("Are you sure you want to delete this Course Rubric?");
-        
+
         if (confirmDelete) {
             var csrftoken = $("[name=csrfmiddlewaretoken]").val();
-    
+
             $.ajax({
                 type: "GET",
                 url: '{% url "delete_course_rubric" %}',
@@ -981,11 +981,11 @@
         if (id) {
             tr_id = "#course_rubric-" + id;
             title = $(tr_id).find(".course_rubric th span:not(.Spinner_for_CourseRubric span)").text().trim();
-    
+
             // Set the input field value in the modal
             $('#new_rubric_title').val(title);
             $('#crID').val(id);
-    
+
             // Show the modal
             $('#editCourseRubricmodal').modal('show');
         }
@@ -1016,7 +1016,7 @@
         var accomplished = $(this).find('textarea[name="accomplished"]').val().trim();
         var expert = $(this).find('textarea[name="expert"]').val().trim();
         var courseRubricId = $(this).find('input[name="course_rubric_id"]').val();
-        
+
         console.log('criteria:', criteria);
         console.log('beginner:', beginner);
         console.log('capable:', capable);
@@ -1073,7 +1073,7 @@
         // Find the specific course_rubric_item container based on data.course_rubric_id
         console.log('Received data:', data);
         var rubricItemContainer = $('#course_rubric_item_body-' + data.course_rubric_id);
-        
+
         // Construct the row HTML with escapeHTML applied to each dynamic data
         var newRow = `
             <tr id="course_rubric_item_body_row-${data.course_rubric_item_id}">
@@ -1084,18 +1084,18 @@
                 <td class="text-center" id="expert_row" style="border-top-color:white;">${escapeHTML(data.expert)}</td>
                 <td class="align-middle col-1" style="border-top-color:white;">
                     <div class="text-center">
-                        <button type="button" class="badge bg-primary rounded-pill border-0" 
+                        <button type="button" class="badge bg-primary rounded-pill border-0"
                             onClick="editCourseRubricItem(${data.course_rubric_item_id})" data-bs-toggle="modal" data-bs-target="#editCourseRubricItemModal">
                             <i class="bx bx-edit-alt"></i>
                         </button>
-                        <button class="badge bg-primary rounded-pill border-0" 
+                        <button class="badge bg-primary rounded-pill border-0"
                             onClick="deleteCourseRubricItem(${data.course_rubric_item_id})">
                             <i class="bx bxs-trash"></i>
                         </button>
                     </div>
                 </td>
             </tr>`;
-    
+
         // Append the row to the last-child of the tbody
         rubricItemContainer.append(newRow);
         console.log(rubricItemContainer);
@@ -1181,7 +1181,7 @@
     function updateToRubricItemTable(data) {
         console.log(data);
         var rubricItemRow = $('#course_rubric_item_body_row-' + data.course_rubric_item_id);
-    
+
         if (rubricItemRow.length > 0) {
             rubricItemRow.find("#criteria_row").text(data.criteria);
             rubricItemRow.find("#beginner_row").text(data.beginner);
@@ -1201,7 +1201,7 @@
             var capable = row.find("#capable_row").text().trim();
             var accomplished = row.find("#accomplished_row").text().trim();
             var expert = row.find("#expert_row").text().trim();
-    
+
             // Set the input field values in the modal
             $('#editCourseRubricItemForm input[name="editCourseRubricItemId"]').val(id);
             $('#editCourseRubricItemForm input[name="editCriteria"]').val(criteria);
@@ -1209,7 +1209,7 @@
             $('#editCourseRubricItemForm textarea[name="editCapable"]').val(capable);
             $('#editCourseRubricItemForm textarea[name="editAccomplished"]').val(accomplished);
             $('#editCourseRubricItemForm textarea[name="editExpert"]').val(expert);
-    
+
             // Show the modal
             $('#editCourseRubricItemModal').modal('show');
         }
@@ -1218,17 +1218,17 @@
     function addNewCourseContent(outlineId) {
         // Set the value of the hidden input
         document.getElementById('course_outline_id').value = outlineId;
-    
+
         // Show the modal
         $('#add_new_CourseContent_modal').modal('show');
     }
     function appendToCourseContent(data) {
         // Assuming data contains the necessary information like ID and content
         var outlineId = data.course_outline_id;
-    
+
         // Select the <ul> element in the corresponding table cell using outlineId
         var courseContentList = $('.course_content-section-' + outlineId + ' ul');
-    
+
         // Append the new course content to the <ul> element
         var newCourseContentItem = $('<li class="mb-2" data-id="' + data.id + '">' + data.course_content + '</li>');
         courseContentList.append(newCourseContentItem);
@@ -1237,10 +1237,10 @@
         event.preventDefault();
         var newCourseContent = $(this).find('textarea[name="NewCourseContent"]').val().trim();
         var courseOutlineId = $(this).find('input[name="course_outline_id"]').val();
-    
+
         if (newCourseContent && courseOutlineId) {
             var csrftoken = $("[name=csrfmiddlewaretoken]").val();
-    
+
             $.ajax({
                 type: "POST",
                 url: '{% url "add_course_content" %}',
@@ -1256,7 +1256,7 @@
                         appendToCourseContent(data);
                         // For example, append the new content to a list or update the UI
                         console.log('Course content added successfully:', data);
-    
+
                         // Close the modal after a successful submission
                         $('#add_new_CourseContent_modal').modal('hide');
                     }
@@ -1269,25 +1269,25 @@
         } else {
             alert("Course Content is required.");
         }
-    
+
         $(this)[0].reset();
     });
 
     function addNewDSLO(outlineId) {
         // Set the value of the hidden input
         document.getElementById('dslo_course_outline_id').value = outlineId;
-    
+
         // Show the modal
         $('#add_new_DSLO_modal').modal('show');
     }
-    
+
     function appendToDSLO(data) {
         // Assuming data contains the necessary information like ID and DSLO content
         var outlineId = data.course_outline_id;
-    
+
         // Select the <ul> element in the corresponding table cell using outlineId
         var dsloList = $('.dslo-section-' + outlineId + ' ul');
-    
+
         // Append the new DSLO to the <ul> element
         var newDSLOItem = $('<li class="mb-2" data-id="' + data.id + '">' + data.dslo_content + '</li>');
         dsloList.append(newDSLOItem);
@@ -1296,10 +1296,10 @@
         event.preventDefault();
         var newDSLOContent = $(this).find('textarea[name="NewDSLO"]').val().trim();
         var dsloOutlineId = $(this).find('input[name="course_outline_id"]').val();
-    
+
         if (newDSLOContent && dsloOutlineId) {
             var csrftoken = $("[name=csrfmiddlewaretoken]").val();
-    
+
             $.ajax({
                 type: "POST",
                 url: '{% url "add_dslo" %}',
@@ -1315,7 +1315,7 @@
                         appendToDSLO(data);
                         // For example, append the new content to a list or update the UI
                         console.log('DSLO added successfully:', data);
-    
+
                         // Close the modal after a successful submission
                         $('#add_new_DSLO_modal').modal('hide');
                     }
@@ -1328,14 +1328,14 @@
         } else {
             alert("DSLO is required.");
         }
-    
+
         $(this)[0].reset();
     });
 
     function addNewOBA(outlineId) {
         // Set the value of the hidden input
         document.getElementById('oba_course_outline_id').value = outlineId;
-    
+
         // Show the modal
         $('#add_new_OBA_modal').modal('show');
     }
@@ -1343,10 +1343,10 @@
     function appendToOBA(data) {
         // Assuming data contains the necessary information like ID and OBA content
         var outlineId = data.course_outline_id;
-    
+
         // Select the <ul> element in the corresponding table cell using outlineId
         var obaList = $('.oba-section-' + outlineId + ' ul');
-    
+
         // Append the new OBA to the <ul> element
         var newOBAItem = $('<li class="mb-2" data-id="' + data.id + '">' + data.oba_content + '</li>');
         obaList.append(newOBAItem);
@@ -1356,10 +1356,10 @@
         event.preventDefault();
         var newOBAContent = $(this).find('textarea[name="NewOBA"]').val().trim();
         var obaOutlineId = $(this).find('input[name="course_outline_id"]').val();
-    
+
         if (newOBAContent && obaOutlineId) {
             var csrftoken = $("[name=csrfmiddlewaretoken]").val();
-    
+
             $.ajax({
                 type: "POST",
                 url: '{% url "add_oba" %}',
@@ -1375,7 +1375,7 @@
                         appendToOBA(data);
                         // For example, append the new content to a list or update the UI
                         console.log('OBA added successfully:', data);
-    
+
                         // Close the modal after a successful submission
                         $('#add_new_OBA_modal').modal('hide');
                     }
@@ -1388,14 +1388,14 @@
         } else {
             alert("OBA is required.");
         }
-    
+
         $(this)[0].reset();
     });
 
     function addNewEOO(outlineId) {
         // Set the value of the hidden input
         document.getElementById('eoo_course_outline_id').value = outlineId;
-    
+
         // Show the modal
         $('#add_new_EOO_modal').modal('show');
     }
@@ -1403,10 +1403,10 @@
     function appendToEOO(data) {
         // Assuming data contains the necessary information like ID and EOO content
         var outlineId = data.course_outline_id;
-    
+
         // Select the <ul> element in the corresponding table cell using outlineId
         var eooList = $('.eoo-section-' + outlineId + ' ul');
-    
+
         // Append the new EOO to the <ul> element
         var newEOOItem = $('<li class="mb-2" data-id="' + data.id + '">' + data.eoo_content + '</li>');
         eooList.append(newEOOItem);
@@ -1422,10 +1422,10 @@
     function appendToValues(data) {
         // Assuming data contains the necessary information like ID and Values content
         var outlineId = data.course_outline_id;
-    
+
         // Select the <ul> element in the corresponding table cell using outlineId
         var valuesList = $('.value-section-' + outlineId + ' ul');
-    
+
         // Append the new Values to the <ul> element
         var newValuesItem = $('<li class="mb-2" data-id="' + data.id + '">' + data.values_content + '</li>');
         valuesList.append(newValuesItem);
@@ -1435,10 +1435,10 @@
         event.preventDefault();
         var newValuesContent = $(this).find('textarea[name="NewValues"]').val().trim();
         var valuesOutlineId = $(this).find('input[name="course_outline_id"]').val();
-    
+
         if (newValuesContent && valuesOutlineId) {
             var csrftoken = $("[name=csrfmiddlewaretoken]").val();
-    
+
             $.ajax({
                 type: "POST",
                 url: '{% url "add_values" %}',
@@ -1454,20 +1454,20 @@
                         appendToValues(data);
                         // For example, append the new content to a list or update the UI
                         console.log('Values added successfully:', data);
-    
+
                         // Close the modal after a successful submission
                         $('#add_new_Values_modal').modal('hide');
                     }
                 },
                 error: function (xhr, status, error) {
-                    alert("Error adding Values Intended. Please try again.");
+                    alert("Error adding Values Integration. Please try again.");
                     console.error("AJAX error:", error);
                 }
             });
         } else {
-            alert("Values Intended is required.");
+            alert("Values Integration is required.");
         }
-    
+
         $(this)[0].reset();
     });
 
@@ -1475,10 +1475,10 @@
         event.preventDefault();
         var newEOOContent = $(this).find('textarea[name="NewEOO"]').val().trim();
         var eooOutlineId = $(this).find('input[name="course_outline_id"]').val();
-    
+
         if (newEOOContent && eooOutlineId) {
             var csrftoken = $("[name=csrfmiddlewaretoken]").val();
-    
+
             $.ajax({
                 type: "POST",
                 url: '{% url "add_eoo" %}',
@@ -1494,7 +1494,7 @@
                         appendToEOO(data);
                         // For example, append the new content to a list or update the UI
                         console.log('EOO added successfully:', data);
-    
+
                         // Close the modal after a successful submission
                         $('#add_new_EOO_modal').modal('hide');
                     }
@@ -1507,7 +1507,7 @@
         } else {
             alert("EOO is required.");
         }
-    
+
         $(this)[0].reset();
     });
 
@@ -1543,7 +1543,7 @@
         for (var pair of formData.entries()) {
             console.log(pair[0] + ': ' + pair[1]);
         }
-    
+
         $.ajax({
             type: "POST",
             url: '{% url "Add_CourseOutline" %}',  // Replace with the actual URL
@@ -1556,7 +1556,7 @@
                 if (data.success) {
                     alert("Course Outline added successfully!");
                     $('#addCourseOutlinemodal').modal('hide');
-                    
+
                     // Append the new course outline to the table
                     appendCourseOutline(data);
                 } else {
@@ -1569,7 +1569,7 @@
                 console.error("AJAX error:", error);
             }
         });
-    
+
         // Reset the form
         $(this)[0].reset();
     });
@@ -1626,7 +1626,7 @@
                                 <i class='bx bx-plus-circle'></i>
                             </button></th>
                         <th>COURSE LEARNING OUTCOMES</th>
-                        <th>VALUES INTENDED<br>
+                        <th>VALUES INTEGRATION<br>
                             <button class="badge bg-primary rounded-pill border-0 ms-3" data-bs-toggle="modal" onClick="addNewValues(${data.course_outline_id})" data-bs-target="#add_new_Values_modal">
                                 <i class='bx bx-plus-circle'></i>
                             </button></th>
@@ -1641,16 +1641,17 @@
                             <button class="badge bg-primary rounded-pill border-0" onClick="deleteCourseOutline(${data.course_outline_id})">
                                 <i class='bx bxs-trash'></i>
                             </button>
-                            <div class="ms-2 Spinner_for_CourseOutline visually-hidden" id="loading_for_CourseOutline">
+                            <button class="badge bg-primary rounded-pill border-0 ms-3" id="regenerateCourseOutlineBtn"
+                            onclick="regenerateCourseOutline('{{ syllabus.id }}', '{{ syllabus.syllabus_ai_id.id }}', '${data.course_outline_id}')">
+                                Regenerate
+                                <i class='bx bx-refresh'></i>
+                            </button>
+                            <div class="ms-2 Spinner_for_CourseOutline visually-hidden" id="loading_for_CourseOutline-${data.course_outline_id}">
                                 <div class="spinner-border spinner-border-sm" role="status">
                                     <span class="visually-hidden">Loading...</span>
                                 </div>
                                 <span>Getting New Info</span>
                             </div>
-                            <button class="badge bg-primary rounded-pill border-0 ms-3" id="regenerateCourseOutlineBtn">
-                                Regenerate
-                                <i class='bx bx-refresh'></i>
-                            </button>
                         </th>
                     </tr>
                     <tr id="course_outline-${data.course_outline_id}">
@@ -1790,7 +1791,7 @@
         if (outlineIdInput && topicInput && weekInput && cloInput) {
             // Get CSRF token from the cookie
             var csrftoken = $("[name=csrfmiddlewaretoken]").val();
-        
+
             // Create Ajax Call with CSRF token
             $.ajax({
                 url: '{% url "update_course_outline" %}',
@@ -1886,21 +1887,21 @@
                 sectionCell.find("ul li").each(function () {
                     // Create an input group with the existing content
                     var inputGroup = $('<div class="input-group pb-2"></div>');
-    
+
                     // Access the content in the list item
                     var content = $(this).text().trim();
-    
+
                     // Extract the ID from the li element
                     var itemId = $(this).data('id');
-    
+
                     // Create individual input fields for each item with the data-id attribute
                     var textArea = $('<textarea class="form-control" rows="2" name="new-' + modelProperty + '[]" data-id="' + itemId + '">' + content + '</textarea>');
                     var removeButton = $('<button class="btn btn-danger edit-remove-' +modelProperty+ '" type="button"><i class="bx bx-minus-circle"></i></button>');
-    
+
                     // Append text area and remove button to the input group
                     inputGroup.append(textArea);
                     inputGroup.append(removeButton);
-    
+
                     // Append the input group to the container
                     container.append(inputGroup);
 

@@ -11,7 +11,7 @@ from django.contrib.auth import get_user_model, update_session_auth_hash
 from datetime import datetime
 from django.utils import timezone
 from django.conf import settings
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
 from django.urls import reverse
 from django.db import transaction
 from django.core.mail import send_mail
@@ -19,6 +19,12 @@ from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+from django.contrib.auth.hashers import make_password
+from django.utils.safestring import mark_safe
+from django.template.loader import render_to_string
+from django.contrib.sites.shortcuts import get_current_site
 
 import json
 import ast
@@ -44,7 +50,7 @@ from account.models import Account, CustomUser
 from syllabus_ai.models import *
 
 # pdf libraries import
-from weasyprint import HTML
+from weasyprint import CSS, HTML
 from django.template import loader
 
 # Get an instance of a logger
@@ -126,69 +132,220 @@ def ask_openai3(message):
     reset_conversation()
     return answer
 
+def ask_openai4(message):
+    openai.api_key = settings.OPENAI_API_KEY4
+
+    # Append the user's message to the conversation history
+    conversation_history.append({"role": "user", "content": message})
+
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo-16k", messages=conversation_history, max_tokens=15000)
+
+    # Get the assistant's reply from the response
+    try:
+        answer = response['choices'][0]['message']['content'].replace('<br>', '').replace('\n', '')
+    except:
+        answer = 'Oops try again'
+
+    # Append the assistant's reply to the conversation history
+    conversation_history.append({"role": "assistant", "content": answer})
+
+    reset_conversation()
+    return answer
+
 def landing_view (request):
     return render(request, 'landing.html')
 
 CustomUser = get_user_model()
 
-
 def forgot_pass_view(request):
-    if request.method == 'POST':
+    return render(request, 'password/send_email_forgot.html')
+
+def forgot_pass_confirm_sent_view(request):
+    # Retrieve the email from the query parameters
+    email = request.GET.get('email')
+
+    # Pass the email as context to the template
+    context = {'email': email}
+
+    return render(request, 'password/send_email_confirm.html', context)
+
+User = get_user_model()
+
+@method_decorator(csrf_exempt, name='dispatch')
+class ForgotPasswordSubmitView(View):
+    def post(self, request, *args, **kwargs):
         email = request.POST.get('email')
 
         # Check if the email exists in your user database
         try:
-            user = CustomUser.objects.get(email=email)
-        except CustomUser.DoesNotExist:
-            user = None
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'No account found with that email address.'})
 
-        if user:
-            # Generate a unique token for password reset using Django's default_token_generator
-            token = default_token_generator.make_token(user)
+        # Generate a unique token for password reset using Django's default_token_generator
+        token = default_token_generator.make_token(user)
 
-            # Build the password reset URL
-            reset_url = request.build_absolute_uri(reverse('password_reset_confirm', kwargs={'uidb64': urlsafe_base64_encode(force_bytes(user.pk)), 'token': token}))
+        # Build the password reset URL
+        reset_url = request.build_absolute_uri(reverse('change_password', kwargs={'uidb64': urlsafe_base64_encode(force_bytes(user.pk)), 'token': token}))
 
-            # Send email
-            subject = 'Reset Your Password'
-            message = f'Click the following link to reset your password: {reset_url}'
-            from_email = settings.DEFAULT_FROM_EMAIL
-            to_email = [user.email]
-            send_mail(subject, message, from_email, to_email)
+        # Send email
+        subject = 'Reset Your Password'
+        message = f'Click the following link to reset your password: {reset_url}'
+        from_email = settings.DEFAULT_FROM_EMAIL
+        to_email = [user.email]
+        send_mail(subject, message, from_email, to_email)
 
-            messages.success(request, 'An email has been sent with instructions to reset your password.')
-            return redirect('login')
+        # Redirect to the 'forgot_password_sent' URL
+        redirect_url = redirect('forgot_password_sent')
+        redirect_url['Location'] += f'?email={email}'
+        return redirect_url
 
-        # If the email doesn't exist, show a message to the user
+def change_password_view(request, uidb64, token):
+    try:
+        user_id = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=user_id)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        return HttpResponseBadRequest('Invalid user ID')
+
+    if not default_token_generator.check_token(user, token):
+        return HttpResponseBadRequest('Invalid token')
+
+    return render(request, 'password/password_change.html', {'uidb64': uidb64, 'token': token})
+
+def process_change_password(request, uidb64, token):
+    try:
+        user_id = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=user_id)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        return HttpResponseBadRequest('Invalid user ID')
+
+    if not default_token_generator.check_token(user, token):
+        return HttpResponseBadRequest('Invalid token')
+
+    if request.method == 'POST':
+        new_password1 = request.POST.get('new_password1')
+        new_password2 = request.POST.get('new_password2')
+
+        if new_password1 and new_password1 == new_password2:
+            # Update user's password
+            user.password = make_password(new_password1)
+            user.save()
+
+            # Update session authentication hash
+            update_session_auth_hash(request, user)
+
+            messages.success(request, 'Your password was successfully updated!')
+            return redirect('success_reset_password')  # Change the URL name to match your URL configuration
         else:
-            messages.error(request, 'No account found with that email address.')
+            messages.error(request, 'Passwords do not match.')
 
-    # For GET requests, you can show a form or some information
-    return render(request, 'password/send_email_forgot.html')
+    return render(request, 'password/password_change.html', {'uidb64': uidb64, 'token': token})
+
+def success_reset_view (request):
+    return render(request, 'password/password_change_success.html')
+
+
 
 def login_view(request):
     if request.method == 'POST':
         email = request.POST['email']
         password = request.POST['password']
-        
+
         if email.endswith('@wmsu.edu.ph'):
             user = auth.authenticate(request, username=email, password=password)
-            
+
             if user is not None:
-                auth.login(request, user)
-                return redirect('userpage')
+                if user.account.verified == 'Yes':
+                    auth.login(request, user)
+                    return redirect('userpage')
+                else:
+                    verification_link = reverse('send_verification')
+                    error_message = mark_safe(f'User is not yet verified. Please check your Email for the Verification. <a href="{verification_link}">Resend Confirmation</a>')
             else:
                 error_message = 'Invalid email or password'
         else:
             error_message = 'You must use your WMSU E-mail'
-        
+
         return render(request, 'login/login.html', {'error_message': error_message})
-        
+
     return render(request, 'login/login.html')
 
+def send_verif_view(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+
+        # Check if the email exists in your user model
+        try:
+            user = CustomUser.objects.get(email=email)
+        except CustomUser.DoesNotExist:
+            # Handle the case where the email doesn't exist
+            # You may want to redirect the user or show an error message
+            pass
+        else:
+            # Generate a verification token
+            token = default_token_generator.make_token(user)
+
+            # Build the verification URL
+            current_site = get_current_site(request)
+            verification_url = reverse('verify_email', args=[urlsafe_base64_encode(force_bytes(user.pk)), token])
+            verification_url = f'http://{current_site.domain}{verification_url}'
+
+            # Send the verification email
+            subject = 'Verify your email address'
+            message = f'Click the following link to verify your Account: {verification_url}'
+            from_email = settings.DEFAULT_FROM_EMAIL  # Set your email here
+            to_email = [user.email]
+            send_mail(subject, message, from_email, to_email, fail_silently=False)
+
+            # Update the Account model or set a flag indicating that the verification email has been sent
+
+            # Redirect to the success page with email parameter
+            redirect_url = redirect('sent_verification')
+            if email:
+                redirect_url['Location'] += f'?email={email}'
+            return redirect_url
+            #return redirect('sent_verification')
+
+    return render(request, 'verification/send_verification.html')
+
+def verify_email(request, uidb64, token):
+    UserModel = get_user_model()
+    try:
+        # Decode the user ID from base64
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        # Get the user with the decoded ID
+        user = UserModel.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, UserModel.DoesNotExist):
+        user = None
+
+    # Initialize the email variable to an empty string
+    email = ""
+
+    # Check if the user exists and if the token is valid
+    if user is not None and default_token_generator.check_token(user, token):
+        # Update the account verification status
+        user.account.verified = 'Yes'
+        user.account.save()
+
+        # Retrieve the email for display in the template
+        email = user.email
+
+    # Pass the email to the template context
+    return render(request, 'verification/email_confirm_success.html', {'email': email})
+
+def sent_verif_success_view (request):
+    # Retrieve the email from the query parameters
+    email = request.GET.get('email')
+
+    # Pass the email as context to the template
+    context = {'email': email}
+
+    return render(request, 'verification/send_verification_success.html', context)
+
+    #return render(request, 'verification/send_verification_success.html')
 
 def signup_view(request):
-    RECAPTCHA_PUBLIC_KEY = settings.RECAPTCHA_PUBLIC_KEY
     if request.method == 'POST':
         username = request.POST['username']
         first_name = request.POST['first_name'].strip().capitalize()   # Remove leading and trailing spaces
@@ -217,39 +374,10 @@ def signup_view(request):
         if CustomUser.objects.filter(email=wmsu_email).exists():
             error_messages['email_checker'] = "WMSU email is already taken"
 
-        # Check if a file is provided for wmsu_id
-        # Check if passwords match
-        if password1 != password2:
-            error_messages['password'] = "Passwords don't match"
-
-        try:
-            # Validate the password for complexity requirements
-            validate_password(password1)
-        except ValidationError as e:
-            error_messages['password_complexity'] = "Password must be at least 8 characters, contain at least one special character, one uppercase letter, and one numerical digit."
 
         # If there are any error messages, return them to the template
         if error_messages:
             return render(request, 'login/signup.html', {'error_messages': error_messages})
-        
-        # Validate reCAPTCHA
-        """ recaptcha_response = request.POST.get("g-recaptcha-response")
-        if not recaptcha_response:
-            error_messages["recaptcha"] = "Please complete the reCAPTCHA."
-        else:
-            data = {
-                "secret": settings.RECAPTCHA_PRIVATE_KEY,
-                "response": recaptcha_response,
-            }
-            response = requests.post(
-                "https://www.google.com/recaptcha/api/siteverify", data=data
-            )
-            result = response.json()
-            if not result["success"]:
-                error_messages[
-                    "recaptcha"
-                ] = "reCAPTCHA verification failed. Please try again." """
-        
 
         try:
             # Create the user with provided data using the CustomUser manager
@@ -261,15 +389,39 @@ def signup_view(request):
                 middle_name=middle_name,
                 last_name=last_name
             )
-            return redirect('login')
+            # Generate a verification token
+            token = default_token_generator.make_token(user)
+
+            # Build the verification URL
+            current_site = get_current_site(request)
+            verification_url = reverse('verify_email', args=[urlsafe_base64_encode(force_bytes(user.pk)), token])
+            verification_url = f'http://{current_site.domain}{verification_url}'
+
+            # Send the verification email
+            subject = 'Verify your email address'
+            message = f'Click the following link to verify your Account: {verification_url}'
+            from_email = settings.DEFAULT_FROM_EMAIL  # Set your email here
+            to_email = [user.email]
+            send_mail(subject, message, from_email, to_email, fail_silently=False)
+
+            # Update the Account model or set a flag indicating that the verification email has been sent
+
+            # Redirect to the success page with email parameter
+            redirect_url = redirect('sent_verification')
+            if wmsu_email:
+                redirect_url['Location'] += f'?email={wmsu_email}'
+            return redirect_url
         except ValidationError as e:
             error_messages['general'] = str(e)
-        except:
-            error_messages['general'] = 'Error Creating Account'
+            print(f'Validation Error: {e}')
+        except Exception as ex:
+            error_messages['general'] = f'Error Creating Account: {ex}'
+            print(f'Error Creating Account: {ex}')
 
         return render(request, 'login/signup.html', {'error_messages': error_messages})
 
     return render(request, 'login/signup.html')
+
 
 def logout(request):
     auth.logout(request)
@@ -325,7 +477,7 @@ def new_template(request):
     if request.method == 'POST':
         # Initialize an empty dictionary to store error messages
         error_messages = {}
-        
+
         # ----- Syllabus Template -----
         name = request.POST['name']
 
@@ -335,10 +487,10 @@ def new_template(request):
             template_count = Syllabus_Template.objects.filter(user_id=request.user).aggregate(Count('id'))['id__count']
             next_template_number = template_count + 1
             name = f'Template {next_template_number}'
-        
+
         syllabus_template = Syllabus_Template(user_id = request.user, name = name)
         syllabus_template.save()
-        
+
         # ----- Logo -----
         form = LogoUploadForm(request.POST, request.FILES)
         if form.is_valid():
@@ -405,12 +557,12 @@ def new_template(request):
         for value in course_outcome_values:
             course_outcome = Course_Outcome(syllabus_template_id=syllabus_template, course_outcome=value.capitalize())
             course_outcome.save()
-            
+
         # ---------- Grading System ----------
         grading_system_type = request.POST['grading_system_type']
         grading_system = Grading_System(syllabus_template_id=syllabus_template, grading_system_type=grading_system_type) # create grading system table
         grading_system.save()
-        
+
         # ----- Midterm -----
         midterm_grade_value = request.POST['midterm-grade']
         if not midterm_grade_value: midterm_grade_value = 0 # if percentage is empty
@@ -463,9 +615,9 @@ def new_template(request):
                 grade = grade
             )
             percentage_grade_range.save()
-            
+
         return redirect('templates_list') # redirect to list of templates
-            
+
 
     form = LogoUploadForm() # form for uploading logo
 
@@ -505,7 +657,7 @@ def edit_template(request, id):
     if 'delete' in request.POST:
         syllabus_template.delete()
         return redirect('templates_list')
-        
+
     elif 'edit' in request.POST:
         name = request.POST['name']
 
@@ -513,7 +665,7 @@ def edit_template(request, id):
             # Query to find the count of existing templates for the user
             template_count = Syllabus_Template.objects.filter(user_id=request.user).aggregate(Count('id'))['id__count']
             name = f'Template {template_count}'
-        
+
         syllabus_template.name = name
         syllabus_template.save()
 
@@ -587,7 +739,7 @@ def edit_template(request, id):
 
         midterm_grade_value = request.POST['midterm-grade']
         if not midterm_grade_value: midterm_grade_value = 0 # if percentage is empty
-            
+
         midterm.term_percentage = midterm_grade_value
         midterm.save()
 
@@ -602,10 +754,10 @@ def edit_template(request, id):
         else: # for bothe lecture and laboratory
             add_grading_system(midterm, 'midterm', 'lecture', request, False)
             add_grading_system(midterm, 'midterm', 'laboratory', request, False)
-        
+
         finalterm_grade_value = request.POST['finalterm-grade']
         if not finalterm_grade_value: finalterm_grade_value = 0 # if percentage is empty
-        
+
         finalterm.term_percentage = finalterm_grade_value
         finalterm.save()
 
@@ -643,9 +795,9 @@ def edit_template(request, id):
                 grade = grade
             )
             percentage_grade_range.save()
-                
+
         return redirect('templates_list')
-    
+
     form = LogoUploadForm() # form for uploading logo
 
     return render(request, 'user/template/edit_template.html', {
@@ -793,32 +945,32 @@ def new_syllabus(request):
 
             if grading_system.grading_system_type == 'lecture only':
                 for template_mt_lec in template_mt_lecs:
-                    term_description = Syllabus_Term_Description(term_grade_id=midterm, 
-                                                                 term_description=template_mt_lec.term_description, 
-                                                                 percentage=template_mt_lec.percentage, 
+                    term_description = Syllabus_Term_Description(term_grade_id=midterm,
+                                                                 term_description=template_mt_lec.term_description,
+                                                                 percentage=template_mt_lec.percentage,
                                                                  lecture_percentage=template_mt_lec.lecture_percentage)
                     term_description.save()
 
             elif grading_system.grading_system_type == 'laboratory only':
                 for template_mt_lab in template_mt_labs:
-                    term_description = Syllabus_Term_Description(term_grade_id=midterm, 
-                                                                 term_description=template_mt_lab.term_description, 
-                                                                 percentage=template_mt_lab.percentage, 
+                    term_description = Syllabus_Term_Description(term_grade_id=midterm,
+                                                                 term_description=template_mt_lab.term_description,
+                                                                 percentage=template_mt_lab.percentage,
                                                                  laboratory_percentage=template_mt_lab.laboratory_percentage)
                     term_description.save()
 
             else: # for both lecture and laboratory
                 for template_mt_lec in template_mt_lecs:
-                    term_description = Syllabus_Term_Description(term_grade_id=midterm, 
-                                                                 term_description=template_mt_lec.term_description, 
-                                                                 percentage=template_mt_lec.percentage, 
+                    term_description = Syllabus_Term_Description(term_grade_id=midterm,
+                                                                 term_description=template_mt_lec.term_description,
+                                                                 percentage=template_mt_lec.percentage,
                                                                  lecture_percentage=template_mt_lec.lecture_percentage)
                     term_description.save()
 
                 for template_mt_lab in template_mt_labs:
-                    term_description = Syllabus_Term_Description(term_grade_id=midterm, 
-                                                                 term_description=template_mt_lab.term_description, 
-                                                                 percentage=template_mt_lab.percentage, 
+                    term_description = Syllabus_Term_Description(term_grade_id=midterm,
+                                                                 term_description=template_mt_lab.term_description,
+                                                                 percentage=template_mt_lab.percentage,
                                                                  laboratory_percentage=template_mt_lab.laboratory_percentage)
                     term_description.save()
 
@@ -828,32 +980,32 @@ def new_syllabus(request):
 
             if grading_system.grading_system_type == 'lecture only':
                 for template_ft_lec in template_ft_lecs:
-                    term_description = Syllabus_Term_Description(term_grade_id=finalterm, 
-                                                                 term_description=template_ft_lec.term_description, 
-                                                                 percentage=template_ft_lec.percentage, 
+                    term_description = Syllabus_Term_Description(term_grade_id=finalterm,
+                                                                 term_description=template_ft_lec.term_description,
+                                                                 percentage=template_ft_lec.percentage,
                                                                  lecture_percentage=template_ft_lec.lecture_percentage)
                     term_description.save()
 
             elif grading_system.grading_system_type == 'laboratory only':
                 for template_ft_lab in template_ft_labs:
-                    term_description = Syllabus_Term_Description(term_grade_id=finalterm, 
-                                                                 term_description=template_ft_lab.term_description, 
-                                                                 percentage=template_ft_lab.percentage, 
+                    term_description = Syllabus_Term_Description(term_grade_id=finalterm,
+                                                                 term_description=template_ft_lab.term_description,
+                                                                 percentage=template_ft_lab.percentage,
                                                                  laboratory_percentage=template_ft_lab.laboratory_percentage)
                     term_description.save()
 
             else: # for both lecture and laboratory
                 for template_ft_lec in template_ft_lecs:
-                    term_description = Syllabus_Term_Description(term_grade_id=finalterm, 
-                                                                 term_description=template_ft_lec.term_description, 
-                                                                 percentage=template_ft_lec.percentage, 
+                    term_description = Syllabus_Term_Description(term_grade_id=finalterm,
+                                                                 term_description=template_ft_lec.term_description,
+                                                                 percentage=template_ft_lec.percentage,
                                                                  lecture_percentage=template_ft_lec.lecture_percentage)
                     term_description.save()
 
                 for template_ft_lab in template_ft_labs:
-                    term_description = Syllabus_Term_Description(term_grade_id=finalterm, 
-                                                                 term_description=template_ft_lab.term_description, 
-                                                                 percentage=template_ft_lab.percentage, 
+                    term_description = Syllabus_Term_Description(term_grade_id=finalterm,
+                                                                 term_description=template_ft_lab.term_description,
+                                                                 percentage=template_ft_lab.percentage,
                                                                  laboratory_percentage=template_ft_lab.laboratory_percentage)
                     term_description.save()
 
@@ -914,7 +1066,7 @@ def new_syllabus(request):
         syllabus.effective_date = effective_date
 
         syllabus.save()
-        
+
         language = request.POST.get('language')
         syllabus_ai.language=language
         syllabus_ai.save()
@@ -924,7 +1076,7 @@ def new_syllabus(request):
             # ----- GENERATE REFERENCES, TOPICS AND LEARNING OUTCOMES -----
             while  True:
                 try:
-                    prompt = 'Speak in this language:'+ syllabus_ai.language + '.' + syllabus.course_name + ' "' + syllabus.course_description + '" please generate 5 popular and existing references in ' + grading_system_type + ' type for exactly ' + syllabus.time_frame + ' weeks\' time frame. Each should be separated by "|". ALWASYS INCLUDE THE YEAR OF THE REFERENCES. Then extract a comprehensive range of significant and pertinent 10-16 topics from the reference sources that align with the objectives of the 18-week time frame, feel free to suggest any additional areas of focus or related subjects that may enhance the depth and breadth of the content, separate each topic by "|". Then after, generate 7 exact course learning outcomes or what should student accomplish based on all information provided and you will provide. Do not explain, comment, add labels, foot notes, no break lines, empty lines, do not provide in a list, no number list or other ordered number format. Provide information right away in single line and in normal style and font style. Use this format: source1 | source2 | and so on || topic1 | topic2 | and so on || course learning outcome1 | course learning outcome2 | and so on. Sample output: "Java Programming: From the Ground Up" by Ralph Bravaco and Shai Simonson | "Object-Oriented Programming in C++" by Robert Lafore || Introduction to OOP principles | Classes and Objects || Design and implement object-oriented programs using Java | Demonstrate proficiency in using inheritance and polymorphism. (Do not put extra "||" at the very end)'
+                    prompt = 'Speak in this language:'+ syllabus_ai.language + '.' + syllabus.course_name + ' "' + syllabus.course_description + '" please generate 5 popular and existing references in ' + grading_system_type + ' type for exactly ' + syllabus.time_frame + ' weeks\' time frame ALWAYS INCLUDE THE YEAR OF THE REFERENCES. Each should be separated by "|". Then extract a comprehensive range of significant and pertinent 10-16 topics from the reference sources that align with the objectives of the 18-week time frame, feel free to suggest any additional areas of focus or related subjects that may enhance the depth and breadth of the content, separate each topic by "|". Then after, generate 7 exact course learning outcomes or what should student accomplish based on all information provided and you will provide. Do not explain, comment, add labels, foot notes, no break lines, empty lines, do not provide in a list, no number list or other ordered number format. Provide information right away in single line and in normal style and font style. Use this format: source1 | source2 | and so on || topic1 | topic2 | and so on || course learning outcome1 | course learning outcome2 | and so on. Sample output: "A Theory of Islamic Finance" by Muhammad Nejatullah Siddiqi (1983) | "Islamic Banking and Interest: A Study of the Prohibition of Riba and Its Contemporary Interpretation" by Waheeduddeen Ahmed (1996) || Introduction to OOP principles | Classes and Objects || Design and implement object-oriented programs using Java | Demonstrate proficiency in using inheritance and polymorphism. (Do not put extra "||" at the very end)'
                     response = ask_openai(prompt, 1)
 
                     syllabus_ai.raw_first_prompt = prompt
@@ -936,7 +1088,7 @@ def new_syllabus(request):
 
                 except ValueError as e:
                     continue
-                
+
             syllabus_ai.raw_source=raw_sources
             syllabus_ai.raw_topics=raw_topics
             syllabus_ai.raw_course_learning_outcomes=raw_learning_outcomes
@@ -947,11 +1099,11 @@ def new_syllabus(request):
 
             # ----- PROCESS RAW SOURCES -----
             raw_sources = raw_sources.strip().split('|')
-            
+
             for source in raw_sources:
                 sources = Sources(syllabus_ai_id=syllabus_ai, reference=source)
                 sources.save()
-            
+
             # ----- PROCESS RAW topics-----
             raw_topics = re.split(r'[-*,A-Za-z0-9]\.\s*|\|', raw_topics)
 
@@ -963,11 +1115,11 @@ def new_syllabus(request):
             learning_outcomes = raw_learning_outcomes.strip().split('|')
             letter_counter = ord('A')
             learning_outcomes_cont = ""
-            
+
             for learning_outcome in learning_outcomes:
                 course_learning_outcome = Course_Learning_Outcome(syllabus_ai_id=syllabus_ai, course_learning_outcome=learning_outcome)
                 course_learning_outcome.save()
-                
+
                 learning_outcomes_cont += f"{chr(letter_counter)}. {learning_outcome.strip()} | "
                 letter_counter += 1
 
@@ -978,7 +1130,7 @@ def new_syllabus(request):
         elif source_type == 'specific':
             sources_values = request.POST.getlist('source[]')
             join_specific_sources = ", ".join(sources_values)  # Join the source names with commas
-            
+
             # ----- GENERATE REFERENCES, TOPICS AND LEARNING OUTCOMES -----
             raw_sources = join_specific_sources
             raw_topics =ask_openai2('Speak in this language:'+ syllabus_ai.language + '.Based on this references: '+ join_specific_sources +'. "' + grading_system_type + '" and based on what type of subject. Get all the topics that can be get. Do not explain, Do not comment, Do not add empty lines, respond with single line with this format. (topic 1| topic 2 | topic 3). Finish until it is done. Do not put inside a parentheses.Do not forget to use the "|" to separate. Give at least 18 topics. Minimum of topics is 18. Do not duplicate topics.')
@@ -997,11 +1149,11 @@ def new_syllabus(request):
 
             # ----- PROCESS RAW SOURCES -----
             raw_sources = raw_sources.strip().split('|')
-            
-            for source in raw_sources:
-                sources = Sources(syllabus_ai_id=syllabus_ai, reference=source)
-                sources.save()
-                
+
+            for value in sources_values:
+                source = Sources(syllabus_ai_id=syllabus_ai, reference=value)
+                source.save()
+
             # ----- PROCESS RAW topics-----
             raw_topics = re.split(r'[-*,A-Za-z0-9]\.\s*|\|', raw_topics)
 
@@ -1013,11 +1165,11 @@ def new_syllabus(request):
             learning_outcomes = re.split(r'[-*A-Za-z0-9]\.\s*|\|', raw_learning_outcomes)
             letter_counter = ord('A')
             learning_outcomes_cont = ""
-            
+
             for learning_outcome in learning_outcomes:
                 course_learning_outcome = Course_Learning_Outcome(syllabus_ai_id=syllabus_ai, course_learning_outcome=learning_outcome)
                 course_learning_outcome.save()
-                
+
                 learning_outcomes_cont += f"{chr(letter_counter)}. {learning_outcome.strip()} | "
                 letter_counter += 1
 
@@ -1026,7 +1178,7 @@ def new_syllabus(request):
             syllabus_ai.save()
 
         return redirect('show_syllabus_first', id=syllabus_ai.id)  # redirect to edit page
-    
+
 
     return render(request, 'user/ai_syllabus/new_syllabus.html', {'syllabus_templates': syllabus_template, 'percentage_grade_ranges': default_percentage_grade_range})
 
@@ -1048,7 +1200,7 @@ def edit_syllabus(request, id):
     finalterm_lecture = Syllabus_Term_Description.objects.filter(term_grade_id=finalterm, lecture_percentage__isnull=False)
     finalterm_laboratory = Syllabus_Term_Description.objects.filter(term_grade_id=finalterm, laboratory_percentage__isnull=False)
     percentage_grade_range = Syllabus_Percentage_Grade_Range.objects.filter(grading_system_id=grading_system)
-    
+
     # ----- SYLLABUS AI -----
     syllabus_ai = get_object_or_404(Syllabus_AI, user_id=request.user, id=syllabus.syllabus_ai_id.id)
     print(syllabus_ai)
@@ -1075,7 +1227,7 @@ def edit_syllabus(request, id):
         # ----- SYLLABUS -----
         syllabus.syllabus_template_id = syllabus_template
         syllabus.save()
-        
+
         fields = ['syllabus_name', 'college', 'department', 'bachelor', 'course_code', 'course_name', 'course_credit', 'course_credit_description', 'course_description', 'semester', 'school_year',
                   'recommending_approval_name', 'recommending_approval_position', 'concured_name', 'concured_position', 'approved_name', 'approved_position', 'footer_info', 'effective_date']
 
@@ -1086,7 +1238,7 @@ def edit_syllabus(request, id):
         if language and language != syllabus_ai.language:
             syllabus_ai.language = language
             syllabus_ai.save()
-        
+
         print("Language:", syllabus_ai.language)
 
         # ----- SYLLABUS CONTENT -----
@@ -1132,7 +1284,7 @@ def edit_syllabus(request, id):
         else: # for both lecture and laboratory
             add_grading_system(midterm, 'midterm', 'lecture', request, True)
             add_grading_system(midterm, 'midterm', 'laboratory', request, True)
-        
+
         finalterm = Syllabus_Term_Grade(grading_system_id=grading_system, term_name='finalterm', term_percentage=finalterm_grade_value)
         finalterm.save()
 
@@ -1188,7 +1340,7 @@ def edit_syllabus(request, id):
         'syllabus_template': syllabus_template,
         'syllabus_templates': syllabus_templates,
     }
-    
+
     return render(request, 'user/ai_syllabus/edit_syllabus.html', context)
 
 
@@ -1308,14 +1460,14 @@ class RegenerateReferences(View):
 
             # Delete all child Specific_Source models
             Sources.objects.filter(syllabus_ai_id=syllabus_ai).delete()
-            
+
             # Get the subject attribute from syllabus_ai_input model
             subject = syllabus.course_name
 
             # Use ask_openai to generate content
-            prompt_message = f'Generate based on this language: {syllabus_ai.language}.Generate 5 popular and existing references on {subject}. Always Include the title of the references. Separate the sources using "|" or vertical bar. Do not explain, Do not comment, Do not add empty lines. Respond with a single line with this format. GENERATE ONLY 5 SOURCES. Do not include links and do not use any numbers to list down. ALWASYS INCLUDE THE YEAR OF THE REFERENCES. Include the authors inside the quotation marks. Do not put inside parentheses. Immediately list all the 5 sources or references with the vertical bar "|" for separating them.'
+            prompt_message = f'Generate based on this language: {syllabus_ai.language}.Generate 5 popular and existing references on {subject}. Always Include the title of the references. Separate the sources using "|" or vertical bar. Do not explain, Do not comment, Do not add empty lines. Respond with a single line with this format. GENERATE ONLY 5 SOURCES. Do not include links and do not use any numbers to list down. ALWASYS INCLUDE THE YEAR OF THE REFERENCES. ENCLOSE THE YEAR WITH A PARENTHESIS. Include the authors inside the quotation marks. Do not put inside parentheses.FIND ONLY REFERENCES FROM YEAR 2016 AND ABOVE.Immediately list all the 5 sources or references with the vertical bar "|" for separating them. FOLLOW THIS FORMAT: "Title" by author (year)|"Title" by author (year)|"Title" by author (year)|"Title" by author (year)|"Title" by author (year) '
             new_raw_source_ai = ask_openai2(prompt_message)
-            
+
             # Store the new_raw_source_ai in raw_source_ai
             syllabus_ai.raw_source = new_raw_source_ai
             syllabus_ai.save()
@@ -1437,23 +1589,23 @@ class RegenerateTopics(View):
         try:
             syllabus_id = Syllabus.objects.get(id=syllabus_id)
             syllabus_ai = Syllabus_AI.objects.get(id=syllabus_ai_id)
-            
+
             # Clear the raw_topics content
             syllabus_ai.raw_topics = ''
             syllabus_ai.save()
-            
+
             # Delete all child Topic models
             Topic.objects.filter(syllabus_ai_id=syllabus_ai).delete()
 
             # Retrieve all Specific Sources
             references = Sources.objects.filter(syllabus_ai_id=syllabus_ai)
             joined_references = ', '.join(reference.reference for reference in references)
-            
+
 
             # Use ask_openai2 to generate content
-            prompt_message = f'"Speak in this language:"{syllabus_ai.language}". And from these:{joined_references}". Extract a significant and pertinent topics (must be 10-15 topics do not exceed) from the reference sources given that align with the objectives of the 16-week time frame, feel free to suggest any additional areas of focus or related subjects that may enhance the depth and breadth of the content, separate each topic by using a vertical bar "|". Do not explain, Do not comment, add labels, titles, Do not add empty lines. Respond with a single line. Use this template " Topic 1 | Topic 2 | ..."'
+            prompt_message = f'"Speak in this language:"{syllabus_ai.language}". And from these:{joined_references}". Get all the topics that can be gain from the references. Get Only 16 topics. Separate each topic by using a vertical bar "|". Do not explain, Do not comment, add labels, titles, Do not add empty lines. Respond with a single line. Use this template " Topic 1 | Topic 2 | ..."'
             new_raw_source_topics = ask_openai2(prompt_message)
-            
+
             # Store the new_raw_source_topics in raw_topics
             syllabus_ai.raw_source = joined_references
             syllabus_ai.raw_topics =  new_raw_source_topics
@@ -1461,7 +1613,7 @@ class RegenerateTopics(View):
             # Retrieve and split the content of raw_topics
             new_prompt_raw_topic = syllabus_ai.raw_topics
             topics = re.split(r'[-*,A-Za-z0-9]\.\s*|\|', new_prompt_raw_topic)
-            
+
 
             unique_topics = set()
 
@@ -1479,7 +1631,7 @@ class RegenerateTopics(View):
             response_data['success'] = True
             response_data['message'] = 'Topic regeneration successful'
             response_data['new_topics'] = new_topics
-            
+
         except Syllabus_AI.DoesNotExist:
             response_data['success'] = False
             response_data['message'] = 'Syllabus AI not found'
@@ -1670,7 +1822,7 @@ class ProcessAndRedirectView(View):
         syllabus_id = request.POST.get('syllabusId')  # Get syllabusId from the POST data
 
         syllabus = Syllabus.objects.get(id=syllabus_id)
-        
+
         # Update the first_time_processing attribute to 'No'
         syllabus_ai = get_object_or_404(Syllabus_AI, id=syllabus_ai_id)
         syllabus_ai.first_time_processing = Syllabus_AI.NO
@@ -1709,25 +1861,27 @@ class ProcessAndRedirectView(View):
             if clo_text not in unique_clos:
                 unique_clos.add(clo_text)
                 clo = Course_Learning_Outcome.objects.create(syllabus_ai_id=syllabus_ai, course_learning_outcome=clo_text)
-        
+
         # Retrieve all topics
         topics = Topic.objects.filter(syllabus_ai_id=syllabus_ai)
         joined_topics = ', '.join(topic.topic_name for topic in topics)
-        
+
         prompt_clo = syllabus_ai.raw_course_learning_outcomes_ai_with_letters
-        
+
         # Initialize course_outline outside the try block
         course_outline = None
-        
+
         Course_Outline.objects.filter(syllabus_ai_id=syllabus_ai).delete()
-        
+
         timeframe = syllabus.time_frame
         counter = 0
         while True:
             try:
-                prompt = f'Speak in this language: "{syllabus_ai.language}".Provide an exact 18 weeks weekly topics course outline for each of these topics "{joined_topics}" It should fit within time frame of EXACLTY 18 WEEKS. Week 9 and 18 should be midterm and final examination or laboratory base on topics provided and course outline. Do not exceed fit all the topics within the time frame one topic can be in a week or more than, feel free to suggest any additional areas of focus or related subjects that may enhance the depth and breadth of the content. Please include final examinations and should only be 1 week. Continue from week 1 until week 18. Adjust the hours according to the level of topic. Use this template ( time frame | Topic (No. of Hours/Topic) | Course Content | DESIRED STUDENT LEARNING OUTCOMES/COMPETENCIES At the end of each topic and semester, the students can: | OUTCOME-BASED (OBA) ACTIVITIES (Teaching & Learning Activities) | EVIDENCE OF OUTCOMES (Assessment of Learning Outcome) | COURSE LEARNING OUTCOMES | VALUES INTENDED ||). Each column should be separated by "|" and each weekly topic should be separated by "||". In COURSE LEARNING OUTCOMES column, if the topic is related to these course learning outcomes "{prompt_clo}" put the letter into course learning outline columns if one or more is related to each course outline row. For Values Intended, get the values that can be get from the topic. Do not put any label, do not put inside of quotations or parentheses. Do not explain, Do not comment and no footnote or other extra info and do not leave any columns blank. Provide it in a normal fonts and style and textual format, and in a single line without any break lines for all and provide and fit all topics within 18 weeks\' timeframe. DO NOT FORGET TO USE THE LANGUAGE: {syllabus_ai.language}.Sample output: Week 18 | Final Examination (5 hours) | ✓Review of Entire Course Content ✓Final Examination | ✓Demonstrate comprehensive understanding of the entire course content ✓Successfully complete the final examination | ✓Final Examination | ✓Final Examination Submission ✓Course Evaluation | A, B, C, D, E, F, G | ✓Problem-solving ✓Ethical reasoning || Week 3 and 4 |Software Project Documentation (5 hours) | ✓Documentation in Software Projects ✓Types of Documentation ✓Best Practices in Documentation | ✓Understand the importance of documentation in software projects ✓Identify and create different types of documentation ✓Apply best practices in documentation | ✓Class discussion ✓Audio-Visual Presentation ✓Hands-on Documentation Exercise | ✓Documentation Exercise Submission ✓Quiz | D, G | ✓Critical thinking ✓Values that was gain ||'
-                response = ask_openai2(prompt)
+                # prompt = f'Speak in this language: "{syllabus_ai.language}".Provide an exact 18 weeks weekly topics course outline for each of these topics "{joined_topics}" It should fit within time frame of EXACLTY 18 WEEKS. Week 9 and 18 should be midterm and final examination or laboratory base on topics provided and course outline. Do not exceed fit all the topics within the time frame one topic can be in a week or more than, feel free to suggest any additional areas of focus or related subjects that may enhance the depth and breadth of the content. Please include final examinations and should only be 1 week. Continue from week 1 until week 18. Adjust the hours according to the level of topic. Use this template ( time frame | Topic (No. of Hours/Topic) | Course Content | DESIRED STUDENT LEARNING OUTCOMES/COMPETENCIES At the end of each topic and semester, the students can: | OUTCOME-BASED (OBA) ACTIVITIES (Teaching & Learning Activities) | EVIDENCE OF OUTCOMES (Assessment of Learning Outcome) | COURSE LEARNING OUTCOMES | VALUES INTENDED ||). Each column should be separated by "|" and each weekly topic should be separated by "||". In COURSE LEARNING OUTCOMES column, if the topic is related to these course learning outcomes "{prompt_clo}" put the letter into course learning outline columns if one or more is related to each course outline row. For Values Intended, get the values that can be get from the topic. Do not put any label, do not put inside of quotations or parentheses. Do not explain, Do not comment and no footnote or other extra info and do not leave any columns blank. Provide it in a normal fonts and style and textual format, and in a single line without any break lines for all and provide and fit all topics within 18 weeks\' timeframe. DO NOT FORGET TO USE THE LANGUAGE: {syllabus_ai.language}.Sample output: Week 18 | Final Examination (5 hours) | ✓Review of Entire Course Content ✓Final Examination | ✓Demonstrate comprehensive understanding of the entire course content ✓Successfully complete the final examination | ✓Final Examination | ✓Final Examination Submission ✓Course Evaluation | A, B, C, D, E, F, G | ✓Problem-solving ✓Ethical reasoning || Week 3 and 4 |Software Project Documentation (5 hours) | ✓Documentation in Software Projects ✓Types of Documentation ✓Best Practices in Documentation | ✓Understand the importance of documentation in software projects ✓Identify and create different types of documentation ✓Apply best practices in documentation | ✓Class discussion ✓Audio-Visual Presentation ✓Hands-on Documentation Exercise | ✓Documentation Exercise Submission ✓Quiz | D, G | ✓Critical thinking ✓Values that was gain ||'
+                prompt = f'Provide an exact 18 weeks weekly topics course outline in "{syllabus_ai.language} language response" for each of these topics "{joined_topics}" It should fit within time frame of EXACLTY 18 WEEKS. Week 9 and 18 should be midterm and final examination or laboratory base on topics provided and course outline. Do not exceed fit all the topics within the time frame one topic can be in a week or more than, feel free to suggest any additional areas of focus or related subjects that may enhance the depth and breadth of the content. Please include final examinations and should only be 1 week. Continue from week 1 until week 18. Adjust the hours according to the level of topic. Use this template ( time frame | Topic (No. of Hours/Topic) | Course Content | DESIRED STUDENT LEARNING OUTCOMES/COMPETENCIES At the end of each topic and semester, the students can: | OUTCOME-BASED (OBA) ACTIVITIES (Teaching & Learning Activities) | EVIDENCE OF OUTCOMES (Assessment of Learning Outcome) | COURSE LEARNING OUTCOMES | VALUES INTENDED ||). Each column should be separated by "|" and each weekly topic should be separated by "||". In COURSE LEARNING OUTCOMES column, if the topic is related to these course learning outcomes "{prompt_clo}" put the letter into course learning outline columns if one or more is related to each course outline row. For Values Intended, get the values that can be get from the topic .DO NOT FORGET TO USE THE LANGUAGE: {syllabus_ai.language} in responding and outputting informations. Do not put any label, do not put inside of quotations or parentheses. Do not explain, do not comment and no footnote or other extra info and do not leave any columns blank and fill all columns according to the reference and sample output you can use None instead of blank fields. Provide it in a normal fonts and style and textual format, and in a single line without any break lines for all and provide and fit all topics within 18 weeks\' timeframe. Sample output: Week 18 | Final Examination (5 hours) | ✓Review of Entire Course Content ✓Final Examination | ✓Demonstrate comprehensive understanding of the entire course content ✓Successfully complete the final examination | ✓Final Examination | ✓Final Examination Submission ✓Course Evaluation | A, B, C, D, E, F, G | ✓Problem-solving ✓Ethical reasoning || Week 3 and 4 |Software Project Documentation (5 hours) | ✓Documentation in Software Projects ✓Types of Documentation ✓Best Practices in Documentation | ✓Understand the importance of documentation in software projects ✓Identify and create different types of documentation ✓Apply best practices in documentation | ✓Class discussion ✓Audio-Visual Presentation ✓Hands-on Documentation Exercise | ✓Documentation Exercise Submission ✓Quiz | D, G | ✓Critical thinking ✓Values that was gain ||'
                 syllabus_ai.raw_second_prompt = prompt
+                syllabus_ai.save()
+                response = ask_openai2(prompt)
                 syllabus_ai.raw_second_response = response
                 syllabus_ai.save()
 
@@ -1735,7 +1889,7 @@ class ProcessAndRedirectView(View):
                 syllabus_ai.save()
 
                 reponse_cc = syllabus_ai.raw_course_outline
-                
+
                 # ----- PROCESS RAW OUTPUT -----
                 raw_course_outlines = reponse_cc[:-3].strip().split('||')
                 for raw_course_outline in raw_course_outlines:
@@ -1770,7 +1924,7 @@ class ProcessAndRedirectView(View):
                     for eoo in eoos:
                         evidence_of_outcome = Evidence_of_Outcome(course_outline_id=course_outline, eoo=eoo)
                         evidence_of_outcome.save()
-                    
+
                     values = raw_values[2:].strip().split('✓')
                     for value in values:
                         values_intended = Values_Intended(course_outline_id=course_outline, values=value)
@@ -1783,11 +1937,11 @@ class ProcessAndRedirectView(View):
                 syllabus_ai.raw_course_outline = f"Error: {e} {counter}"
                 syllabus_ai.save()
 
-                if course_outline: 
+                if course_outline:
                     course_outline.delete()
 
                 continue
-        
+
          # Get all Course_Outline instances created during the process
 
         # Redirect to the 'show_syllabus_second' URL
@@ -2011,25 +2165,25 @@ class UpdateCourseOutline(View):
 
         # Delete Course_Content items
         self.delete_course_content(deleted_course_content_data)
-        
+
         # Update dslo details
         self.update_dslo(outline_id, new_dslo_data)
 
         # Delete dslo items
         self.delete_dslo(deleted_dslo_data)
-        
+
         # Update oba details
         self.update_oba(outline_id, new_oba_data)
 
         # Delete oba items
         self.delete_oba(deleted_oba_data)
-        
+
         # Update eoo details
         self.update_eoo(outline_id, new_eoo_data)
 
         # Delete eoo items
         self.delete_eoo(deleted_eoo_data)
-        
+
         # Update value details
         self.update_value(outline_id, new_value_data)
 
@@ -2195,28 +2349,25 @@ class RegenerateCourseOutline(View):
         course_outline = Course_Outline.objects.get(id=course_outline_id)
 
         # Delete all child models
-        Course_Content.objects.filter(course_outline_id=course_outline).delete()
         Desired_Student_Learning_Outcome.objects.filter(course_outline_id=course_outline).delete()
         Outcome_Based_Activity.objects.filter(course_outline_id=course_outline).delete()
         Evidence_of_Outcome.objects.filter(course_outline_id=course_outline).delete()
         Values_Intended.objects.filter(course_outline_id=course_outline).delete()
 
+        course_outline.course_learning_outcomes = ''
+        course_outline.save()
+
+        prompt_0 = ask_openai4('Based on this Course Learning Outcomes:'+ syllabus_ai.raw_course_learning_outcomes_ai_with_letters +'. Choose the letters that corresponds or similar or connected with the topic:'+ course_outline.topic +'. Example: A,C,D. Respond only with the letters with commas. Do not put period.')
+        course_outline.course_learning_outcomes = prompt_0
+        course_outline.save()
+
+        course_contents = Course_Content.objects.filter(course_outline_id=course_outline)
+        joined_content = ', '.join(content.course_content for content in course_contents)
+
 
         # Use ask_openai2 to generate content
-        prompt_1 = ask_openai2('Speak in this language:'+ syllabus_ai.language +'Based on this topic: '+ course_outline.topic +'. And Based on this subject: '+ syllabus.course_name +'. Generate the Course Content for the topic.Do not use long sentences. Use only 2-3 words ONLY. Split each item using a vertical bar "|". Give at least 5 items. USE VERTICAL BAR TO SPLIT.Do not use any other symbols to split ONLY VERTCAL BAR.Do not comment, do not use numbers, respond in one single line')
-        
-        # Split the text using the pipe symbol
-        content_items = prompt_1.split('|')
+        prompt_2 = ask_openai2('Speak in this language:'+ syllabus_ai.language +'Based on this Course Content: '+ joined_content +'. And Based on this subject: '+ syllabus.course_name +'. Generate the Desired Learning Outcomes for the topic.Do not use long sentences.   Split each item using a vertical bar "|". GIVE ONLY 5 ITEMS DO NOT EXCEED MORE THAN 5 ITEMS.USE VERTICAL BAR TO SPLIT. Do not use any other symbols to split ONLY VERTCAL BAR. Do not comment, do not use numbers, respond in one single line')
 
-        # Assuming you have a Course_Content model
-        for content_item in content_items:
-            # Trim whitespaces and create a new Course_Content instance
-            course_content = Course_Content(course_outline_id=course_outline, course_content=content_item.strip())
-            course_content.save()
-            
-        # Use ask_openai2 to generate content
-        prompt_2 = ask_openai2('Speak in this language:'+ syllabus_ai.language +'Based on this topic: '+ course_outline.topic +'. And Based on this subject: '+ syllabus.course_name +'. Generate the Desired Learning Outcomes for the topic.Do not use long sentences.   Split each item using a vertical bar "|". Give at least 5 items.USE VERTICAL BAR TO SPLIT. Do not use any other symbols to split ONLY VERTCAL BAR. Do not comment, do not use numbers, respond in one single line')
-        
         # Split the text using the pipe symbol
         content_dslos = prompt_2.split('|')
 
@@ -2225,10 +2376,10 @@ class RegenerateCourseOutline(View):
             # Trim whitespaces and create a new Course_Content instance
             dslo = Desired_Student_Learning_Outcome(course_outline_id=course_outline, dslo=content_dslo.strip())
             dslo.save()
-            
+
         # Use ask_openai2 to generate content
-        prompt_3 = ask_openai2('Speak in this language:'+ syllabus_ai.language +'Based on this topic: '+ course_outline.topic +'. And Based on this subject: '+ syllabus.course_name +'. Generate the Outcome Based Activity for the topic.Do not use long sentences.  Use only 3-4 words ONLY. Split each item using a vertical bar "|". Give at least 5 items.USE VERTICAL BAR TO SPLIT.Do not use any other symbols to split ONLY VERTCAL BAR. Do not comment, do not use numbers, respond in one single line')
-        
+        prompt_3 = ask_openai2('Speak in this language:'+ syllabus_ai.language +'Based on this Course Content: '+ joined_content +'. And Based on this subject: '+ syllabus.course_name +'. Generate the Outcome Based Activity based on the Course Content. Example of Outcome Based Activity: Class Discussion, Lab Activity:(Based this on the course Content), Audio Visual Presentation .Do not use long sentences.  Use only 5-6 words ONLY. Split each item using a vertical bar "|". Give at least 5 items.USE VERTICAL BAR TO SPLIT.Do not use any other symbols to split ONLY VERTCAL BAR. Do not comment, do not use numbers, respond in one single line')
+
         # Split the text using the pipe symbol
         content_obas = prompt_3.split('|')
 
@@ -2237,8 +2388,8 @@ class RegenerateCourseOutline(View):
             # Trim whitespaces and create a new Course_Content instance
             oba = Outcome_Based_Activity(course_outline_id=course_outline, oba=content_oba.strip())
             oba.save()
-        
-        prompt_4 = ask_openai3('Speak in this language:'+ syllabus_ai.language +'Based on this topic: '+ course_outline.topic +'. And Based on this subject: '+ syllabus.course_name +'. Generate the Evidence of Outcome for the topic. Do not use long sentences. Use only 2-3 words ONLY. Split each item using a vertical bar "|". Give at least 5 items.USE VERTICAL BAR TO SPLIT.Do not use any other symbols to split ONLY VERTCAL BAR. Do not comment, do not use numbers, respond in one single line')
+
+        prompt_4 = ask_openai3('Speak in this language:'+ syllabus_ai.language +'Based on this Course Content: '+ joined_content +'. And Based on this subject: '+ syllabus.course_name +'. Generate the Evidence of Outcome based on the Course Content. Example of Evidence of outcome: Quiz, Lab Activity Submision, Presentation.  Do not use long sentences. Use only 2-3 words ONLY. Split each item using a vertical bar "|". Give at least 5 items.USE VERTICAL BAR TO SPLIT.Do not use any other symbols to split ONLY VERTCAL BAR. Do not comment, do not use numbers, respond in one single line')
 
         # Split the text using the pipe symbol
         content_eoos = prompt_4.split('|')
@@ -2248,8 +2399,8 @@ class RegenerateCourseOutline(View):
             # Trim whitespaces and create a new Course_Content instance
             eoo = Evidence_of_Outcome(course_outline_id=course_outline, eoo=content_eoo.strip())
             eoo.save()
-        
-        prompt_5 = ask_openai3('Speak in this language:'+ syllabus_ai.language +'Based on this topic: '+ course_outline.topic +'. And Based on this subject: '+ syllabus.course_name +'. Generate the VAlues intended or what values can be gain for the topic.Do not use long sentences. Use only 3-5 words ONLY. Split each item using a vertical bar "|". USE VERTICAL BAR TO SPLIT. Give at least 5 items.Do not use any other symbols to split ONLY VERTCAL BAR. Do not comment, do not use numbers, respond in one single line')
+
+        prompt_5 = ask_openai3('Speak in this language:'+ syllabus_ai.language +'Based on this Topic: '+ course_outline.topic +'. And Based on this subject: '+ syllabus.course_name +'. Generate the Values integration or what values can be gain from the Topic.Do not use long sentences. Example of Values Integration: Critical Thinking, Analytical Reasoning. Use only 3-5 words ONLY. Split each item using a vertical bar "|". USE VERTICAL BAR TO SPLIT. Give at least 5 items.Do not use any other symbols to split ONLY VERTCAL BAR. Do not comment, do not use numbers, respond in one single line')
 
         # Split the text using the pipe symbol
         content_values = prompt_5.split('|')
@@ -2266,7 +2417,7 @@ class RegenerateCourseOutline(View):
         response_data['success'] = True
         response_data['message'] = 'Regeneration was successful.'
         # Assuming new_clos is the correct data to be sent
-        response_data['new_raw_course_outline_item'] = prompt_1
+        response_data['new_raw_course_outline_item'] = prompt_5
         # Return a JsonResponse with the response_data
         return JsonResponse(response_data)
 
@@ -2359,9 +2510,9 @@ class RegenerateCourseRubricView(View):
             joined_topics = ', '.join(topic.topic_name for topic in topics)
 
             # Use ask_openai2 to generate content
-            prompt_message = f'Speak in this language: "{syllabus_ai.language}".Generate a table for rubrics'+ rubric.title +' for the subject:'+ syllabus.course_name +' and Based on these Topics: '+ joined_topics +'.First Column is the Criteria Name:(Example: Organization(15%)). Second Column for beginner (Example:Very hard to find information.6pts.) Third Column: Capable (Example: Information difficult to locate.9pts) Fourth Column for Accomplished (Example:Can find information with slight effort. 12pts) Fifth Column for Expert (Example: All information is easy to find and important points stand out.15pts) Do only 5 Criteria Based on the topics and subject. Do not comment, Do not add anything. Do not add any headers. Do not Use Parenthesis. Use the DOUBLE VERITCAL LINE "||" to proceed to the next criteria.Follow this given format: (Criteria✓Beginner✓Capable✓Accomplished✓Expert||Criteria✓Beginner✓Capable✓Accomplished✓Expert||Criteria✓Beginner✓Capable✓Accomplished✓Expert||Criteria✓Beginner✓Capable✓Accomplished✓Expert) Example of Format: Organization (20%)✓The information appears to be disorganized.8pts✓Information is organized, but paragraphs are not wellconstructed. 12pts✓ Information is organized with well-constructed paragraphs.16pts✓Information is very organized with well-constructed paragraphs and subheadings.20pts||Amount of Information (30%)✓ One or more topics were not addressed.12pts✓All topics are addressed, and most questions are answered with 1 sentence about each.18pts✓All topics are addressed and most questions answered with at least 2 sentences about each.24pts✓All topics are addressed and all questions answered with at least 2 sentences about each.30pts.Do not forget the double vertical line to separate the criterias , the percentage of each criteria must all sum up into 100 percent and the points of each items. DO NOT PUT A DOUBLE VERICAL LINE IN THE END. DO NOT FORGET THE PERCENTAGE OF EACH CRITERIA. DO NOT FORGET TO SPEAK IN THIS LANGUAGE:'+ syllabus_ai.language +'.'
+            prompt_message = f'Speak in this language: "{syllabus_ai.language}".Generate a table for rubrics'+ rubric.title +' for the subject:'+ syllabus.course_name +' and Based on these Topics: '+ joined_topics +'.First Column is the Criteria Name:(Example: Organization(15%)). Second Column for beginner (Example:Very hard to find information.6pts.) Third Column: Capable (Example: Information difficult to locate.9pts) Fourth Column for Accomplished (Example:Can find information with slight effort. 12pts) Fifth Column for Expert (Example: All information is easy to find and important points stand out.15pts) Do only 5 Criteria Based on the topics and subject. Do not comment, Do not add anything. Do not add any headers. Do not Use Parenthesis. Use the DOUBLE VERITCAL LINE "||" to proceed to the next criteria.Follow this given format: (Criteria✓Beginner✓Capable✓Accomplished✓Expert||Criteria✓Beginner✓Capable✓Accomplished✓Expert||Criteria✓Beginner✓Capable✓Accomplished✓Expert||Criteria✓Beginner✓Capable✓Accomplished✓Expert) Example of Format: Organization (20%)✓The information appears to be disorganized.8pts✓Information is organized, but paragraphs are not wellconstructed. 12pts✓ Information is organized with well-constructed paragraphs.16pts✓Information is very organized with well-constructed paragraphs and subheadings.20pts||Amount of Information (30%)✓ One or more topics were not addressed.12pts✓All topics are addressed, and most questions are answered with 1 sentence about each.18pts✓All topics are addressed and most questions answered with at least 2 sentences about each.24pts✓All topics are addressed and all questions answered with at least 2 sentences about each.30pts.Do not forget the double vertical line to separate the criterias , the percentage of each criteria must all sum up into 100 percent and the points of each items. DO NOT PUT A DOUBLE VERICAL LINE IN THE END. DO NOT FORGET THE PERCENTAGE OF EACH CRITERIA. DO NOT FORGET TO SPEAK IN THIS LANGUAGE:'+ syllabus_ai.language +'.DO NOT FORGET TO PUT DOUBLE VERTICAL "||" TO SEPARATE EACH CRITERIA. ALWAYS PUT DOUBLE VERTICAL LINE WHEN PROCEEDING TO THE NEXT CRITERIA'
             new_raw_cr = ask_openai2(prompt_message)
-            
+
             rubric.raw_source_course_rubric_ai = new_raw_cr
             rubric.save()
             # Split the text into criteria based on double vertical bars (||)
@@ -2595,7 +2746,7 @@ class AddNewOBA(View):
         }
 
         return JsonResponse(response_data)
-    
+
 class AddNewEOO(View):
     def post(self, request):
         course_outline_id = request.POST.get('course_outline_id', None)
@@ -2686,7 +2837,7 @@ def pdf(request, id):
         finalterm_lecture = Syllabus_Term_Description.objects.filter(term_grade_id=finalterm, lecture_percentage__isnull=False)
         finalterm_laboratory = Syllabus_Term_Description.objects.filter(term_grade_id=finalterm, laboratory_percentage__isnull=False)
         percentage_grade_range = Syllabus_Percentage_Grade_Range.objects.filter(grading_system_id=grading_system)
-    
+
     else:  # if user picked the grading system from template
         grading_system = Grading_System.objects.get(syllabus_template_id=syllabus_template)
         midterm = Term_Grade.objects.get(grading_system_id=grading_system, term_name='midterm')
@@ -2696,8 +2847,12 @@ def pdf(request, id):
         finalterm_lecture = Term_Description.objects.filter(term_grade_id=finalterm, lecture_percentage__isnull=False)
         finalterm_laboratory = Term_Description.objects.filter(term_grade_id=finalterm, laboratory_percentage__isnull=False)
         percentage_grade_range = Percentage_Grade_Range.objects.filter(grading_system_id=grading_system)
-    
-    total_term_percentage = midterm.term_percentage + finalterm.term_percentage   
+
+    total_term_percentage = midterm.term_percentage + finalterm.term_percentage
+
+    wmsu_logo = str(settings.PDF_LOGO) + '/' + wmsu_logo.img_name
+    course_logo = str(settings.PDF_LOGO) + '/' + course_logo.img_name
+    iso_logo = str(settings.PDF_LOGO) + '/' + iso_logo.img_name
 
     template = loader.get_template('PDF_template/template.html') # Load HTML template
     html_string = template.render({
@@ -2739,7 +2894,10 @@ def pdf(request, id):
     }) # Render the template
 
     # Generate the PDF using WeasyPrint
-    pdf = HTML(string=html_string, base_url=request.build_absolute_uri()).write_pdf()
+    # pdf = HTML(string=html_string, base_url=request.build_absolute_uri()).write_pdf()
+    base_url = settings.PDF_LOGO
+    pdf = HTML(string=html_string, base_url=request.build_absolute_uri()).write_pdf(presentational_hints=True)
+    # pdf = html.write_pdf(stylesheets=[CSS(settings.STATIC_ROOT +  '/css/detail_pdf_gen.css')], presentational_hints=True);
 
     # Create an HttpResponse with the PDF content
     response = HttpResponse(pdf, content_type='application/pdf')
@@ -2774,7 +2932,7 @@ def add_grading_system(term_id, term, type, request, isSyllabus):
 
         elif type == 'laboratory':
             term_description.laboratory_percentage = grade
-            
+
         term_description.save()
 
     return True
