@@ -27,6 +27,35 @@
                             <div class="d-flex">
                                 <div class="flex-grow-1"><h3 class="multisteps-form__title">Generated Information</h3></div>
                             </div>
+                            <!-- Modal -->
+                            <div class="modal fade" id="chooseregen" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content" style="background-color: #202022">
+                                        <div class="modal-header">
+                                            <h1 class="modal-title fs-5" id="staticBackdropLabel">Choose Regeneration</h1>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form id="regenForm">
+                                                {% csrf_token %}
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="radio" name="ChooseRegen" id="RegenCourseOutlineTopic" value="topic">
+                                                    <label class="form-check-label" for="RegenCourseOutlineTopic"><span data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="When this is selected, The Regeneration will be based on the Topic and Replace all Columns except Time Frame. This will delete all columns except Time Frame and replace with the New Generated Info.">Topic of Course Outline</span></label>
+                                                </div>
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="radio" name="ChooseRegen" id="RegenCourseContent" value="coursecontent">
+                                                    <label class="form-check-label" for="RegenCourseContent"><span data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="When this is selected, The Regeneration will be based on the Course Content and Replace all Columns except Course Content, Time-Frame and Topic. ">Course Content</span></label>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-primary" onclick="handleRegenerate()">Regenerate</button>
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
                             <hr>
                             <div class="multisteps-form__content ">
                                 <div class="container-fluid scroll overflow-auto">
@@ -169,10 +198,11 @@
                                                                 <i class='bx bxs-trash'></i>
                                                             </button>
                                                             <button class="badge bg-primary rounded-pill border-0 ms-3" id="regenerateCourseOutlineBtn"
-                                                            onclick="regenerateCourseOutline('{{ syllabus.id }}', '{{ syllabus.syllabus_ai_id.id }}', '{{ outline.id }}')">
+                                                                    onclick="openRegenModal('{{ syllabus.id }}', '{{ syllabus.syllabus_ai_id.id }}', '{{ outline.id }}')">
                                                                 Regenerate
                                                                 <i class='bx bx-refresh'></i>
                                                             </button>
+
                                                             <div class="ms-2 Spinner_for_CourseOutline visually-hidden" id="loading_for_CourseOutline-{{ outline.id }}">
                                                                 <div class="spinner-border spinner-border-sm" role="status">
                                                                     <span class="visually-hidden">Loading...</span>
@@ -744,6 +774,9 @@
 {% endblock %}
 {% block scripts %}
 <script>
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+
     function openInNewTab(url) {
         window.open(url, '_blank');
     }
@@ -1642,7 +1675,7 @@
                                 <i class='bx bxs-trash'></i>
                             </button>
                             <button class="badge bg-primary rounded-pill border-0 ms-3" id="regenerateCourseOutlineBtn"
-                            onclick="regenerateCourseOutline('{{ syllabus.id }}', '{{ syllabus.syllabus_ai_id.id }}', '${data.course_outline_id}')">
+                            onclick="openRegenModal('{{ syllabus.id }}', '{{ syllabus.syllabus_ai_id.id }}', '${data.course_outline_id}')">
                                 Regenerate
                                 <i class='bx bx-refresh'></i>
                             </button>
@@ -1967,24 +2000,37 @@
             courseOutlineElement.scrollIntoView({ behavior: "smooth" });
         }
     }
+    function openRegenModal(syllabusId, syllabusAiId, outlineId) {
+        // Set the parameters in local storage for later use
+        localStorage.setItem('syllabusId', syllabusId);
+        localStorage.setItem('syllabusAiId', syllabusAiId);
+        localStorage.setItem('outlineId', outlineId);
+    
+        // Open the modal
+        $('#chooseregen').modal('show');
+    }
 
-    function regenerateCourseOutline(syllabus, syllabusai, outlineId) {
+    function regenerateCourseOutline(syllabusId, syllabusAiId, outlineId, regenOption) {
         // Set a flag in local storage to indicate that scrolling should occur
         localStorage.setItem('scrollToCourseOutline', 'true');
         // Store the outlineId in local storage for later use
         localStorage.setItem('courseOutlineId', outlineId);
-
+    
+        // Add the regeneration option to local storage
+        localStorage.setItem('regenOption', regenOption);
+    
         // Hide the button and show the loading spinner
         $('#regenerateCourseOutlineBtn').addClass('visually-hidden');
         $('#loading_for_CourseOutline-' + outlineId).removeClass('visually-hidden');
-
+    
         $.ajax({
             type: "POST",
             url: '{% url "regenerate_course_outline" %}',
             data: {
-                'syllabus': syllabus,
-                'syllabus_ai': syllabusai,
+                'syllabus': syllabusId,
+                'syllabus_ai': syllabusAiId,
                 'outline_id': outlineId,
+                'regen_option': regenOption,  // Pass the regeneration option to the view
             },
             headers: {
                 "X-CSRFToken": $("[name=csrfmiddlewaretoken]").val(),
@@ -1993,7 +2039,7 @@
             success: function (data) {
                 if (data.success) {
                     playAudio();
-
+    
                     // Delay the page reload by 1 second
                     setTimeout(function () {
                         // Reload the page after processing
@@ -2003,30 +2049,41 @@
                     console.error("Regeneration failed. Please try again.");
                     showToast('Error Regenerating', 'Regeneration failed. Please try again.');
                 }
-
+    
                 // Handle the response data here
                 console.log('Response Data:', data);
             },
             error: function (xhr, status, error) {
                 console.error("AJAX error:", error);
-
+    
                 // Hide the loading spinner and show the button
                 $('#loading_for_CourseOutline-' + outlineId).addClass('visually-hidden');
                 $('#regenerateCourseOutlineBtn').removeClass('visually-hidden');
-
+    
                 // Display error toast
                 showToast('AJAX Error', 'An error occurred during regeneration. Please try reloading the page.');
             },
         });
-
+    
         function showToast(title, message) {
             // Set title and message in the toast
             $('#liveToast .toast-header strong').text(title);
             $('#liveToast .toast-body').text(message);
-
+    
             // Show the toast
             $('#liveToast').toast('show');
         }
+    }
+    
+    function handleRegenerate() {
+        // Get the selected value
+        var selectedRegenOption = $("input[name='ChooseRegen']:checked").val();
+    
+        // Close the modal
+        $('#chooseregen').modal('hide');
+    
+        // Call the regenerateCourseOutline function with the selected option
+        regenerateCourseOutline(localStorage.getItem('syllabusId'), localStorage.getItem('syllabusAiId'), localStorage.getItem('outlineId'), selectedRegenOption);
     }
 
 </script>

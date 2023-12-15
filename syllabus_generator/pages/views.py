@@ -2341,83 +2341,155 @@ class RegenerateCourseOutline(View):
         syllabus_id = request.POST.get('syllabus')
         syllabus_ai_id = request.POST.get('syllabus_ai')
         course_outline_id = request.POST.get('outline_id')
+        regen_option = request.POST.get('regen_option')  # Extract the regeneration option
 
         # Print the values for debugging
         print(f'Syllabus ID: {syllabus_id}, Syllabus AI ID: {syllabus_ai_id},Course Outine ID: {course_outline_id} ')
+        print(regen_option)
         syllabus = Syllabus.objects.get(id=syllabus_id)
         syllabus_ai = Syllabus_AI.objects.get(id=syllabus_ai_id)
         course_outline = Course_Outline.objects.get(id=course_outline_id)
 
-        # Delete all child models
-        Desired_Student_Learning_Outcome.objects.filter(course_outline_id=course_outline).delete()
-        Outcome_Based_Activity.objects.filter(course_outline_id=course_outline).delete()
-        Evidence_of_Outcome.objects.filter(course_outline_id=course_outline).delete()
-        Values_Intended.objects.filter(course_outline_id=course_outline).delete()
+        if regen_option == 'topic':
+            # Delete all child models
+            Course_Content.objects.filter(course_outline_id=course_outline).delete()
+            Desired_Student_Learning_Outcome.objects.filter(course_outline_id=course_outline).delete()
+            Outcome_Based_Activity.objects.filter(course_outline_id=course_outline).delete()
+            Evidence_of_Outcome.objects.filter(course_outline_id=course_outline).delete()
+            Values_Intended.objects.filter(course_outline_id=course_outline).delete()
 
-        course_outline.course_learning_outcomes = ''
-        course_outline.save()
+            course_outline.course_learning_outcomes = ''
+            course_outline.save()
 
-        prompt_0 = ask_openai4('Based on this Course Learning Outcomes:'+ syllabus_ai.raw_course_learning_outcomes_ai_with_letters +'. Choose the letters that corresponds or similar or connected with the topic:'+ course_outline.topic +'. Example: A,C,D. Respond only with the letters with commas. Do not put period.')
-        course_outline.course_learning_outcomes = prompt_0
-        course_outline.save()
+            prompt_0 = ask_openai4('Based on this Course Learning Outcomes:'+ syllabus_ai.raw_course_learning_outcomes_ai_with_letters +'. Choose the letters that corresponds or similar or connected with the topic:'+ course_outline.topic +'. Example: A,C,D. Respond only with the letters with commas. Do not put period.')
+            course_outline.course_learning_outcomes = prompt_0
+            course_outline.save()
+            
+            # Use ask_openai2 to generate content
+            prompt_1 = ask_openai2('Speak in this language:'+ syllabus_ai.language +'Based on this Topic: '+ course_outline.topic  +'. And Based on this subject: '+ syllabus.course_name +'. Generate the Course Content for the topic. Split each item using a vertical bar "|". GIVE ONLY 5 ITEMS DO NOT EXCEED MORE THAN 5 ITEMS.USE VERTICAL BAR TO SPLIT. Do not use any other symbols to split ONLY VERTCAL BAR. Do not comment, do not use numbers, respond in one single line')
 
-        course_contents = Course_Content.objects.filter(course_outline_id=course_outline)
-        joined_content = ', '.join(content.course_content for content in course_contents)
+            # Split the text using the pipe symbol
+            content_courses = prompt_1.split('|')
+
+            # Assuming you have a Course_Content model
+            for content_course in content_courses:
+                # Trim whitespaces and create a new Course_Content instance
+                course_content = Course_Content(course_outline_id=course_outline, course_content=content_course.strip())
+                course_content.save()
+
+            # Use ask_openai2 to generate content
+            prompt_2 = ask_openai2('Speak in this language:'+ syllabus_ai.language +'Based on this Topic: '+ course_outline.topic  +'. And Based on this subject: '+ syllabus.course_name +'. Generate the Desired Learning Outcomes for the topic.Do not use long sentences.   Split each item using a vertical bar "|". GIVE ONLY 5 ITEMS DO NOT EXCEED MORE THAN 5 ITEMS.USE VERTICAL BAR TO SPLIT. Do not use any other symbols to split ONLY VERTCAL BAR. Do not comment, do not use numbers, respond in one single line')
+
+            # Split the text using the pipe symbol
+            content_dslos = prompt_2.split('|')
+
+            # Assuming you have a Course_Content model
+            for content_dslo in content_dslos:
+                # Trim whitespaces and create a new Course_Content instance
+                dslo = Desired_Student_Learning_Outcome(course_outline_id=course_outline, dslo=content_dslo.strip())
+                dslo.save()
+
+            # Use ask_openai2 to generate content
+            prompt_3 = ask_openai2('Speak in this language:'+ syllabus_ai.language +'Based on this Topic: '+ course_outline.topic  +'. And Based on this subject: '+ syllabus.course_name +'. Generate the Outcome Based Activity based on the Course Content. Example of Outcome Based Activity: Class Discussion, Lab Activity:(Based this on the course Content), Audio Visual Presentation .Do not use long sentences.  Use only 5-6 words ONLY. Split each item using a vertical bar "|". Give at least 5 items.USE VERTICAL BAR TO SPLIT.Do not use any other symbols to split ONLY VERTCAL BAR. Do not comment, do not use numbers, respond in one single line')
+
+            # Split the text using the pipe symbol
+            content_obas = prompt_3.split('|')
+
+            # Assuming you have a Course_Content model
+            for content_oba in content_obas:
+                # Trim whitespaces and create a new Course_Content instance
+                oba = Outcome_Based_Activity(course_outline_id=course_outline, oba=content_oba.strip())
+                oba.save()
+
+            prompt_4 = ask_openai3('Speak in this language:'+ syllabus_ai.language +'Based on this Topic: '+ course_outline.topic +'. And Based on this subject: '+ syllabus.course_name +'. Generate the Evidence of Outcome based on the Course Content. Example of Evidence of outcome: Quiz, Lab Activity Submision, Presentation.  Do not use long sentences. Use only 2-3 words ONLY. Split each item using a vertical bar "|". Give at least 5 items.USE VERTICAL BAR TO SPLIT.Do not use any other symbols to split ONLY VERTCAL BAR. Do not comment, do not use numbers, respond in one single line')
+
+            # Split the text using the pipe symbol
+            content_eoos = prompt_4.split('|')
+
+            # Assuming you have a Course_Content model
+            for content_eoo in content_eoos:
+                # Trim whitespaces and create a new Course_Content instance
+                eoo = Evidence_of_Outcome(course_outline_id=course_outline, eoo=content_eoo.strip())
+                eoo.save()
+
+            prompt_5 = ask_openai3('Speak in this language:'+ syllabus_ai.language +'Based on this Topic: '+ course_outline.topic +'. And Based on this subject: '+ syllabus.course_name +'. Generate the Values integration or what values can be gain from the Topic.Do not use long sentences. Example of Values Integration: Critical Thinking, Analytical Reasoning. Use only 3-5 words ONLY. Split each item using a vertical bar "|". USE VERTICAL BAR TO SPLIT. Give at least 5 items.Do not use any other symbols to split ONLY VERTCAL BAR. Do not comment, do not use numbers, respond in one single line')
+
+            # Split the text using the pipe symbol
+            content_values = prompt_5.split('|')
+
+            # Assuming you have a Course_Content model
+            for content_value in content_values:
+                # Trim whitespaces and create a new Course_Content instance
+                value = Values_Intended(course_outline_id=course_outline, values=content_value.strip())
+                value.save()
+        
+        elif regen_option == 'coursecontent':
+            # Delete all child models
+            Desired_Student_Learning_Outcome.objects.filter(course_outline_id=course_outline).delete()
+            Outcome_Based_Activity.objects.filter(course_outline_id=course_outline).delete()
+            Evidence_of_Outcome.objects.filter(course_outline_id=course_outline).delete()
+            Values_Intended.objects.filter(course_outline_id=course_outline).delete()
+
+            course_outline.course_learning_outcomes = ''
+            course_outline.save()
+
+            prompt_0 = ask_openai4('Based on this Course Learning Outcomes:'+ syllabus_ai.raw_course_learning_outcomes_ai_with_letters +'. Choose the letters that corresponds or similar or connected with the topic:'+ course_outline.topic +'. Example: A,C,D. Respond only with the letters with commas. Do not put period.')
+            course_outline.course_learning_outcomes = prompt_0
+            course_outline.save()
+
+            course_contents = Course_Content.objects.filter(course_outline_id=course_outline)
+            joined_content = ', '.join(content.course_content for content in course_contents)
 
 
-        # Use ask_openai2 to generate content
-        prompt_2 = ask_openai2('Speak in this language:'+ syllabus_ai.language +'Based on this Course Content: '+ joined_content +'. And Based on this subject: '+ syllabus.course_name +'. Generate the Desired Learning Outcomes for the topic.Do not use long sentences.   Split each item using a vertical bar "|". GIVE ONLY 5 ITEMS DO NOT EXCEED MORE THAN 5 ITEMS.USE VERTICAL BAR TO SPLIT. Do not use any other symbols to split ONLY VERTCAL BAR. Do not comment, do not use numbers, respond in one single line')
+            # Use ask_openai2 to generate content
+            prompt_2 = ask_openai2('Speak in this language:'+ syllabus_ai.language +'Based on this Course Content: '+ joined_content +'. And Based on this subject: '+ syllabus.course_name +'. Generate the Desired Learning Outcomes for the topic.Do not use long sentences.   Split each item using a vertical bar "|". GIVE ONLY 5 ITEMS DO NOT EXCEED MORE THAN 5 ITEMS.USE VERTICAL BAR TO SPLIT. Do not use any other symbols to split ONLY VERTCAL BAR. Do not comment, do not use numbers, respond in one single line')
 
-        # Split the text using the pipe symbol
-        content_dslos = prompt_2.split('|')
+            # Split the text using the pipe symbol
+            content_dslos = prompt_2.split('|')
 
-        # Assuming you have a Course_Content model
-        for content_dslo in content_dslos:
-            # Trim whitespaces and create a new Course_Content instance
-            dslo = Desired_Student_Learning_Outcome(course_outline_id=course_outline, dslo=content_dslo.strip())
-            dslo.save()
+            # Assuming you have a Course_Content model
+            for content_dslo in content_dslos:
+                # Trim whitespaces and create a new Course_Content instance
+                dslo = Desired_Student_Learning_Outcome(course_outline_id=course_outline, dslo=content_dslo.strip())
+                dslo.save()
 
-        # Use ask_openai2 to generate content
-        prompt_3 = ask_openai2('Speak in this language:'+ syllabus_ai.language +'Based on this Course Content: '+ joined_content +'. And Based on this subject: '+ syllabus.course_name +'. Generate the Outcome Based Activity based on the Course Content. Example of Outcome Based Activity: Class Discussion, Lab Activity:(Based this on the course Content), Audio Visual Presentation .Do not use long sentences.  Use only 5-6 words ONLY. Split each item using a vertical bar "|". Give at least 5 items.USE VERTICAL BAR TO SPLIT.Do not use any other symbols to split ONLY VERTCAL BAR. Do not comment, do not use numbers, respond in one single line')
+            # Use ask_openai2 to generate content
+            prompt_3 = ask_openai2('Speak in this language:'+ syllabus_ai.language +'Based on this Course Content: '+ joined_content +'. And Based on this subject: '+ syllabus.course_name +'. Generate the Outcome Based Activity based on the Course Content. Example of Outcome Based Activity: Class Discussion, Lab Activity:(Based this on the course Content), Audio Visual Presentation .Do not use long sentences.  Use only 5-6 words ONLY. Split each item using a vertical bar "|". Give at least 5 items.USE VERTICAL BAR TO SPLIT.Do not use any other symbols to split ONLY VERTCAL BAR. Do not comment, do not use numbers, respond in one single line')
 
-        # Split the text using the pipe symbol
-        content_obas = prompt_3.split('|')
+            # Split the text using the pipe symbol
+            content_obas = prompt_3.split('|')
 
-        # Assuming you have a Course_Content model
-        for content_oba in content_obas:
-            # Trim whitespaces and create a new Course_Content instance
-            oba = Outcome_Based_Activity(course_outline_id=course_outline, oba=content_oba.strip())
-            oba.save()
+            # Assuming you have a Course_Content model
+            for content_oba in content_obas:
+                # Trim whitespaces and create a new Course_Content instance
+                oba = Outcome_Based_Activity(course_outline_id=course_outline, oba=content_oba.strip())
+                oba.save()
 
-        prompt_4 = ask_openai3('Speak in this language:'+ syllabus_ai.language +'Based on this Course Content: '+ joined_content +'. And Based on this subject: '+ syllabus.course_name +'. Generate the Evidence of Outcome based on the Course Content. Example of Evidence of outcome: Quiz, Lab Activity Submision, Presentation.  Do not use long sentences. Use only 2-3 words ONLY. Split each item using a vertical bar "|". Give at least 5 items.USE VERTICAL BAR TO SPLIT.Do not use any other symbols to split ONLY VERTCAL BAR. Do not comment, do not use numbers, respond in one single line')
+            prompt_4 = ask_openai3('Speak in this language:'+ syllabus_ai.language +'Based on this Course Content: '+ joined_content +'. And Based on this subject: '+ syllabus.course_name +'. Generate the Evidence of Outcome based on the Course Content. Example of Evidence of outcome: Quiz, Lab Activity Submision, Presentation.  Do not use long sentences. Use only 2-3 words ONLY. Split each item using a vertical bar "|". Give at least 5 items.USE VERTICAL BAR TO SPLIT.Do not use any other symbols to split ONLY VERTCAL BAR. Do not comment, do not use numbers, respond in one single line')
 
-        # Split the text using the pipe symbol
-        content_eoos = prompt_4.split('|')
+            # Split the text using the pipe symbol
+            content_eoos = prompt_4.split('|')
 
-        # Assuming you have a Course_Content model
-        for content_eoo in content_eoos:
-            # Trim whitespaces and create a new Course_Content instance
-            eoo = Evidence_of_Outcome(course_outline_id=course_outline, eoo=content_eoo.strip())
-            eoo.save()
+            # Assuming you have a Course_Content model
+            for content_eoo in content_eoos:
+                # Trim whitespaces and create a new Course_Content instance
+                eoo = Evidence_of_Outcome(course_outline_id=course_outline, eoo=content_eoo.strip())
+                eoo.save()
 
-        prompt_5 = ask_openai3('Speak in this language:'+ syllabus_ai.language +'Based on this Topic: '+ course_outline.topic +'. And Based on this subject: '+ syllabus.course_name +'. Generate the Values integration or what values can be gain from the Topic.Do not use long sentences. Example of Values Integration: Critical Thinking, Analytical Reasoning. Use only 3-5 words ONLY. Split each item using a vertical bar "|". USE VERTICAL BAR TO SPLIT. Give at least 5 items.Do not use any other symbols to split ONLY VERTCAL BAR. Do not comment, do not use numbers, respond in one single line')
+            prompt_5 = ask_openai3('Speak in this language:'+ syllabus_ai.language +'Based on this Topic: '+ course_outline.topic +'. And Based on this subject: '+ syllabus.course_name +'. And Based on this Course Content:'+ joined_content +' Generate the Values integration or what values can be gain from the Topic and Course Content.Do not use long sentences. Example of Values Integration: Critical Thinking, Analytical Reasoning. Use only 3-5 words ONLY. Split each item using a vertical bar "|". USE VERTICAL BAR TO SPLIT. Give at least 5 items.Do not use any other symbols to split ONLY VERTCAL BAR. Do not comment, do not use numbers, respond in one single line')
 
-        # Split the text using the pipe symbol
-        content_values = prompt_5.split('|')
+            # Split the text using the pipe symbol
+            content_values = prompt_5.split('|')
 
-        # Assuming you have a Course_Content model
-        for content_value in content_values:
-            # Trim whitespaces and create a new Course_Content instance
-            value = Values_Intended(course_outline_id=course_outline, values=content_value.strip())
-            value.save()
-
-
+            # Assuming you have a Course_Content model
+            for content_value in content_values:
+                # Trim whitespaces and create a new Course_Content instance
+                value = Values_Intended(course_outline_id=course_outline, values=content_value.strip())
+                value.save()
 
         # Assuming your regeneration logic was successful
         response_data['success'] = True
         response_data['message'] = 'Regeneration was successful.'
-        # Assuming new_clos is the correct data to be sent
-        response_data['new_raw_course_outline_item'] = prompt_5
         # Return a JsonResponse with the response_data
         return JsonResponse(response_data)
 
