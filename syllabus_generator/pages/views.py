@@ -1884,18 +1884,14 @@ class ProcessAndRedirectView(View):
                 response = ask_openai2(prompt)
                 syllabus_ai.raw_second_response = response
                 syllabus_ai.save()
-
                 syllabus_ai.raw_course_outline = syllabus_ai.raw_second_response
                 syllabus_ai.save()
-
                 reponse_cc = syllabus_ai.raw_course_outline
-
                 # ----- PROCESS RAW OUTPUT -----
                 raw_course_outlines = reponse_cc[:-3].strip().split('||')
                 for raw_course_outline in raw_course_outlines:
                     # ----- SPLITTING FOR DIFFERENT COLUMNS OF COURSE OUTLINE -----
                     week, topic, raw_content, raw_dslo, raw_oba, raw_eoo, learning_outcome, raw_values = raw_course_outline.strip().split('|')
-
                     # ----- INSTANTIATION AND STORING OF NON LIST DATA -----
                     course_outline = Course_Outline(
                         syllabus_ai_id=syllabus_ai,
@@ -1903,28 +1899,23 @@ class ProcessAndRedirectView(View):
                         course_learning_outcomes=learning_outcome
                         )
                     course_outline.save()
-
                     # ----- DATA PROCESS AND STORING TO TABLES OF LIST DATA -----
                     contents = raw_content[2:].strip().split('✓')
                     for content in contents:
                         course_content = Course_Content(course_outline_id=course_outline, course_content=content)
                         course_content.save()
-
                     dslos = raw_dslo[2:].strip().split('✓')
                     for dslo in dslos:
                         desired_student_learning_outcome = Desired_Student_Learning_Outcome(course_outline_id=course_outline, dslo=dslo)
                         desired_student_learning_outcome.save()
-
                     obas = raw_oba[2:].strip().split('✓')
                     for oba in obas:
                         outcome_based_activity = Outcome_Based_Activity(course_outline_id=course_outline, oba=oba)
                         outcome_based_activity.save()
-
                     eoos = raw_eoo[2:].strip().split('✓')
                     for eoo in eoos:
                         evidence_of_outcome = Evidence_of_Outcome(course_outline_id=course_outline, eoo=eoo)
                         evidence_of_outcome.save()
-
                     values = raw_values[2:].strip().split('✓')
                     for value in values:
                         values_intended = Values_Intended(course_outline_id=course_outline, values=value)
@@ -2871,6 +2862,7 @@ class AddNewValues(View):
 
         return JsonResponse(response_data)
 
+from weasyprint import CSS, HTML
 @login_required
 def pdf(request, id):
     # ---------- SYLLABUS ----------
@@ -2966,10 +2958,8 @@ def pdf(request, id):
     }) # Render the template
 
     # Generate the PDF using WeasyPrint
-    # pdf = HTML(string=html_string, base_url=request.build_absolute_uri()).write_pdf()
     base_url = settings.PDF_LOGO
     pdf = HTML(string=html_string, base_url=request.build_absolute_uri()).write_pdf(presentational_hints=True)
-    # pdf = html.write_pdf(stylesheets=[CSS(settings.STATIC_ROOT +  '/css/detail_pdf_gen.css')], presentational_hints=True);
 
     # Create an HttpResponse with the PDF content
     response = HttpResponse(pdf, content_type='application/pdf')
