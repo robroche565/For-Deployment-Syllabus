@@ -66,7 +66,6 @@ def reset_conversation():
     global conversation_history
     conversation_history = []
 
-
 def ask_openai(message, api):
     if api == 1:
         openai.api_key = settings.OPENAI_API_KEY
@@ -1321,7 +1320,7 @@ def edit_syllabus(request, id):
             )
             percentage_grade_range.save()
 
-        return redirect('userpage')
+        return redirect('edit_syllabus', id=id)
 
     # Pass the data to the template
     context = {
@@ -1878,20 +1877,25 @@ class ProcessAndRedirectView(View):
         counter = 0
         while True:
             try:
+                # prompt = f'Speak in this language: "{syllabus_ai.language}".Provide an exact 18 weeks weekly topics course outline for each of these topics "{joined_topics}" It should fit within time frame of EXACLTY 18 WEEKS. Week 9 and 18 should be midterm and final examination or laboratory base on topics provided and course outline. Do not exceed fit all the topics within the time frame one topic can be in a week or more than, feel free to suggest any additional areas of focus or related subjects that may enhance the depth and breadth of the content. Please include final examinations and should only be 1 week. Continue from week 1 until week 18. Adjust the hours according to the level of topic. Use this template ( time frame | Topic (No. of Hours/Topic) | Course Content | DESIRED STUDENT LEARNING OUTCOMES/COMPETENCIES At the end of each topic and semester, the students can: | OUTCOME-BASED (OBA) ACTIVITIES (Teaching & Learning Activities) | EVIDENCE OF OUTCOMES (Assessment of Learning Outcome) | COURSE LEARNING OUTCOMES | VALUES INTENDED ||). Each column should be separated by "|" and each weekly topic should be separated by "||". In COURSE LEARNING OUTCOMES column, if the topic is related to these course learning outcomes "{prompt_clo}" put the letter into course learning outline columns if one or more is related to each course outline row. For Values Intended, get the values that can be get from the topic. Do not put any label, do not put inside of quotations or parentheses. Do not explain, Do not comment and no footnote or other extra info and do not leave any columns blank. Provide it in a normal fonts and style and textual format, and in a single line without any break lines for all and provide and fit all topics within 18 weeks\' timeframe. DO NOT FORGET TO USE THE LANGUAGE: {syllabus_ai.language}.Sample output: Week 18 | Final Examination (5 hours) | ✓Review of Entire Course Content ✓Final Examination | ✓Demonstrate comprehensive understanding of the entire course content ✓Successfully complete the final examination | ✓Final Examination | ✓Final Examination Submission ✓Course Evaluation | A, B, C, D, E, F, G | ✓Problem-solving ✓Ethical reasoning || Week 3 and 4 |Software Project Documentation (5 hours) | ✓Documentation in Software Projects ✓Types of Documentation ✓Best Practices in Documentation | ✓Understand the importance of documentation in software projects ✓Identify and create different types of documentation ✓Apply best practices in documentation | ✓Class discussion ✓Audio-Visual Presentation ✓Hands-on Documentation Exercise | ✓Documentation Exercise Submission ✓Quiz | D, G | ✓Critical thinking ✓Values that was gain ||'
                 prompt = f'Provide an exact 18 weeks weekly topics course outline in "{syllabus_ai.language} language response" for each of these topics "{joined_topics}" It should fit within time frame of EXACLTY 18 WEEKS. Week 9 and 18 should be midterm and final examination or laboratory base on topics provided and course outline. Do not exceed fit all the topics within the time frame one topic can be in a week or more than, feel free to suggest any additional areas of focus or related subjects that may enhance the depth and breadth of the content. Please include final examinations and should only be 1 week. Continue from week 1 until week 18. Adjust the hours according to the level of topic. Use this template ( time frame | Topic (No. of Hours/Topic) | Course Content | DESIRED STUDENT LEARNING OUTCOMES/COMPETENCIES At the end of each topic and semester, the students can: | OUTCOME-BASED (OBA) ACTIVITIES (Teaching & Learning Activities) | EVIDENCE OF OUTCOMES (Assessment of Learning Outcome) | COURSE LEARNING OUTCOMES | VALUES INTENDED ||). Each column should be separated by "|" and each weekly topic should be separated by "||". In COURSE LEARNING OUTCOMES column, if the topic is related to these course learning outcomes "{prompt_clo}" put the letter into course learning outline columns if one or more is related to each course outline row. For Values Intended, get the values that can be get from the topic .DO NOT FORGET TO USE THE LANGUAGE: {syllabus_ai.language} in responding and outputting informations. Do not put any label, do not put inside of quotations or parentheses. Do not explain, do not comment and no footnote or other extra info and do not leave any columns blank and fill all columns according to the reference and sample output you can use None instead of blank fields. Provide it in a normal fonts and style and textual format, and in a single line without any break lines for all and provide and fit all topics within 18 weeks\' timeframe. Sample output: Week 18 | Final Examination (5 hours) | ✓Review of Entire Course Content ✓Final Examination | ✓Demonstrate comprehensive understanding of the entire course content ✓Successfully complete the final examination | ✓Final Examination | ✓Final Examination Submission ✓Course Evaluation | A, B, C, D, E, F, G | ✓Problem-solving ✓Ethical reasoning || Week 3 and 4 |Software Project Documentation (5 hours) | ✓Documentation in Software Projects ✓Types of Documentation ✓Best Practices in Documentation | ✓Understand the importance of documentation in software projects ✓Identify and create different types of documentation ✓Apply best practices in documentation | ✓Class discussion ✓Audio-Visual Presentation ✓Hands-on Documentation Exercise | ✓Documentation Exercise Submission ✓Quiz | D, G | ✓Critical thinking ✓Values that was gain ||'
                 syllabus_ai.raw_second_prompt = prompt
                 syllabus_ai.save()
                 response = ask_openai2(prompt)
                 syllabus_ai.raw_second_response = response
                 syllabus_ai.save()
+
                 syllabus_ai.raw_course_outline = syllabus_ai.raw_second_response
                 syllabus_ai.save()
+
                 reponse_cc = syllabus_ai.raw_course_outline
+
                 # ----- PROCESS RAW OUTPUT -----
                 raw_course_outlines = reponse_cc[:-3].strip().split('||')
                 for raw_course_outline in raw_course_outlines:
                     # ----- SPLITTING FOR DIFFERENT COLUMNS OF COURSE OUTLINE -----
                     week, topic, raw_content, raw_dslo, raw_oba, raw_eoo, learning_outcome, raw_values = raw_course_outline.strip().split('|')
+
                     # ----- INSTANTIATION AND STORING OF NON LIST DATA -----
                     course_outline = Course_Outline(
                         syllabus_ai_id=syllabus_ai,
@@ -1899,23 +1903,28 @@ class ProcessAndRedirectView(View):
                         course_learning_outcomes=learning_outcome
                         )
                     course_outline.save()
+
                     # ----- DATA PROCESS AND STORING TO TABLES OF LIST DATA -----
                     contents = raw_content[2:].strip().split('✓')
                     for content in contents:
                         course_content = Course_Content(course_outline_id=course_outline, course_content=content)
                         course_content.save()
+
                     dslos = raw_dslo[2:].strip().split('✓')
                     for dslo in dslos:
                         desired_student_learning_outcome = Desired_Student_Learning_Outcome(course_outline_id=course_outline, dslo=dslo)
                         desired_student_learning_outcome.save()
+
                     obas = raw_oba[2:].strip().split('✓')
                     for oba in obas:
                         outcome_based_activity = Outcome_Based_Activity(course_outline_id=course_outline, oba=oba)
                         outcome_based_activity.save()
+
                     eoos = raw_eoo[2:].strip().split('✓')
                     for eoo in eoos:
                         evidence_of_outcome = Evidence_of_Outcome(course_outline_id=course_outline, eoo=eoo)
                         evidence_of_outcome.save()
+
                     values = raw_values[2:].strip().split('✓')
                     for value in values:
                         values_intended = Values_Intended(course_outline_id=course_outline, values=value)
@@ -2355,7 +2364,7 @@ class RegenerateCourseOutline(View):
             prompt_0 = ask_openai4('Based on this Course Learning Outcomes:'+ syllabus_ai.raw_course_learning_outcomes_ai_with_letters +'. Choose the letters that corresponds or similar or connected with the topic:'+ course_outline.topic +'. Example: A,C,D. Respond only with the letters with commas. Do not put period.')
             course_outline.course_learning_outcomes = prompt_0
             course_outline.save()
-            
+
             # Use ask_openai2 to generate content
             prompt_1 = ask_openai2('Speak in this language:'+ syllabus_ai.language +'Based on this Topic: '+ course_outline.topic  +'. And Based on this subject: '+ syllabus.course_name +'. Generate the Course Content for the topic. Split each item using a vertical bar "|". GIVE ONLY 5 ITEMS DO NOT EXCEED MORE THAN 5 ITEMS.USE VERTICAL BAR TO SPLIT. Do not use any other symbols to split ONLY VERTCAL BAR. Do not comment, do not use numbers, respond in one single line')
 
@@ -2413,7 +2422,7 @@ class RegenerateCourseOutline(View):
                 # Trim whitespaces and create a new Course_Content instance
                 value = Values_Intended(course_outline_id=course_outline, values=content_value.strip())
                 value.save()
-        
+
         elif regen_option == 'coursecontent':
             # Delete all child models
             Desired_Student_Learning_Outcome.objects.filter(course_outline_id=course_outline).delete()
@@ -2862,7 +2871,6 @@ class AddNewValues(View):
 
         return JsonResponse(response_data)
 
-from weasyprint import CSS, HTML
 @login_required
 def pdf(request, id):
     # ---------- SYLLABUS ----------
@@ -2958,8 +2966,10 @@ def pdf(request, id):
     }) # Render the template
 
     # Generate the PDF using WeasyPrint
+    # pdf = HTML(string=html_string, base_url=request.build_absolute_uri()).write_pdf()
     base_url = settings.PDF_LOGO
     pdf = HTML(string=html_string, base_url=request.build_absolute_uri()).write_pdf(presentational_hints=True)
+    # pdf = html.write_pdf(stylesheets=[CSS(settings.STATIC_ROOT +  '/css/detail_pdf_gen.css')], presentational_hints=True);
 
     # Create an HttpResponse with the PDF content
     response = HttpResponse(pdf, content_type='application/pdf')
