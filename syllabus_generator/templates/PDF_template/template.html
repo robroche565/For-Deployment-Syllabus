@@ -21,12 +21,15 @@
     size: A4 landscape;
     margin: 0.9in 0.92in 0.9in 0.9in;
     @bottom-left {
-      content: "{{ syllabus.footer_info }} | Effective Date: {{ syllabus.effective_date|date:"d-M-Y"|upper }}";
+      content: "{{ syllabus.footer_info }} \A Effective Date: {{ syllabus.effective_date|date:"d-M-Y"|upper }}";
       font-size: 12px;
+      white-space: pre; /* Preserve line breaks */
     }
     @bottom-right {
-      content: counter(page) " of " counter(pages);
+      content: counter(page) " of " counter(pages) "\A CONTROLLED COPY"; /* Add line break before the "CONTROLLED COPY" */
       font-size: 12px;
+      position: relative; /* Ensure positioning context */
+      white-space: pre; /* Preserve line breaks */
     }
   }
   @page :first {
