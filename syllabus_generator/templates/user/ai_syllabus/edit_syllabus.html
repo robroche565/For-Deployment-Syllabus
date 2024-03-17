@@ -227,184 +227,183 @@
                                         </div>
 
                                         <hr>
-                                        {% if syllabus.grading_system_option == "create-new" %}
-                                            <h4>Grading System</h4>
-                                            <div id="additional_info_inputs" style="display: none;">
-                                                <div class="form-group radio-buttons">
-                                                    <label class="type-label">Type :</label>
-                                                    <div class="form-check form-check-inline">
-                                                        <!---------- the input value has 'only' after the initial value, this is will be use for later prompting in creating syllabus ---------->
-                                                        <input class="form-check-input" id="lecture" type="radio" name="grading_system_type" value="lecture only" {% if grading_system.grading_system_type == 'lecture only' %}checked{% endif %} checked>
-                                                        <label class="form-check-label" for="lecture">Lecture</label>
-                                                    </div>
-                                                    <div class="form-check form-check-inline">
-                                                        <input class="form-check-input" id="laboratory" type="radio" name="grading_system_type" value="laboratory only"  {% if grading_system.grading_system_type == 'laboratory only' %}checked{% endif %}>
-                                                        <label class="form-check-label" for="laboratory">Laboratory</label>
-                                                    </div>
-                                                    <div class="form-check form-check-inline">
-                                                        <input class="form-check-input" id="both" type="radio" name="grading_system_type" value="laboratory & lecture" {% if grading_system.grading_system_type == 'laboratory & lecture' %}checked{% endif %}>
-                                                        <label class="form-check-label" for="both">Both</label>
-                                                    </div>
+                                        <h4>Grading System</h4>
+                                        {% if syllabus.grading_system_option == "use-template" %}
+                                            <h4>You have Chosen Use From Template</h4>
+                                            <h6>Edit the Grading System in the Template Selected For This AI Generated Syllabus.</h6>
+                                        {% endif %}
+                                        <div id="additional_info_inputs" {% if syllabus.grading_system_option == "use-template" %} class="d-none" {% endif%}>
+                                            <div class="form-group radio-buttons">
+                                                <label class="type-label">Type :</label>
+                                                <div class="form-check form-check-inline">
+                                                    <!---------- the input value has 'only' after the initial value, this is will be use for later prompting in creating syllabus ---------->
+                                                    <input class="form-check-input" id="lecture" type="radio" name="grading_system_type" value="lecture only" {% if grading_system.grading_system_type == 'lecture only' %}checked{% endif %} checked>
+                                                    <label class="form-check-label" for="lecture">Lecture</label>
                                                 </div>
-                                                <div class="row terms-cont" id="midterm-cont">
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" id="laboratory" type="radio" name="grading_system_type" value="laboratory only"  {% if grading_system.grading_system_type == 'laboratory only' %}checked{% endif %}>
+                                                    <label class="form-check-label" for="laboratory">Laboratory</label>
+                                                </div>
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" id="both" type="radio" name="grading_system_type" value="laboratory & lecture" {% if grading_system.grading_system_type == 'laboratory & lecture' %}checked{% endif %}>
+                                                    <label class="form-check-label" for="both">Both</label>
+                                                </div>
+                                            </div>
+                                            <div class="row terms-cont" id="midterm-cont">
+                                                <div class="mb-3 col-lg-6">
+                                                    <label for="" class="form-label">Mid Term Grade</label>
+                                                    <input type="number" class="form-control med-input" name="midterm-grade" placeholder="percentage" value="{{ midterm.term_percentage }}">
+                                                </div>
+                                                <div class="term-description-cont lecture-cont" id="midterm-lecture">
                                                     <div class="mb-3 col-lg-6">
-                                                        <label for="" class="form-label">Mid Term Grade</label>
-                                                        <input type="number" class="form-control med-input" name="midterm-grade" placeholder="percentage" value="{{ midterm.term_percentage }}">
+                                                        <label for="" class="form-label">Lecture Grade</label>
+                                                        <input type="number" class="form-control med-input" name="midterm-lecture-grade" placeholder="percentage" value="{{ midterm_lectures.0.lecture_percentage }}">
                                                     </div>
-                                                    <div class="term-description-cont lecture-cont" id="midterm-lecture">
-                                                        <div class="mb-3 col-lg-6">
-                                                            <label for="" class="form-label">Lecture Grade</label>
-                                                            <input type="number" class="form-control med-input" name="midterm-lecture-grade" placeholder="percentage" value="{{ midterm_lectures.0.lecture_percentage }}">
-                                                        </div>
-                                                        <div class="col-lg-6">
-                                                            <label class="form-label">Description and Percent</label>
-                                                            <div class="list-input-container">
-                                                                {% if midterm_lectures|length < 1 %}
-                                                                <div class="input-group mb-2">
-                                                                    <input type="text" class="form-control med-input" name="midterm-lecture-description" placeholder="Attendance">
-                                                                    <input type="number" aria-label="First name" class="form-control med-input" name="midterm-lecture-percentage" placeholder="Percentage">
-                                                                    <button class="btn btn-danger remove-input" type="button"><i class='bx bx-minus-circle'></i></button>
-                                                                </div>
-                                                                {% endif %}
-                                                                {% for midterm_lecture in midterm_lectures %}
-                                                                <div class="input-group mb-2">
-                                                                    <input type="text" class="form-control med-input" name="midterm-lecture-description" placeholder="Attendance" value="{{ midterm_lecture.term_description }}">
-                                                                    <input type="number" aria-label="First name" class="form-control med-input" name="midterm-lecture-percentage" placeholder="Percentage" value="{{ midterm_lecture.percentage }}">
-                                                                    <button class="btn btn-danger remove-input" type="button"><i class='bx bx-minus-circle'></i></button>
-                                                                </div>
-                                                                {% endfor %}
-                                                            </div>
-                                                            <div class="mt-2">
-                                                                <button class="btn btn-success btn-sm mb-2 add-input" id="add-midterm-lecture" type="button">Add more</button>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="term-description-cont laboratory-cont" id="midterm-laboratory">
-                                                        <div class="mb-3 col-lg-6">
-                                                            <label for="" class="form-label">Laboratory Grade</label>
-                                                            <input type="number" class="form-control med-input" name="midterm-laboratory-grade" placeholder="percentage" value="{{ midterm_laboratories.0.laboratory_percentage }}">
-                                                        </div>
-                                                        <div class="col-lg-6">
-                                                            <label class="form-label">Description and Percent</label>
-                                                            <div class="list-input-container">
-                                                                {% if midterm_laboratories|length < 1 %}
-                                                                <div class="input-group mb-2">
-                                                                    <input type="text" class="form-control med-input" name="midterm-laboratory-description" placeholder="Attendance">
-                                                                    <input type="number" aria-label="First name" class="form-control med-input" name="midterm-laboratory-percentage" placeholder="Percentage">
-                                                                    <button class="btn btn-danger remove-input" type="button"><i class='bx bx-minus-circle'></i></button>
-                                                                </div>
-                                                                {% endif %}
-                                                                {% for midterm_laboratory in midterm_laboratories %}
-                                                                <div class="input-group mb-2">
-                                                                    <input type="text" class="form-control med-input" name="midterm-laboratory-description" placeholder="Attendance" value="{{ midterm_laboratory.term_description }}">
-                                                                    <input type="number" aria-label="First name" class="form-control med-input" name="midterm-laboratory-percentage" placeholder="Percentage" value="{{ midterm_laboratory.percentage }}">
-                                                                    <button class="btn btn-danger remove-input" type="button"><i class='bx bx-minus-circle'></i></button>
-                                                                </div>
-                                                                {% endfor %}
-                                                            </div>
-                                                            <div class="mt-2">
-                                                                <button class="btn btn-success btn-sm mb-2 add-input" id="add-midterm-laboratory" type="button">Add more</button>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="row terms-cont" id="finalterm-cont">
-                                                    <div class="mb-3 col-lg-6">
-                                                        <label for="" class="form-label">Final Term Grade</label>
-                                                        <input type="number" class="form-control med-input" name="finalterm-grade" placeholder="percentage" value="{{ finalterm.term_percentage }}">
-                                                    </div>
-                                                    <div class="term-description-cont lecture-cont" id="finalterm-lecture">
-                                                        <div class="mb-3 col-lg-6">
-                                                            <label for="" class="form-label">Lecture Grade</label>
-                                                            <input type="number" class="form-control med-input" name="finalterm-lecture-grade" placeholder="percentage" value="{{ finalterm_lectures.0.lecture_percentage }}">
-                                                        </div>
-                                                        <div class="col-lg-6">
-                                                            <label class="form-label">Description and Percent</label>
-                                                            <div class="list-input-container">
-                                                                {% if finalterm_lectures|length < 1 %}
-                                                                <div class="input-group mb-2">
-                                                                    <input type="text" class="form-control med-input" name="finalterm-lecture-description" placeholder="Attendance">
-                                                                    <input type="number" aria-label="First name" class="form-control med-input" name="finalterm-lecture-percentage" placeholder="Percentage">
-                                                                    <button class="btn btn-danger remove-input" type="button"><i class='bx bx-minus-circle'></i></button>
-                                                                </div>
-                                                                {% endif %}
-                                                                {% for finalterm_lecture in finalterm_lectures %}
-                                                                <div class="input-group mb-2">
-                                                                    <input type="text" class="form-control med-input" name="finalterm-lecture-description" placeholder="Attendance" value="{{ finalterm_lecture.term_description }}">
-                                                                    <input type="number" aria-label="First name" class="form-control med-input" name="finalterm-lecture-percentage" placeholder="Percentage" value="{{ finalterm_lecture.percentage }}">
-                                                                    <button class="btn btn-danger remove-input" type="button"><i class='bx bx-minus-circle'></i></button>
-                                                                </div>
-                                                                {% endfor %}
-                                                            </div>
-                                                            <div class="mt-2">
-                                                                <button class="btn btn-success btn-sm mb-2 add-input" id="add-finalterm-lecture" type="button">Add more</button>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="term-description-cont laboratory-cont" id="finalterm-laboratory">
-                                                        <div class="mb-3 col-lg-6">
-                                                            <label for="" class="form-label">Laboratory Grade</label>
-                                                            <input type="number" class="form-control med-input" name="finalterm-laboratory-grade" placeholder="percentage" value="{{ finalterm_laboratories.0.laboratory_percentage }}">
-                                                        </div>
-                                                        <div class="col-lg-6">
-                                                            <label class="form-label">Description and Percent</label>
-                                                            <div class="list-input-container">
-                                                                {% if finalterm_laboratories|length < 1 %}
-                                                                <div class="input-group mb-2">
-                                                                    <input type="text" class="form-control med-input" name="finalterm-laboratory-description" placeholder="Attendance">
-                                                                    <input type="number" aria-label="First name" class="form-control med-input" name="finalterm-laboratory-percentage" placeholder="Percentage">
-                                                                    <button class="btn btn-danger remove-input" type="button"><i class='bx bx-minus-circle'></i></button>
-                                                                </div>
-                                                                {% endif %}
-                                                                {% for finalterm_laboratory in finalterm_laboratories %}
-                                                                <div class="input-group mb-2">
-                                                                    <input type="text" class="form-control med-input" name="finalterm-laboratory-description" placeholder="Attendance" value="{{ finalterm_laboratory.term_description }}">
-                                                                    <input type="number" aria-label="First name" class="form-control med-input" name="finalterm-laboratory-percentage" placeholder="Percentage" value="{{ finalterm_laboratory.percentage }}">
-                                                                    <button class="btn btn-danger remove-input" type="button"><i class='bx bx-minus-circle'></i></button>
-                                                                </div>
-                                                                {% endfor %}
-                                                            </div>
-                                                            <div class="mt-2">
-                                                                <button class="btn btn-success btn-sm mb-2 add-input" id="add-finalterm-laboratory" type="button">Add more</button>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="row" id="range-cont">
-                                                    <label>Percentage Grade Range</label>
-                                                    <div class="col-lg-12">
+                                                    <div class="col-lg-6">
+                                                        <label class="form-label">Description and Percent</label>
                                                         <div class="list-input-container">
-                                                            {% if percentage_grade_ranges|length < 1 %}
-                                                            <div class="input-group mt-2">
-                                                                <span class="input-group-text">Enter Range Here</span>
-                                                                <input type="number" name="min-range" class="form-control med-input" placeholder="96">
-                                                                <input type="number" name="max-range" class="form-control med-input" placeholder="100">
-                                                                <span class="input-group-text">Enter Grade Here</span>
-                                                                <input type="text" name="grade" class="form-control med-input" placeholder="1.0">
+                                                            {% if midterm_lectures|length < 1 %}
+                                                            <div class="input-group mb-2">
+                                                                <input type="text" class="form-control med-input" name="midterm-lecture-description" placeholder="Attendance">
+                                                                <input type="number" aria-label="First name" class="form-control med-input" name="midterm-lecture-percentage" placeholder="Percentage">
                                                                 <button class="btn btn-danger remove-input" type="button"><i class='bx bx-minus-circle'></i></button>
                                                             </div>
                                                             {% endif %}
-                                                            {% for percentage_grade_range in percentage_grade_ranges %}
-                                                            <div class="input-group mt-2">
-                                                                <span class="input-group-text">Enter Range Here</span>
-                                                                <input type="number" name="min-range" class="form-control med-input" placeholder="96" value="{{ percentage_grade_range.min_range }}">
-                                                                <input type="number" name="max-range" class="form-control med-input" placeholder="100"  value="{{ percentage_grade_range.max_range }}">
-                                                                <span class="input-group-text">Enter Grade Here</span>
-                                                                <input type="text" name="grade" class="form-control med-input" placeholder="1.0" value="{{ percentage_grade_range.grade }}">
+                                                            {% for midterm_lecture in midterm_lectures %}
+                                                            <div class="input-group mb-2">
+                                                                <input type="text" class="form-control med-input" name="midterm-lecture-description" placeholder="Attendance" value="{{ midterm_lecture.term_description }}">
+                                                                <input type="number" aria-label="First name" class="form-control med-input" name="midterm-lecture-percentage" placeholder="Percentage" value="{{ midterm_lecture.percentage }}">
                                                                 <button class="btn btn-danger remove-input" type="button"><i class='bx bx-minus-circle'></i></button>
                                                             </div>
                                                             {% endfor %}
                                                         </div>
                                                         <div class="mt-2">
-                                                            <button class="btn btn-success btn-sm add-input" id="add-range" type="button">Add Grade Range</button>
+                                                            <button class="btn btn-success btn-sm mb-2 add-input" id="add-midterm-lecture" type="button">Add more</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="term-description-cont laboratory-cont" id="midterm-laboratory">
+                                                    <div class="mb-3 col-lg-6">
+                                                        <label for="" class="form-label">Laboratory Grade</label>
+                                                        <input type="number" class="form-control med-input" name="midterm-laboratory-grade" placeholder="percentage" value="{{ midterm_laboratories.0.laboratory_percentage }}">
+                                                    </div>
+                                                    <div class="col-lg-6">
+                                                        <label class="form-label">Description and Percent</label>
+                                                        <div class="list-input-container">
+                                                            {% if midterm_laboratories|length < 1 %}
+                                                            <div class="input-group mb-2">
+                                                                <input type="text" class="form-control med-input" name="midterm-laboratory-description" placeholder="Attendance">
+                                                                <input type="number" aria-label="First name" class="form-control med-input" name="midterm-laboratory-percentage" placeholder="Percentage">
+                                                                <button class="btn btn-danger remove-input" type="button"><i class='bx bx-minus-circle'></i></button>
+                                                            </div>
+                                                            {% endif %}
+                                                            {% for midterm_laboratory in midterm_laboratories %}
+                                                            <div class="input-group mb-2">
+                                                                <input type="text" class="form-control med-input" name="midterm-laboratory-description" placeholder="Attendance" value="{{ midterm_laboratory.term_description }}">
+                                                                <input type="number" aria-label="First name" class="form-control med-input" name="midterm-laboratory-percentage" placeholder="Percentage" value="{{ midterm_laboratory.percentage }}">
+                                                                <button class="btn btn-danger remove-input" type="button"><i class='bx bx-minus-circle'></i></button>
+                                                            </div>
+                                                            {% endfor %}
+                                                        </div>
+                                                        <div class="mt-2">
+                                                            <button class="btn btn-success btn-sm mb-2 add-input" id="add-midterm-laboratory" type="button">Add more</button>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        {% elif syllabus.grading_system_option == "use-template" %}
-                                            <h4>You have Chosen Use From Template</h4>
-                                            <h6>Edit the Grading System in the Template Selected For This AI Generated Syllabus.</h6>
-                                        {% endif %}
+                                            <div class="row terms-cont" id="finalterm-cont">
+                                                <div class="mb-3 col-lg-6">
+                                                    <label for="" class="form-label">Final Term Grade</label>
+                                                    <input type="number" class="form-control med-input" name="finalterm-grade" placeholder="percentage" value="{{ finalterm.term_percentage }}">
+                                                </div>
+                                                <div class="term-description-cont lecture-cont" id="finalterm-lecture">
+                                                    <div class="mb-3 col-lg-6">
+                                                        <label for="" class="form-label">Lecture Grade</label>
+                                                        <input type="number" class="form-control med-input" name="finalterm-lecture-grade" placeholder="percentage" value="{{ finalterm_lectures.0.lecture_percentage }}">
+                                                    </div>
+                                                    <div class="col-lg-6">
+                                                        <label class="form-label">Description and Percent</label>
+                                                        <div class="list-input-container">
+                                                            {% if finalterm_lectures|length < 1 %}
+                                                            <div class="input-group mb-2">
+                                                                <input type="text" class="form-control med-input" name="finalterm-lecture-description" placeholder="Attendance">
+                                                                <input type="number" aria-label="First name" class="form-control med-input" name="finalterm-lecture-percentage" placeholder="Percentage">
+                                                                <button class="btn btn-danger remove-input" type="button"><i class='bx bx-minus-circle'></i></button>
+                                                            </div>
+                                                            {% endif %}
+                                                            {% for finalterm_lecture in finalterm_lectures %}
+                                                            <div class="input-group mb-2">
+                                                                <input type="text" class="form-control med-input" name="finalterm-lecture-description" placeholder="Attendance" value="{{ finalterm_lecture.term_description }}">
+                                                                <input type="number" aria-label="First name" class="form-control med-input" name="finalterm-lecture-percentage" placeholder="Percentage" value="{{ finalterm_lecture.percentage }}">
+                                                                <button class="btn btn-danger remove-input" type="button"><i class='bx bx-minus-circle'></i></button>
+                                                            </div>
+                                                            {% endfor %}
+                                                        </div>
+                                                        <div class="mt-2">
+                                                            <button class="btn btn-success btn-sm mb-2 add-input" id="add-finalterm-lecture" type="button">Add more</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="term-description-cont laboratory-cont" id="finalterm-laboratory">
+                                                    <div class="mb-3 col-lg-6">
+                                                        <label for="" class="form-label">Laboratory Grade</label>
+                                                        <input type="number" class="form-control med-input" name="finalterm-laboratory-grade" placeholder="percentage" value="{{ finalterm_laboratories.0.laboratory_percentage }}">
+                                                    </div>
+                                                    <div class="col-lg-6">
+                                                        <label class="form-label">Description and Percent</label>
+                                                        <div class="list-input-container">
+                                                            {% if finalterm_laboratories|length < 1 %}
+                                                            <div class="input-group mb-2">
+                                                                <input type="text" class="form-control med-input" name="finalterm-laboratory-description" placeholder="Attendance">
+                                                                <input type="number" aria-label="First name" class="form-control med-input" name="finalterm-laboratory-percentage" placeholder="Percentage">
+                                                                <button class="btn btn-danger remove-input" type="button"><i class='bx bx-minus-circle'></i></button>
+                                                            </div>
+                                                            {% endif %}
+                                                            {% for finalterm_laboratory in finalterm_laboratories %}
+                                                            <div class="input-group mb-2">
+                                                                <input type="text" class="form-control med-input" name="finalterm-laboratory-description" placeholder="Attendance" value="{{ finalterm_laboratory.term_description }}">
+                                                                <input type="number" aria-label="First name" class="form-control med-input" name="finalterm-laboratory-percentage" placeholder="Percentage" value="{{ finalterm_laboratory.percentage }}">
+                                                                <button class="btn btn-danger remove-input" type="button"><i class='bx bx-minus-circle'></i></button>
+                                                            </div>
+                                                            {% endfor %}
+                                                        </div>
+                                                        <div class="mt-2">
+                                                            <button class="btn btn-success btn-sm mb-2 add-input" id="add-finalterm-laboratory" type="button">Add more</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row" id="range-cont">
+                                                <label>Percentage Grade Range</label>
+                                                <div class="col-lg-12">
+                                                    <div class="list-input-container">
+                                                        {% if percentage_grade_ranges|length < 1 %}
+                                                        <div class="input-group mt-2">
+                                                            <span class="input-group-text">Enter Range Here</span>
+                                                            <input type="number" name="min-range" class="form-control med-input" placeholder="96">
+                                                            <input type="number" name="max-range" class="form-control med-input" placeholder="100">
+                                                            <span class="input-group-text">Enter Grade Here</span>
+                                                            <input type="text" name="grade" class="form-control med-input" placeholder="1.0">
+                                                            <button class="btn btn-danger remove-input" type="button"><i class='bx bx-minus-circle'></i></button>
+                                                        </div>
+                                                        {% endif %}
+                                                        {% for percentage_grade_range in percentage_grade_ranges %}
+                                                        <div class="input-group mt-2">
+                                                            <span class="input-group-text">Enter Range Here</span>
+                                                            <input type="number" name="min-range" class="form-control med-input" placeholder="96" value="{{ percentage_grade_range.min_range }}">
+                                                            <input type="number" name="max-range" class="form-control med-input" placeholder="100"  value="{{ percentage_grade_range.max_range }}">
+                                                            <span class="input-group-text">Enter Grade Here</span>
+                                                            <input type="text" name="grade" class="form-control med-input" placeholder="1.0" value="{{ percentage_grade_range.grade }}">
+                                                            <button class="btn btn-danger remove-input" type="button"><i class='bx bx-minus-circle'></i></button>
+                                                        </div>
+                                                        {% endfor %}
+                                                    </div>
+                                                    <div class="mt-2">
+                                                        <button class="btn btn-success btn-sm add-input" id="add-range" type="button">Add Grade Range</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                     <hr>
                                     <div class="d-flex justify-content-end mt-4">
