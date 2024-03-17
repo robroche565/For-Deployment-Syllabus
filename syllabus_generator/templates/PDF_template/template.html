@@ -706,9 +706,9 @@
         <p>{{ syllabus.course_code }}</p>
         <p>{{ syllabus.course_name }}</p>
         <p>
-            {% for prerequisite in prerequisites %}
-                {{ prerequisite.prerequisite }}{% if not forloop.last %}, {% endif %}
-            {% endfor %}
+          {% for preriquisite in preriquisites %}
+            {{ preriquisite.preriquisite }} {% if not forloop.last %}, {% endif %}
+          {% endfor %}
         </p>
         <p>{{ syllabus.course_credit }} Units {{ syllabus.course_credit_description }}</p>
         <p>{{ syllabus.course_description }}</p>
