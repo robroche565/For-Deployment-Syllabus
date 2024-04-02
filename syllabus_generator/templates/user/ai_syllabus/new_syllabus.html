@@ -34,6 +34,10 @@
                                             <div class="mb-3 col-lg-6">
                                                 <label for="syllabus-name" class="form-label">Name of Syllabus</label>
                                                 <input type="text" class="form-control med-input" id="syllabus-name" name="syllabus-name" placeholder="Insert name of syllabus here">
+                                                <div id="syllabus-name-error" class="text-danger" style="display:none;">
+                                                    <i class='bx bx-info-circle align-middle'></i>
+                                                    <span class="px-2 align-middle me-1">Can only have 21 Characters.</span>
+                                                </div>
                                             </div>
                                             <div class="mb-3 col-lg-6">
                                                 <label for="language" class="form-label">Language</label>
@@ -55,20 +59,73 @@
                                             <div class="col-lg-6">
                                                 <label for="time-frame" class="form-label">Time Frame (weeks)</label>
                                                 <input type="number" class="form-control med-input" id="time-frame" name="time-frame" placeholder="18" value="18">
+                                                <div id="time-frame-error" class="text-danger" style="display:none;">
+                                                    <i class='bx bx-info-circle align-middle'></i>
+                                                    <span class="px-2 align-middle me-1">Can only be between 18-21 Weeks.</span>
+                                                </div>
                                             </div>
                                         </div>
                                         <div class="row">
                                             <div class="mb-3 col-lg-4">
                                                 <label for="college" class="form-label">College</label>
-                                                <input type="text" class="form-control med-input" id="college" name="college" placeholder="College of Computing Studies">
+                                                <input type="text" class="form-control med-input" id="college" name="college" placeholder="College of ....">
+                                                <div id="college-length-error" class="text-danger" style="display:none;">
+                                                    <i class='bx bx-info-circle align-middle'></i>
+                                                    <span class="px-2 align-middle me-1">Can only have 57 characters only.</span>
+                                                </div>
+                                                <div id="college-format-error" class="text-danger" style="display:none;">
+                                                    <i class='bx bx-info-circle align-middle'></i>
+                                                    <span class="align-middle me-1">You do not need to input the phrase "College of".</span>
+                                                </div>
+                                                <div id="college-space-error" class="text-danger" style="display:none;">
+                                                    <i class='bx bx-info-circle align-middle'></i>
+                                                    <span class="align-middle me-1">There can be only One Space Used Between Words.</span>
+                                                </div>
+                                                <div id="college-characters-error" class="text-danger" style="display:none;">
+                                                    <i class='bx bx-info-circle align-middle'></i>
+                                                    <span class="align-middle me-1">You cannot add any Special Characters.</span>
+                                                </div>
                                             </div>
                                             <div class="mb-3 col-lg-4">
                                                 <label for="department" class="form-label">Department</label>
-                                                <input type="text" class="form-control med-input" id="department" name="department" placeholder="Computer Science">
+                                                <input type="text" class="form-control med-input" id="department" name="department" placeholder="Department of ...">
+                                                <div id="department-length-error" class="text-danger" style="display:none;">
+                                                    <i class='bx bx-info-circle align-middle'></i>
+                                                    <span class="px-2 align-middle me-1">Can only have 57 characters only.</span>
+                                                </div>
+                                                <div id="department-format-error" class="text-danger" style="display:none;">
+                                                    <i class='bx bx-info-circle align-middle'></i>
+                                                    <span class="align-middle me-1">You do not need to input the phrase "Department of".</span>
+                                                </div>
+                                                <div id="department-space-error" class="text-danger" style="display:none;">
+                                                    <i class='bx bx-info-circle align-middle'></i>
+                                                    <span class="align-middle me-1">There can be only One Space Used Between Words.</span>
+                                                </div>
+                                                <div id="department-characters-error" class="text-danger" style="display:none;">
+                                                    <i class='bx bx-info-circle align-middle'></i>
+                                                    <span class="align-middle me-1">You cannot add any Special Characters.</span>
+                                                </div>
                                             </div>
+                                            
                                             <div class="mb-3 col-lg-4">
                                                 <label for="bachelor" class="form-label">Bachelor</label>
                                                 <input type="text" class="form-control med-input" id="bachelor" name="bachelor" placeholder="Bachelor of .....">
+                                                <div id="bachelor-length-error" class="text-danger" style="display:none;">
+                                                    <i class='bx bx-info-circle align-middle'></i>
+                                                    <span class="px-2 align-middle me-1">Can only have 57 characters only.</span>
+                                                </div>
+                                                <div id="bachelor-format-error" class="text-danger" style="display:none;">
+                                                    <i class='bx bx-info-circle align-middle'></i>
+                                                    <span class="px-2 align-middle me-1">You do not need to input the phrase "Bachelor of".</span>
+                                                </div>
+                                                <div id="bachelor-space-error" class="text-danger" style="display:none;">
+                                                    <i class='bx bx-info-circle align-middle'></i>
+                                                    <span class="align-middle me-1">There can be only One Space Used Between Words.</span>
+                                                </div>
+                                                <div id="bachelor-characters-error" class="text-danger" style="display:none;">
+                                                    <i class='bx bx-info-circle align-middle'></i>
+                                                    <span class="align-middle me-1">You cannot add any Special Characters.</span>
+                                                </div>
                                             </div>
                                         </div>
 
@@ -77,21 +134,57 @@
                                         <div class="row">
                                             <div class="mb-3 col-lg-4">
                                                 <label for="course-code" class="form-label">Course Code</label>
-                                                <input type="text" class="form-control med-input" id="course-code" name="course-code" placeholder="CS 137">
+                                                <input type="text" class="form-control med-input" id="course-code" name="course-code" placeholder="Insert Course Code">
+                                                <div id="course-code-length-error" class="text-danger" style="display:none;">
+                                                    <i class='bx bx-info-circle align-middle'></i>
+                                                    <span class="align-middle me-1">Can only have 15 Characters.</span>
+                                                </div>
+                                                <div id="course-code-format-error" class="text-danger" style="display:none;">
+                                                    <i class='bx bx-info-circle align-middle'></i>
+                                                    <span class="align-middle me-1">There can't be any Special Characters</span>
+                                                </div>
+                                                <div id="course-code-space-error" class="text-danger" style="display:none;">
+                                                    <i class='bx bx-info-circle align-middle'></i>
+                                                    <span class="align-middle me-1">There can be only One Space Used Between Words.</span>
+                                                </div>
                                             </div>
                                             <div class="mb-3 col-lg-8">
                                                 <label for="course-name" class="form-label">Course Name</label>
-                                                <input type="text" class="form-control med-input" id="course-name" name="course-name" placeholder="Software Engineering 1">
+                                                <input type="text" class="form-control med-input" id="course-name" name="course-name" placeholder="Insert Course Name">
+                                                <div id="course-name-length-error" class="text-danger" style="display:none;">
+                                                    <i class='bx bx-info-circle align-middle'></i>
+                                                    <span class="align-middle me-1">Can only have 60 Characters.</span>
+                                                </div>
+                                                <div id="course-name-format-error" class="text-danger" style="display:none;">
+                                                    <i class='bx bx-info-circle align-middle'></i>
+                                                    <span class="align-middle me-1">There can't be any Special Characters</span>
+                                                </div>
+                                                <div id="course-name-space-error" class="text-danger" style="display:none;">
+                                                    <i class='bx bx-info-circle align-middle'></i>
+                                                    <span class="align-middle me-1">There can be only One Space Used Between Words.</span>
+                                                </div>
                                             </div>
                                         </div>
                                         <div class="row">
                                             <div class="mb-3 col-lg-4">
                                                 <label for="course-credit" class="form-label">Course Credit</label>
                                                 <input type="number" class="form-control med-input" id="course-credit" name="course-credit" placeholder="3.0">
+                                                <div id="course-credit-error" class="text-danger" style="display:none;">
+                                                    <i class='bx bx-info-circle align-middle'></i>
+                                                    <span class="align-middle me-1">Value can be only between 1.0 to 3.0</span>
+                                                </div>
+                                                <div id="course-credit-format-error" class="text-danger" style="display:none;">
+                                                    <i class='bx bx-info-circle align-middle'></i>
+                                                    <span class="align-middle me-1">There can be only upto two decimal places.</span>
+                                                </div>
                                             </div>
                                             <div class="mb-3 col-lg-8">
                                                 <label for="course_credit_description" class="form-label">Course Credit Description</label>
-                                                <input type="text" class="form-control med-input" id="course_credit_description" name="course_credit_description" placeholder=" (2 Units Lecture and 1 Unit Laboratory/2hrs. Lecture + 3hrs. Laboratory = 5hrs/week)">
+                                                <input type="text" class="form-control med-input" id="course_credit_description" name="course_credit_description" placeholder="(2 Units Lecture and 1 Unit Laboratory/2hrs. Lecture + 3hrs. Laboratory = 5hrs/week)">
+                                                <div id="course-credit-desc-error" class="text-danger" style="display:none;">
+                                                    <i class='bx bx-info-circle align-middle'></i>
+                                                    <span class="align-middle me-1">Can only have 100 characters.</span>
+                                                </div>
                                             </div>
                                         </div>
                                         <div class="row" id="preriquisite-cont">
@@ -99,8 +192,12 @@
                                                 <label for="preriquisite" class="mb-1">Preriquisite</label>
                                                 <div class="mid-term-inputs list-input-container">
                                                     <div class="input-group mt-1">
-                                                        <input type="text" class="form-control med-input" name="preriquisite" placeholder="CC 104 - Information Management">
+                                                        <input type="text" class="form-control med-input" name="preriquisite" id="preriquisite" placeholder="Course Code - Course Name">
                                                         <button class="btn btn-danger remove-input" type="button"><i class='bx bx-minus-circle'></i></button>
+                                                    </div>
+                                                    <div id="preriquisite-length-error" class="text-danger" style="display:none;">
+                                                        <i class='bx bx-info-circle align-middle'></i>
+                                                        <span class="align-middle me-1">Can only have 80 characters.</span>
                                                     </div>
                                                 </div>
                                                 <div class="mt-2">
@@ -241,7 +338,7 @@
                                                             <input type="number" name="min-range" class="form-control med-input" placeholder="96">
                                                             <input type="number" name="max-range" class="form-control med-input" placeholder="100">
                                                             <span class="input-group-text">Enter Grade Here</span>
-                                                            <input type="text" name="grade" class="form-control med-input" placeholder="1.0">
+                                                            <input type=" number" name="grade" class="form-control med-input" placeholder="1.0">
                                                             <button class="btn btn-danger remove-input" type="button"><i class='bx bx-minus-circle'></i></button>
                                                         </div>
                                                         {% endif %}
@@ -252,7 +349,7 @@
                                                             <input type="number" name="min-range" class="form-control med-input" placeholder="96" value="{{ percentage_grade_range.min_range }}">
                                                             <input type="number" name="max-range" class="form-control med-input" placeholder="100" value="{{ percentage_grade_range.max_range }}">
                                                             <span class="input-group-text">Enter Grade Here</span>
-                                                            <input type="text" name="grade" class="form-control med-input" placeholder="1.0"  value="{{ percentage_grade_range.grade }}">
+                                                            <input type="number" name="grade" class="form-control med-input" placeholder="1.0"  value="{{ percentage_grade_range.grade }}">
                                                             <button class="btn btn-danger remove-input" type="button"><i class='bx bx-minus-circle'></i></button>
                                                         </div>
                                                         {% endfor %}
@@ -394,11 +491,13 @@
                                             <button class="btn btn-primary js-btn-prev" type="button" title="Prev">Back</button>
                                         </div>
                                         <div class="col d-flex justify-content-end">
-                                            <button class="btn btn-primary ml-auto save-info" type="button" title="Save">Save</button>
+                                            <span class="d-inline-block" tabindex="0" data-bs-toggle="tooltip" data-bs-original-title="Missing Required Inputs: Name of Syllabus, Course Name, Course Description">
+                                                <button class="btn btn-primary ml-auto save-info" type="button" title="Save" disabled>Submit</button>
+                                            </span>
 
                                             <!---------- MODAL ---------->
                                             <div class="confirmation-modal-edit">
-                                                <p>Are you sure you want to confirm <br> on creating this new Syllabus?</p>
+                                                <p>Are you sure you want to submit the data <br> on creating this new Syllabus?</p>
                                                 <div class="action-cont">
                                                     <button type="button" class="btn btn-secondary">Cancel</button>
                                                     <button type="submit" class="btn btn-primary js-btn-next">Confirm</button>
@@ -439,4 +538,12 @@
 </main>
 
 <script src="{% static 'js/multi_form.js' %}"></script>
+<script src="{% static 'js/validation_add_ai.js' %}"></script>
+
 {% endblock %}
+{% block scripts %}
+<script>
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+</script>
+{% endblock scripts %}

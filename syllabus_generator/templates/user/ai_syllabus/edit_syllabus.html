@@ -45,6 +45,10 @@
                                             <div class="mb-3 col-lg-6">
                                                 <label for="syllabus-name" class="form-label">Name of Syllabus</label>
                                                 <input type="text" class="form-control med-input" id="syllabus-name" name="syllabus_name" placeholder="Insert name of syllabus here" value="{{ syllabus.syllabus_name }}">
+                                                <div id="syllabus-name-error" class="text-danger" style="display:none;">
+                                                    <i class='bx bx-info-circle align-middle'></i>
+                                                    <span class="px-2 align-middle me-1">Can only have 21 Characters.</span>
+                                                </div>
                                             </div>
                                             <div class="mb-3 col-lg-6">
                                                 <label for="language" class="form-label">Language</label>
@@ -68,20 +72,72 @@
                                             <div class="col-lg-6">
                                                 <label for="time-frame" class="form-label">Time Frame (weeks)</label>
                                                 <input type="number" class="form-control med-input" id="time-frame" name="time-frame" placeholder="18" value="18">
+                                                <div id="time-frame-error" class="text-danger" style="display:none;">
+                                                    <i class='bx bx-info-circle align-middle'></i>
+                                                    <span class="px-2 align-middle me-1">Can only be between 18-21 Weeks.</span>
+                                                </div>
                                             </div>
                                         </div>
                                         <div class="row">
                                             <div class="mb-3 col-lg-4">
                                                 <label for="college" class="form-label">College</label>
-                                                <input type="text" class="form-control med-input" id="college" name="college" placeholder="College of Computing Studies" value="{{ syllabus.college }}">
+                                                <input type="text" class="form-control med-input" id="college" name="college" placeholder="College of ...." value="{{ syllabus.college }}">
+                                                <div id="college-length-error" class="text-danger" style="display:none;">
+                                                    <i class='bx bx-info-circle align-middle'></i>
+                                                    <span class="px-2 align-middle me-1">Can only have 57 characters only.</span>
+                                                </div>
+                                                <div id="college-format-error" class="text-danger" style="display:none;">
+                                                    <i class='bx bx-info-circle align-middle'></i>
+                                                    <span class="align-middle me-1">You do not need to input the phrase "College of".</span>
+                                                </div>
+                                                <div id="college-space-error" class="text-danger" style="display:none;">
+                                                    <i class='bx bx-info-circle align-middle'></i>
+                                                    <span class="align-middle me-1">There can be only One Space Used Between Words.</span>
+                                                </div>
+                                                <div id="college-characters-error" class="text-danger" style="display:none;">
+                                                    <i class='bx bx-info-circle align-middle'></i>
+                                                    <span class="align-middle me-1">You cannot add any Special Characters.</span>
+                                                </div>
                                             </div>
                                             <div class="mb-3 col-lg-4">
                                                 <label for="department" class="form-label">Department</label>
-                                                <input type="text" class="form-control med-input" id="department" name="department" placeholder="Computer Science" value="{{ syllabus.department }}">
+                                                <input type="text" class="form-control med-input" id="department" name="department" placeholder="Department of ..." value="{{ syllabus.department }}">
+                                                <div id="department-length-error" class="text-danger" style="display:none;">
+                                                    <i class='bx bx-info-circle align-middle'></i>
+                                                    <span class="px-2 align-middle me-1">Can only have 57 characters only.</span>
+                                                </div>
+                                                <div id="department-format-error" class="text-danger" style="display:none;">
+                                                    <i class='bx bx-info-circle align-middle'></i>
+                                                    <span class="align-middle me-1">You do not need to input the phrase "Department of".</span>
+                                                </div>
+                                                <div id="department-space-error" class="text-danger" style="display:none;">
+                                                    <i class='bx bx-info-circle align-middle'></i>
+                                                    <span class="align-middle me-1">There can be only One Space Used Between Words.</span>
+                                                </div>
+                                                <div id="department-characters-error" class="text-danger" style="display:none;">
+                                                    <i class='bx bx-info-circle align-middle'></i>
+                                                    <span class="align-middle me-1">You cannot add any Special Characters.</span>
+                                                </div>
                                             </div>
                                             <div class="mb-3 col-lg-4">
                                                 <label for="bachelor" class="form-label">Bachelor</label>
                                                 <input type="text" class="form-control med-input" id="bachelor" name="bachelor" placeholder="Bachelor of ....." value="{{ syllabus.bachelor }}">
+                                                <div id="bachelor-length-error" class="text-danger" style="display:none;">
+                                                    <i class='bx bx-info-circle align-middle'></i>
+                                                    <span class="px-2 align-middle me-1">Can only have 57 characters only.</span>
+                                                </div>
+                                                <div id="bachelor-format-error" class="text-danger" style="display:none;">
+                                                    <i class='bx bx-info-circle align-middle'></i>
+                                                    <span class="px-2 align-middle me-1">You do not need to input the phrase "Bachelor of".</span>
+                                                </div>
+                                                <div id="bachelor-space-error" class="text-danger" style="display:none;">
+                                                    <i class='bx bx-info-circle align-middle'></i>
+                                                    <span class="align-middle me-1">There can be only One Space Used Between Words.</span>
+                                                </div>
+                                                <div id="bachelor-characters-error" class="text-danger" style="display:none;">
+                                                    <i class='bx bx-info-circle align-middle'></i>
+                                                    <span class="align-middle me-1">You cannot add any Special Characters.</span>
+                                                </div>
                                             </div>
                                         </div>
 
@@ -90,21 +146,57 @@
                                         <div class="row">
                                             <div class="mb-3 col-lg-4">
                                                 <label for="course-code" class="form-label">Course Code</label>
-                                                <input type="text" class="form-control med-input" id="course-code" name="course_code" placeholder="CS 137" value="{{ syllabus.course_code }}">
+                                                <input type="text" class="form-control med-input" id="course-code" name="course_code" placeholder="Insert Course Code" value="{{ syllabus.course_code }}">
+                                                <div id="course-code-length-error" class="text-danger" style="display:none;">
+                                                    <i class='bx bx-info-circle align-middle'></i>
+                                                    <span class="align-middle me-1">Can only have 15 Characters.</span>
+                                                </div>
+                                                <div id="course-code-format-error" class="text-danger" style="display:none;">
+                                                    <i class='bx bx-info-circle align-middle'></i>
+                                                    <span class="align-middle me-1">There can't be any Special Characters</span>
+                                                </div>
+                                                <div id="course-code-space-error" class="text-danger" style="display:none;">
+                                                    <i class='bx bx-info-circle align-middle'></i>
+                                                    <span class="align-middle me-1">There can be only One Space Used Between Words.</span>
+                                                </div>
                                             </div>
                                             <div class="mb-3 col-lg-8">
                                                 <label for="course-name" class="form-label">Course Name</label>
-                                                <input type="text" class="form-control med-input" id="course-name" name="course_name" placeholder="Software Engineering 1" value="{{ syllabus.course_name }}">
+                                                <input type="text" class="form-control med-input" id="course-name" name="course_name" placeholder="Insert Course Name" value="{{ syllabus.course_name }}">
+                                                <div id="course-name-length-error" class="text-danger" style="display:none;">
+                                                    <i class='bx bx-info-circle align-middle'></i>
+                                                    <span class="align-middle me-1">Can only have 60 Characters.</span>
+                                                </div>
+                                                <div id="course-name-format-error" class="text-danger" style="display:none;">
+                                                    <i class='bx bx-info-circle align-middle'></i>
+                                                    <span class="align-middle me-1">There can't be any Special Characters</span>
+                                                </div>
+                                                <div id="course-name-space-error" class="text-danger" style="display:none;">
+                                                    <i class='bx bx-info-circle align-middle'></i>
+                                                    <span class="align-middle me-1">There can be only One Space Used Between Words.</span>
+                                                </div>
                                             </div>
                                         </div>
                                         <div class="row">
                                             <div class="mb-3 col-lg-4">
                                                 <label for="course-credit" class="form-label">Course Credit</label>
                                                 <input type="number" class="form-control med-input" id="course-credit" name="course_credit" placeholder="1.0" value="{{ syllabus.course_credit }}">
+                                                <div id="course-credit-error" class="text-danger" style="display:none;">
+                                                    <i class='bx bx-info-circle align-middle'></i>
+                                                    <span class="align-middle me-1">Value can be only between 1.0 to 3.0</span>
+                                                </div>
+                                                <div id="course-credit-format-error" class="text-danger" style="display:none;">
+                                                    <i class='bx bx-info-circle align-middle'></i>
+                                                    <span class="align-middle me-1">There can be only upto two decimal places.</span>
+                                                </div>
                                             </div>
                                             <div class="mb-3 col-lg-8">
                                                 <label for="course_credit_description" class="form-label">Course Credit Description</label>
                                                 <input type="text" class="form-control med-input" id="course_credit_description" name="course_credit_description" placeholder="(2 Units Lecture and 1 Unit Laboratory/2hrs. Lecture + 3hrs. Laboratory = 5hrs/week)" value="{{ syllabus.course_credit_description }}">
+                                                <div id="course-credit-desc-error" class="text-danger" style="display:none;">
+                                                    <i class='bx bx-info-circle align-middle'></i>
+                                                    <span class="align-middle me-1">Can only have 100 characters.</span>
+                                                </div>
                                             </div>
                                         </div>
                                         <div class="row" id="preriquisite-cont">
@@ -113,13 +205,13 @@
                                                 <div class="mid-term-inputs list-input-container">
                                                     {% if preriquisites|length < 1 %}
                                                     <div class="input-group mt-1">
-                                                        <input type="text" class="form-control med-input" name="preriquisite" placeholder="CC 104 - Information Management">
+                                                        <input type="text" class="form-control med-input" name="preriquisite" placeholder="Course Code - Course Subject Name">
                                                         <button class="btn btn-danger remove-input" type="button"><i class='bx bx-minus-circle'></i></button>
                                                     </div>
                                                     {% endif %}
                                                     {% for preriquisite in preriquisites %}
                                                     <div class="input-group mt-1">
-                                                        <input type="text" class="form-control med-input" name="preriquisite" placeholder="CC 104 - Information Management" value="{{ preriquisite.preriquisite }}">
+                                                        <input type="text" class="form-control med-input" name="preriquisite" placeholder="Course Code - Course Subject Name" value="{{ preriquisite.preriquisite }}">
                                                         <button class="btn btn-danger remove-input" type="button"><i class='bx bx-minus-circle'></i></button>
                                                     </div>
                                                     {% endfor %}
@@ -130,14 +222,17 @@
                                             </div>
                                             <div class="mb-3 col-lg-6">
                                                 <label for="course-description" class="form-label">Course Description</label>
-                                                <textarea row="3" class="form-control big-input" id="course-description" name="course_description" placeholder="Software engineering is an engineering discipline in which the aim is...">{{ syllabus.course_description }}</textarea>
+                                                <textarea row="3" class="form-control big-input" id="course-description" name="course_description" placeholder="Insert Course Description Here">{{ syllabus.course_description }}</textarea>
                                             </div>
                                         </div>
 
                                         <hr>
-
                                         <h4>Grading System</h4>
-                                        <div id="additional_info_inputs" style="display: none;">
+                                        {% if syllabus.grading_system_option == "use-template" %}
+                                            <h4>You have Chosen Use From Template</h4>
+                                            <h6>Edit the Grading System in the Template Selected For This AI Generated Syllabus.</h6>
+                                        {% endif %}
+                                        <div id="additional_info_inputs" {% if syllabus.grading_system_option == "use-template" %} class="d-none" {% endif%}>
                                             <div class="form-group radio-buttons">
                                                 <label class="type-label">Type :</label>
                                                 <div class="form-check form-check-inline">
@@ -494,5 +589,5 @@
         window.open(url, '_blank');
     }
 </script>
-
+<script src="{% static 'js/validation_add_ai.js' %}"></script>
 {% endblock scripts %}
