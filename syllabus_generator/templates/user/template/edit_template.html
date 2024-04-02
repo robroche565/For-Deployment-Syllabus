@@ -5,8 +5,6 @@
 
 {% block title %}Edit Syllabus Template{% endblock %}
 {% block content %}
-{% include '../../includes/top_nav.html' %}
-{% include '../../includes/side_nav.html' %}
 <main class="col-md-9 ms-sm-auto col-lg-9 col-xl-10 p-md-4 edit-template">
     <div class="w-100 text-light">
         <div class="multisteps-form">
@@ -56,17 +54,16 @@
                                                 <!-- Existing Images -->
                                                 <div class="images-cont">
                                                     {% if logos|length < 1 %}
-                                                    <img src="{% static '/logo.png' %}" id="{{form_field.name}}">
+                                                        <img src="{% static '/logo.png' %}" id="{{form_field.name}}">
                                                     {% endif %}
 
                                                     {% for logo in logos %}
-                                                    {% if form_field.name == logo.name %}
-                                                    <img src="{% static 'upload/' %}{{ logo.img_name }}" id="{{form_field.name}}">
-                                                    {% else %}
-                                                    <img src="{% static '/logo.png' %}" id="{{form_field.name}}">
-                                                    {% endif %}
+                                                        {% if form_field.name == logo.name %}
+                                                            <img src="{% static 'upload/' %}{{ logo.img_name }}" id="{{form_field.name}}">
+                                                        {% endif %}
                                                     {% endfor %}
                                                 </div>
+
 
                                                 <!-- File Input Field -->
                                                 <div class="input-group mb-3">
@@ -232,6 +229,14 @@
                             <div class="col-lg-6">
                                 <label class="form-label">Description and Percent</label>
                                 <div class="list-input-container">
+                                    {% if midterm_lectures|length < 1 %}
+                                    <div class="input-group mb-2">
+                                        <input type="text" class="form-control med-input" name="midterm-lecture-description" placeholder="Attendance">
+                                        <input type="number" aria-label="First name" class="form-control med-input" name="midterm-lecture-percentage">
+                                        <button class="btn btn-danger remove-input" type="button"><i class='bx bx-minus-circle'></i></button>
+                                    </div>
+                                    {% endif %}
+
                                     {% for midterm_lecture in midterm_lectures %}
                                     <div class="input-group mb-2">
                                         <input type="text" class="form-control med-input" name="midterm-lecture-description" placeholder="Attendance" value="{{ midterm_lecture.term_description }}">
@@ -253,6 +258,14 @@
                             <div class="col-lg-6">
                                 <label class="form-label">Description and Percent</label>
                                 <div class="list-input-container">
+                                    {% if midterm_laboratories|length < 1 %}
+                                    <div class="input-group mb-2">
+                                        <input type="text" class="form-control med-input" name="midterm-laboratory-description" placeholder="Attendance">
+                                        <input type="number" aria-label="First name" class="form-control med-input" name="midterm-laboratory-percentage" placeholder="Percentage">
+                                        <button class="btn btn-danger remove-input" type="button"><i class='bx bx-minus-circle'></i></button>
+                                    </div>
+                                    {% endif %}
+
                                     {% for midterm_laboratory in midterm_laboratories %}
                                     <div class="input-group mb-2">
                                         <input type="text" class="form-control med-input" name="midterm-laboratory-description" placeholder="Attendance" value="{{ midterm_laboratory.term_description }}">
@@ -280,6 +293,14 @@
                             <div class="col-lg-6">
                                 <label class="form-label">Description and Percent</label>
                                 <div class="list-input-container">
+                                    {% if midterm_laboratories|length < 1 %}
+                                    <div class="input-group mb-2">
+                                        <input type="text" class="form-control med-input" name="finalterm-lecture-description" placeholder="Attendance">
+                                        <input type="number" aria-label="First name" class="form-control med-input" name="finalterm-lecture-percentage" placeholder="Percentage">
+                                        <button class="btn btn-danger remove-input" type="button"><i class='bx bx-minus-circle'></i></button>
+                                    </div>
+                                    {% endif %}
+
                                     {% for finalterm_lecture in finalterm_lectures %}
                                     <div class="input-group mb-2">
                                         <input type="text" class="form-control med-input" name="finalterm-lecture-description" placeholder="Attendance" value="{{ finalterm_lecture.term_description }}">
@@ -301,6 +322,14 @@
                             <div class="col-lg-6">
                                 <label class="form-label">Description and Percent</label>
                                 <div class="list-input-container">
+                                    {% if midterm_laboratories|length < 1 %}
+                                    <div class="input-group mb-2">
+                                        <input type="text" class="form-control med-input" name="finalterm-laboratory-description" placeholder="Attendance">
+                                        <input type="number" aria-label="First name" class="form-control med-input" name="finalterm-laboratory-percentage" placeholder="Percentage">
+                                        <button class="btn btn-danger remove-input" type="button"><i class='bx bx-minus-circle'></i></button>
+                                    </div>
+                                    {% endif %}
+
                                     {% for finalterm_laboratory in finalterm_laboratories %}
                                     <div class="input-group mb-2">
                                         <input type="text" class="form-control med-input" name="finalterm-laboratory-description" placeholder="Attendance" value="{{ finalterm_laboratory.term_description }}">
@@ -401,6 +430,9 @@
     </div>
     </div>
 </main>
+
+<!---------- SYLLABUS TEMPLATE JS ---------->
+<script src="{% static 'js/syllabus_template.js' %}"></script>
 
 <script src="{% static 'js/multi_form.js' %}"></script>
 <script>

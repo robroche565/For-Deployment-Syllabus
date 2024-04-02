@@ -5,8 +5,6 @@
 
 {% block title %}Setup Syllabus{% endblock %}
 {% block content %}
-{% include '../../includes/top_nav.html' %}
-{% include '../../includes/side_nav.html' %}
 <main class="col-md-9 ms-sm-auto col-lg-9 col-xl-10 p-md-4 create-template" >
     <div class="w-100 text-light">
         <div class="multisteps-form">
@@ -37,6 +35,11 @@
                                         <div class="mb-3 col-lg-12">
                                             <label for="exampleFormControlTextarea1" class="form-label">Template Name</label>
                                             <input class="form-control med-input" name="name" id="exampleFormControlTextarea1">
+
+                                            <div class="text-danger mb-0 mt-1" style="font-size: 14px; display: none;" id="error_name">
+                                                <i class='bx bx-error-circle' style="font-size:16px;vertical-align: middle;"></i>
+                                                <span style="vertical-align: middle;"></span>
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="row">
@@ -54,6 +57,11 @@
                                                 <div class="input-group mb-3">
                                                     <label class="input-group-text" for="inputGroupFile01">{{ form_field.label }}</label>
                                                     {{ form_field|add_class:"form-control" }}
+                                                </div>
+
+                                                <div class="text-danger mb-0 mt-1" style="font-size: 14px; display: none;" id="error_{{form_field.name}}">
+                                                    <i class='bx bx-error-circle' style="font-size:16px;vertical-align: middle;"></i>
+                                                    <span style="vertical-align: middle;"></span>
                                                 </div>
                                             </div>
                                             {% endfor %}
@@ -107,6 +115,11 @@
                                         <div class="mb-3 col-lg-12">
                                             <label for="exampleFormControlTextarea1" class="form-label">Goal Description of College</label>
                                             <textarea class="form-control big-input" name="goal" id="exampleFormControlTextarea1"></textarea>
+
+                                            <div class="text-danger mb-0 mt-1" style="font-size: 14px; display: none;" id="error_goal_desc">
+                                                <i class='bx bx-error-circle' style="font-size:16px;vertical-align: middle;"></i>
+                                                <span style="vertical-align: middle;"></span>
+                                            </div>
                                         </div>
 
                                         <label>Itemized Goals</label>
@@ -116,6 +129,12 @@
                                                 <button class="btn btn-danger remove-input" type="button"><i class='bx bx-minus-circle'></i></button>
                                             </div>
                                         </div>
+
+                                        <div class="text-danger mb-0 mt-1" style="font-size: 14px; display: none;" id="error_itemize_goal">
+                                            <i class='bx bx-error-circle' style="font-size:16px;vertical-align: middle;"></i>
+                                            <span style="vertical-align: middle;"></span>
+                                        </div>
+
                                         <div class="mt-2">
                                             <button class="btn btn-success btn-sm add-input" id="add-goal" type="button">Add Itemized Goal</button>
                                         </div>
@@ -124,7 +143,7 @@
                                 <hr>
 
                                 <div class="d-flex justify-content-end mt-4">
-                                    <button class="btn btn-primary ml-auto js-btn-next" type="button" title="Next">Next</button>
+                                    <button class="btn btn-primary ml-auto js-btn-next" type="button" title="Next" id="next_btn">Next</button>
                                 </div>
                             </div>
                         </div>
@@ -138,11 +157,16 @@
                                     <div id="college-cont" class="row mb-3">
                                         <div class="list-input-container">
                                             <div class="input-group mt-1">
-                                                {% comment %} <input type="text" class="form-control big-input" name="course_outcome"> {% endcomment %}
                                                 <textarea class="form-control big-input input" name="course_outcome"></textarea>
-                                                <button class="btn btn-danger remove-input" type="button"><i class='bx bx-minus-circle'></i></button>
+                                                <button class="btn btn-danger remove-input" id="course_outcome_delete" type="button"><i class='bx bx-minus-circle'></i></button>
                                             </div>
                                         </div>
+
+                                        <div class="text-danger mb-0 mt-1" style="font-size: 14px; display: none;" id="error_course_outcome">
+                                            <i class='bx bx-error-circle' style="font-size:16px;vertical-align: middle;"></i>
+                                            <span style="vertical-align: middle;"></span>
+                                        </div>
+
                                         <div class="mt-2">
                                             <button class="btn btn-success btn-sm add-input" id="add-college" type="button">Add College Course</button>
                                         </div>
@@ -296,39 +320,6 @@
                             </div>
                         </div>
 
-                        <!--single form panel-->
-                        {% comment %} <div class="multisteps-form__panel shadow p-4 rounded background-color-custom" data-animation="fadeIn">
-                            <div class="row mb-2">
-                                <div class="col-12 col-lg-6">
-                                    <h3 class="multisteps-form__title">Your Template</h3>
-                                </div>
-                                <div class="col-12 col-lg-6 d-flex justify-content-end">
-                                    <div class="btn-group dropstart">
-                                        <button class="btn btn-primary btn-sm mt-2 dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-                                            Save As
-                                        </button>
-                                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1" style="min-width:20px;">
-                                            <li><a class="dropdown-item" href="#">Print</a></li>
-                                            <li><a class="dropdown-item" href="#">PDF</a></li>
-                                            <li><a class="dropdown-item" href="#">Word</a></li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="multisteps-form__content">
-                                <embed src="{% static 'files/Software-Engineering-1-Syllabus-Ballaho-2021v1.1-1.pdf' %}" type="application/pdf" width="100%" height="600px" />
-
-                                <div class="row pt-3">
-                                    <div class="col d-flex justify-content-start">
-                                        <button class="btn btn-primary js-btn-prev" type="button" title="Prev">Back</button>
-                                    </div>
-                                    <div class="col d-flex justify-content-end">
-                                        <a href="userpage" class="btn btn-primary ml-auto js-btn-next">Finish</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div> {% endcomment %}
-
                         <div class="multisteps-form__panel shadow p-4 rounded background-color-custom last-content" data-animation="fadeIn">
                             <div class="wait-cont">
                                 <h3 class="multisteps-form__title mb-3">Saving new Syllabus Template</h3>
@@ -357,21 +348,6 @@
 <script src="{% static 'js/syllabus_template.js' %}"></script>
 
 <script src="{% static 'js/multi_form.js' %}"></script>
-<script>
-  $('.cust-btn').on('click', function (event) {
-    event.preventDefault();
-    $('.cust-div').addClass('active');
-});
-
-function myFunction() {
-  var x = document.getElementById("myDIV");
-  if (x.style.display === "none") {
-    x.style.display = "block";
-  } else {
-    x.style.display = "none";
-  }
-}
-</script>
 <script type="text/javascript">
       (function () {
         var words = ["Checking fields", "Adjusting Rows", "Uploading logos", "Uploading infos to database"],

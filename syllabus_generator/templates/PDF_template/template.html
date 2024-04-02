@@ -21,12 +21,15 @@
     size: A4 landscape;
     margin: 0.9in 0.92in 0.9in 0.9in;
     @bottom-left {
-      content: "{{ syllabus.footer_info }} | Effective Date: {{ syllabus.effective_date|date:"d-M-Y"|upper }}";
+      content: "{{ syllabus.footer_info }} \A Effective Date: {{ syllabus.effective_date|date:"d-M-Y"|upper }}";
       font-size: 12px;
+      white-space: pre; /* Preserve line breaks */
     }
     @bottom-right {
-      content: counter(page) " of " counter(pages);
+      content: counter(page) " of " counter(pages) "\A CONTROLLED COPY"; /* Add line break before the "CONTROLLED COPY" */
       font-size: 12px;
+      position: relative; /* Ensure positioning context */
+      white-space: pre; /* Preserve line breaks */
     }
   }
   @page :first {
@@ -92,19 +95,20 @@
     white-space: nowrap;
   }
   .section_1 .top_content .cont .header_wmsu{
-    padding-left: 0.1in;
-    padding-right: 0.8in;
+    padding-left:0.1in;
+    padding-right:1.17in;
   }
-  .section_1 .top_content .cont .logo1,
-  .section_1 .top_content .cont .logo2 {
+  .section_1 .top_content .cont .logo1{
     margin-right: 1.15in;
   }
   .section_1 .top_content .cont .logo2 {
+    padding-left: 0.4in;
     margin-left: 1.3in;
     margin-right: 2.5in;
+    padding-right: 0.2in;
   }
   .section_1 .top_content .cont .logo3 {
-    margin-left: 0.3in;
+    padding-left: 0.53in;
   }
   .section_1 .top_content .info-cont {
     border: 0.02cm solid black;
@@ -580,7 +584,7 @@
         <div class="header_wmsu">
           <p>Republic of the Philippines</p>
           <p>Western Mindanao State University</p>
-          <p>{{ syllabus.college }}</p>
+          <p>College of {{ syllabus.college }}</p>
           <p class="title">DEPARTMENT OF {{ syllabus.department }}</p>
         </div>
 
@@ -645,7 +649,7 @@
       </div>
 
       <div class="college-info">
-        <p class="title">{{ syllabus.college }}</p>
+        <p class="title">College of {{ syllabus.college }}</p>
 
         <p class="title">GOALS</p>
         <p>{{ goal.goal }}</p>
@@ -702,8 +706,8 @@
         <p>{{ syllabus.course_code }}</p>
         <p>{{ syllabus.course_name }}</p>
         <p>
-            {% for prerequisite in prerequisites %}
-                {{ prerequisite.prerequisite }}{% if not forloop.last %}, {% endif %}
+            {% for preriquisite in preriquisites %}
+                {{ preriquisite.preriquisite }} {% if not forloop.last %}, {% endif %}
             {% endfor %}
         </p>
         <p>{{ syllabus.course_credit }} Units {{ syllabus.course_credit_description }}</p>
