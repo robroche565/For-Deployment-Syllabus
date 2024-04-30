@@ -24,6 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-4a(h@b#(q(8ua42ozhie+52k(i1&o4e1-=hb-l*)q=wy9zt1q('
 
 OPENAI_API_KEY = ''  # INSERT API KEY HERE
+OPENAI_API_KEY_EXTRA = ''  # INSERT EXTRA API KEY HERE
 # SECURITY WARNING: don't run with debug turned on in production!
 
 RECAPTCHA_PUBLIC_KEY = '6Le02hwpAAAAAOxD6_rII7V3RRjh2kBPLiAzf7_K'

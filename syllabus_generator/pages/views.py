@@ -67,8 +67,30 @@ def reset_conversation():
     conversation_history = []
 
 
-def ask_openai2(message):
+def ask_openai(message):
     openai.api_key = settings.OPENAI_API_KEY
+
+    # Append the user's message to the conversation history
+    conversation_history.append({"role": "user", "content": message})
+
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo-16k", messages=conversation_history, max_tokens=15000)
+
+    # Get the assistant's reply from the response
+    try:
+        answer = response['choices'][0]['message']['content'].replace('<br>', '').replace('\n', '')
+    except:
+        answer = 'Oops try again'
+
+    # Append the assistant's reply to the conversation history
+    conversation_history.append({"role": "assistant", "content": answer})
+
+    reset_conversation()
+    return answer
+
+#if you want to have separate keys just add in the settings
+def ask_openaiextra(message):
+    openai.api_key = settings.OPENAI_API_KEY_EXTRA
 
     # Append the user's message to the conversation history
     conversation_history.append({"role": "user", "content": message})
@@ -1013,7 +1035,7 @@ def new_syllabus(request):
             while  True:
                 try:
                     prompt = 'Speak in this language:'+ syllabus_ai.language + '.' + syllabus.course_name + ' "' + syllabus.course_description + '" please generate 5 popular and existing references in ' + grading_system_type + ' type for exactly ' + syllabus.time_frame + ' weeks\' time frame ALWAYS INCLUDE THE YEAR OF THE REFERENCES. Each should be separated by "|". Then extract a comprehensive range of significant and pertinent 10-16 topics from the reference sources that align with the objectives of the 18-week time frame, feel free to suggest any additional areas of focus or related subjects that may enhance the depth and breadth of the content, separate each topic by "|". Then after, generate 7 exact course learning outcomes or what should student accomplish based on all information provided and you will provide. Do not explain, comment, add labels, foot notes, no break lines, empty lines, do not provide in a list, no number list or other ordered number format. Provide information right away in single line and in normal style and font style. Use this format: source1 | source2 | and so on || topic1 | topic2 | and so on || course learning outcome1 | course learning outcome2 | and so on. Sample output: "A Theory of Islamic Finance" by Muhammad Nejatullah Siddiqi (1983) | "Islamic Banking and Interest: A Study of the Prohibition of Riba and Its Contemporary Interpretation" by Waheeduddeen Ahmed (1996) || Introduction to OOP principles | Classes and Objects || Design and implement object-oriented programs using Java | Demonstrate proficiency in using inheritance and polymorphism. (Do not put extra "||" at the very end)'
-                    response = ask_openai2(prompt)
+                    response = ask_openai(prompt)
 
                     syllabus_ai.raw_first_prompt = prompt
                     syllabus_ai.raw_first_response = response
@@ -1069,9 +1091,9 @@ def new_syllabus(request):
 
             # ----- GENERATE REFERENCES, TOPICS AND LEARNING OUTCOMES -----
             raw_sources = join_specific_sources
-            raw_topics =ask_openai2('Speak in this language:'+ syllabus_ai.language + '.Based on this references: '+ join_specific_sources +'. "' + grading_system_type + '" and based on what type of subject. Get all the topics that can be get. Do not explain, Do not comment, Do not add empty lines, respond with single line with this format. (topic 1| topic 2 | topic 3). Finish until it is done. Do not put inside a parentheses.Do not forget to use the "|" to separate. Give at least 18 topics. Minimum of topics is 18. Do not duplicate topics.')
+            raw_topics =ask_openai('Speak in this language:'+ syllabus_ai.language + '.Based on this references: '+ join_specific_sources +'. "' + grading_system_type + '" and based on what type of subject. Get all the topics that can be get. Do not explain, Do not comment, Do not add empty lines, respond with single line with this format. (topic 1| topic 2 | topic 3). Finish until it is done. Do not put inside a parentheses.Do not forget to use the "|" to separate. Give at least 18 topics. Minimum of topics is 18. Do not duplicate topics.')
 
-            raw_learning_outcomes =ask_openai2('Speak in this language:'+ syllabus_ai.language + '.Based on these topics ' + raw_topics + ', generate the course learning outcomes. Separate everything using "|" or use a vertical line. Do not explain, Do not comment, Do not add empty lines, respond with a single line. Repeat until it is done. Do not add parentheses.')
+            raw_learning_outcomes =ask_openai('Speak in this language:'+ syllabus_ai.language + '.Based on these topics ' + raw_topics + ', generate the course learning outcomes. Separate everything using "|" or use a vertical line. Do not explain, Do not comment, Do not add empty lines, respond with a single line. Repeat until it is done. Do not add parentheses.')
 
 
             syllabus_ai.raw_source=raw_sources
@@ -1402,7 +1424,7 @@ class RegenerateReferences(View):
 
             # Use ask_openai to generate content
             prompt_message = f'Generate based on this language: {syllabus_ai.language}.Generate 5 popular and existing references on {subject}. Always Include the title of the references. Separate the sources using "|" or vertical bar. Do not explain, Do not comment, Do not add empty lines. Respond with a single line with this format. GENERATE ONLY 5 SOURCES. Do not include links and do not use any numbers to list down. ALWASYS INCLUDE THE YEAR OF THE REFERENCES. ENCLOSE THE YEAR WITH A PARENTHESIS. Include the authors inside the quotation marks. Do not put inside parentheses.FIND ONLY REFERENCES FROM YEAR 2016 AND ABOVE.Immediately list all the 5 sources or references with the vertical bar "|" for separating them. FOLLOW THIS FORMAT: "Title" by author (year)|"Title" by author (year)|"Title" by author (year)|"Title" by author (year)|"Title" by author (year) '
-            new_raw_source_ai = ask_openai2(prompt_message)
+            new_raw_source_ai = ask_openai(prompt_message)
 
             # Store the new_raw_source_ai in raw_source_ai
             syllabus_ai.raw_source = new_raw_source_ai
@@ -1538,9 +1560,9 @@ class RegenerateTopics(View):
             joined_references = ', '.join(reference.reference for reference in references)
 
 
-            # Use ask_openai2 to generate content
+            # Use ask_openai to generate content
             prompt_message = f'"Speak in this language:"{syllabus_ai.language}". And from these:{joined_references}". Get all the topics that can be gain from the references. Get Only 16 topics. Separate each topic by using a vertical bar "|". Do not explain, Do not comment, add labels, titles, Do not add empty lines. Respond with a single line. Use this template " Topic 1 | Topic 2 | ..."'
-            new_raw_source_topics = ask_openai2(prompt_message)
+            new_raw_source_topics = ask_openai(prompt_message)
 
             # Store the new_raw_source_topics in raw_topics
             syllabus_ai.raw_source = joined_references
@@ -1675,9 +1697,9 @@ class RegenerateCLO(View):
             topics = Topic.objects.filter(syllabus_ai_id=syllabus_ai)
             joined_topics = ', '.join(topic.topic_name for topic in topics)
 
-            # Use ask_openai2 to generate content
+            # Use ask_openai to generate content
             prompt_message = f'Speak in this language: {syllabus_ai.language},Based on the topics from: {joined_topics}. Generate at least 8 Course Learning Outcomes from the topics. Join topics if needed to accommodate all the topics. Do not use numbers immedialtely list all Course Learning Outcomes. Separate all Course Learning Outcomes by using a vertical bar "|". Do not explain, Do not comment, Do not add empty lines. Respond with a single line. Separate all Course Learning Outcomes by using a vertical bar "|"'
-            new_raw_clo = ask_openai2(prompt_message)
+            new_raw_clo = ask_openai(prompt_message)
 
             # Store the new_raw_source_topics in raw_topics
             syllabus_ai.raw_topics = joined_topics
@@ -1817,7 +1839,7 @@ class ProcessAndRedirectView(View):
                 prompt = f'Provide an exact 18 weeks weekly topics course outline in "{syllabus_ai.language} language response" for each of these topics "{joined_topics}" It should fit within time frame of EXACLTY 18 WEEKS. Week 9 and 18 should be midterm and final examination or laboratory base on topics provided and course outline. Do not exceed fit all the topics within the time frame one topic can be in a week or more than, feel free to suggest any additional areas of focus or related subjects that may enhance the depth and breadth of the content. Please include final examinations and should only be 1 week. Continue from week 1 until week 18. Adjust the hours according to the level of topic. Use this template ( time frame | Topic (No. of Hours/Topic) | Course Content | DESIRED STUDENT LEARNING OUTCOMES/COMPETENCIES At the end of each topic and semester, the students can: | OUTCOME-BASED (OBA) ACTIVITIES (Teaching & Learning Activities) | EVIDENCE OF OUTCOMES (Assessment of Learning Outcome) | COURSE LEARNING OUTCOMES | VALUES INTENDED ||). Each column should be separated by "|" and each weekly topic should be separated by "||". In COURSE LEARNING OUTCOMES column, if the topic is related to these course learning outcomes "{prompt_clo}" put the letter into course learning outline columns if one or more is related to each course outline row. For Values Intended, get the values that can be get from the topic .DO NOT FORGET TO USE THE LANGUAGE: {syllabus_ai.language} in responding and outputting informations. Do not put any label, do not put inside of quotations or parentheses. Do not explain, do not comment and no footnote or other extra info and do not leave any columns blank and fill all columns according to the reference and sample output you can use None instead of blank fields. Provide it in a normal fonts and style and textual format, and in a single line without any break lines for all and provide and fit all topics within 18 weeks\' timeframe. Sample output: Week 18 | Final Examination (5 hours) | ✓Review of Entire Course Content ✓Final Examination | ✓Demonstrate comprehensive understanding of the entire course content ✓Successfully complete the final examination | ✓Final Examination | ✓Final Examination Submission ✓Course Evaluation | A, B, C, D, E, F, G | ✓Problem-solving ✓Ethical reasoning || Week 3 and 4 |Software Project Documentation (5 hours) | ✓Documentation in Software Projects ✓Types of Documentation ✓Best Practices in Documentation | ✓Understand the importance of documentation in software projects ✓Identify and create different types of documentation ✓Apply best practices in documentation | ✓Class discussion ✓Audio-Visual Presentation ✓Hands-on Documentation Exercise | ✓Documentation Exercise Submission ✓Quiz | D, G | ✓Critical thinking ✓Values that was gain ||'
                 syllabus_ai.raw_second_prompt = prompt
                 syllabus_ai.save()
-                response = ask_openai2(prompt)
+                response = ask_openai(prompt)
                 syllabus_ai.raw_second_response = response
                 syllabus_ai.save()
 
@@ -2297,12 +2319,12 @@ class RegenerateCourseOutline(View):
             course_outline.course_learning_outcomes = ''
             course_outline.save()
 
-            prompt_0 = ask_openai2('Based on this Course Learning Outcomes:'+ syllabus_ai.raw_course_learning_outcomes_ai_with_letters +'. Choose the letters that corresponds or similar or connected with the topic:'+ course_outline.topic +'. Example: A,C,D. Respond only with the letters with commas. Do not put period.')
+            prompt_0 = ask_openai('Based on this Course Learning Outcomes:'+ syllabus_ai.raw_course_learning_outcomes_ai_with_letters +'. Choose the letters that corresponds or similar or connected with the topic:'+ course_outline.topic +'. Example: A,C,D. Respond only with the letters with commas. Do not put period.')
             course_outline.course_learning_outcomes = prompt_0
             course_outline.save()
 
-            # Use ask_openai2 to generate content
-            prompt_1 = ask_openai2('Speak in this language:'+ syllabus_ai.language +'Based on this Topic: '+ course_outline.topic  +'. And Based on this subject: '+ syllabus.course_name +'. Generate the Course Content for the topic. Split each item using a vertical bar "|". GIVE ONLY 5 ITEMS DO NOT EXCEED MORE THAN 5 ITEMS.USE VERTICAL BAR TO SPLIT. Do not use any other symbols to split ONLY VERTCAL BAR. Do not comment, do not use numbers, respond in one single line')
+            # Use ask_openai to generate content
+            prompt_1 = ask_openai('Speak in this language:'+ syllabus_ai.language +'Based on this Topic: '+ course_outline.topic  +'. And Based on this subject: '+ syllabus.course_name +'. Generate the Course Content for the topic. Split each item using a vertical bar "|". GIVE ONLY 5 ITEMS DO NOT EXCEED MORE THAN 5 ITEMS.USE VERTICAL BAR TO SPLIT. Do not use any other symbols to split ONLY VERTCAL BAR. Do not comment, do not use numbers, respond in one single line')
 
             # Split the text using the pipe symbol
             content_courses = prompt_1.split('|')
@@ -2313,8 +2335,8 @@ class RegenerateCourseOutline(View):
                 course_content = Course_Content(course_outline_id=course_outline, course_content=content_course.strip())
                 course_content.save()
 
-            # Use ask_openai2 to generate content
-            prompt_2 = ask_openai2('Speak in this language:'+ syllabus_ai.language +'Based on this Topic: '+ course_outline.topic  +'. And Based on this subject: '+ syllabus.course_name +'. Generate the Desired Learning Outcomes for the topic.Do not use long sentences.   Split each item using a vertical bar "|". GIVE ONLY 5 ITEMS DO NOT EXCEED MORE THAN 5 ITEMS.USE VERTICAL BAR TO SPLIT. Do not use any other symbols to split ONLY VERTCAL BAR. Do not comment, do not use numbers, respond in one single line')
+            # Use ask_openai to generate content
+            prompt_2 = ask_openai('Speak in this language:'+ syllabus_ai.language +'Based on this Topic: '+ course_outline.topic  +'. And Based on this subject: '+ syllabus.course_name +'. Generate the Desired Learning Outcomes for the topic.Do not use long sentences.   Split each item using a vertical bar "|". GIVE ONLY 5 ITEMS DO NOT EXCEED MORE THAN 5 ITEMS.USE VERTICAL BAR TO SPLIT. Do not use any other symbols to split ONLY VERTCAL BAR. Do not comment, do not use numbers, respond in one single line')
 
             # Split the text using the pipe symbol
             content_dslos = prompt_2.split('|')
@@ -2325,8 +2347,8 @@ class RegenerateCourseOutline(View):
                 dslo = Desired_Student_Learning_Outcome(course_outline_id=course_outline, dslo=content_dslo.strip())
                 dslo.save()
 
-            # Use ask_openai2 to generate content
-            prompt_3 = ask_openai2('Speak in this language:'+ syllabus_ai.language +'Based on this Topic: '+ course_outline.topic  +'. And Based on this subject: '+ syllabus.course_name +'. Generate the Outcome Based Activity based on the Course Content. Example of Outcome Based Activity: Class Discussion, Lab Activity:(Based this on the course Content), Audio Visual Presentation .Do not use long sentences.  Use only 5-6 words ONLY. Split each item using a vertical bar "|". Give at least 5 items.USE VERTICAL BAR TO SPLIT.Do not use any other symbols to split ONLY VERTCAL BAR. Do not comment, do not use numbers, respond in one single line')
+            # Use ask_openai to generate content
+            prompt_3 = ask_openai('Speak in this language:'+ syllabus_ai.language +'Based on this Topic: '+ course_outline.topic  +'. And Based on this subject: '+ syllabus.course_name +'. Generate the Outcome Based Activity based on the Course Content. Example of Outcome Based Activity: Class Discussion, Lab Activity:(Based this on the course Content), Audio Visual Presentation .Do not use long sentences.  Use only 5-6 words ONLY. Split each item using a vertical bar "|". Give at least 5 items.USE VERTICAL BAR TO SPLIT.Do not use any other symbols to split ONLY VERTCAL BAR. Do not comment, do not use numbers, respond in one single line')
 
             # Split the text using the pipe symbol
             content_obas = prompt_3.split('|')
@@ -2337,7 +2359,7 @@ class RegenerateCourseOutline(View):
                 oba = Outcome_Based_Activity(course_outline_id=course_outline, oba=content_oba.strip())
                 oba.save()
 
-            prompt_4 = ask_openai2('Speak in this language:'+ syllabus_ai.language +'Based on this Topic: '+ course_outline.topic +'. And Based on this subject: '+ syllabus.course_name +'. Generate the Evidence of Outcome based on the Course Content. Example of Evidence of outcome: Quiz, Lab Activity Submision, Presentation.  Do not use long sentences. Use only 2-3 words ONLY. Split each item using a vertical bar "|". Give at least 5 items.USE VERTICAL BAR TO SPLIT.Do not use any other symbols to split ONLY VERTCAL BAR. Do not comment, do not use numbers, respond in one single line')
+            prompt_4 = ask_openai('Speak in this language:'+ syllabus_ai.language +'Based on this Topic: '+ course_outline.topic +'. And Based on this subject: '+ syllabus.course_name +'. Generate the Evidence of Outcome based on the Course Content. Example of Evidence of outcome: Quiz, Lab Activity Submision, Presentation.  Do not use long sentences. Use only 2-3 words ONLY. Split each item using a vertical bar "|". Give at least 5 items.USE VERTICAL BAR TO SPLIT.Do not use any other symbols to split ONLY VERTCAL BAR. Do not comment, do not use numbers, respond in one single line')
 
             # Split the text using the pipe symbol
             content_eoos = prompt_4.split('|')
@@ -2348,7 +2370,7 @@ class RegenerateCourseOutline(View):
                 eoo = Evidence_of_Outcome(course_outline_id=course_outline, eoo=content_eoo.strip())
                 eoo.save()
 
-            prompt_5 = ask_openai2('Speak in this language:'+ syllabus_ai.language +'Based on this Topic: '+ course_outline.topic +'. And Based on this subject: '+ syllabus.course_name +'. Generate the Values integration or what values can be gain from the Topic.Do not use long sentences. Example of Values Integration: Critical Thinking, Analytical Reasoning. Use only 3-5 words ONLY. Split each item using a vertical bar "|". USE VERTICAL BAR TO SPLIT. Give at least 5 items.Do not use any other symbols to split ONLY VERTCAL BAR. Do not comment, do not use numbers, respond in one single line')
+            prompt_5 = ask_openai('Speak in this language:'+ syllabus_ai.language +'Based on this Topic: '+ course_outline.topic +'. And Based on this subject: '+ syllabus.course_name +'. Generate the Values integration or what values can be gain from the Topic.Do not use long sentences. Example of Values Integration: Critical Thinking, Analytical Reasoning. Use only 3-5 words ONLY. Split each item using a vertical bar "|". USE VERTICAL BAR TO SPLIT. Give at least 5 items.Do not use any other symbols to split ONLY VERTCAL BAR. Do not comment, do not use numbers, respond in one single line')
 
             # Split the text using the pipe symbol
             content_values = prompt_5.split('|')
@@ -2369,7 +2391,7 @@ class RegenerateCourseOutline(View):
             course_outline.course_learning_outcomes = ''
             course_outline.save()
 
-            prompt_0 = ask_openai2('Based on this Course Learning Outcomes:'+ syllabus_ai.raw_course_learning_outcomes_ai_with_letters +'. Choose the letters that corresponds or similar or connected with the topic:'+ course_outline.topic +'. Example: A,C,D. Respond only with the letters with commas. Do not put period.')
+            prompt_0 = ask_openai('Based on this Course Learning Outcomes:'+ syllabus_ai.raw_course_learning_outcomes_ai_with_letters +'. Choose the letters that corresponds or similar or connected with the topic:'+ course_outline.topic +'. Example: A,C,D. Respond only with the letters with commas. Do not put period.')
             course_outline.course_learning_outcomes = prompt_0
             course_outline.save()
 
@@ -2377,8 +2399,8 @@ class RegenerateCourseOutline(View):
             joined_content = ', '.join(content.course_content for content in course_contents)
 
 
-            # Use ask_openai2 to generate content
-            prompt_2 = ask_openai2('Speak in this language:'+ syllabus_ai.language +'Based on this Course Content: '+ joined_content +'. And Based on this subject: '+ syllabus.course_name +'. Generate the Desired Learning Outcomes for the topic.Do not use long sentences.   Split each item using a vertical bar "|". GIVE ONLY 5 ITEMS DO NOT EXCEED MORE THAN 5 ITEMS.USE VERTICAL BAR TO SPLIT. Do not use any other symbols to split ONLY VERTCAL BAR. Do not comment, do not use numbers, respond in one single line')
+            # Use ask_openai to generate content
+            prompt_2 = ask_openai('Speak in this language:'+ syllabus_ai.language +'Based on this Course Content: '+ joined_content +'. And Based on this subject: '+ syllabus.course_name +'. Generate the Desired Learning Outcomes for the topic.Do not use long sentences.   Split each item using a vertical bar "|". GIVE ONLY 5 ITEMS DO NOT EXCEED MORE THAN 5 ITEMS.USE VERTICAL BAR TO SPLIT. Do not use any other symbols to split ONLY VERTCAL BAR. Do not comment, do not use numbers, respond in one single line')
 
             # Split the text using the pipe symbol
             content_dslos = prompt_2.split('|')
@@ -2389,8 +2411,8 @@ class RegenerateCourseOutline(View):
                 dslo = Desired_Student_Learning_Outcome(course_outline_id=course_outline, dslo=content_dslo.strip())
                 dslo.save()
 
-            # Use ask_openai2 to generate content
-            prompt_3 = ask_openai2('Speak in this language:'+ syllabus_ai.language +'Based on this Course Content: '+ joined_content +'. And Based on this subject: '+ syllabus.course_name +'. Generate the Outcome Based Activity based on the Course Content. Example of Outcome Based Activity: Class Discussion, Lab Activity:(Based this on the course Content), Audio Visual Presentation .Do not use long sentences.  Use only 5-6 words ONLY. Split each item using a vertical bar "|". Give at least 5 items.USE VERTICAL BAR TO SPLIT.Do not use any other symbols to split ONLY VERTCAL BAR. Do not comment, do not use numbers, respond in one single line')
+            # Use ask_openai to generate content
+            prompt_3 = ask_openai('Speak in this language:'+ syllabus_ai.language +'Based on this Course Content: '+ joined_content +'. And Based on this subject: '+ syllabus.course_name +'. Generate the Outcome Based Activity based on the Course Content. Example of Outcome Based Activity: Class Discussion, Lab Activity:(Based this on the course Content), Audio Visual Presentation .Do not use long sentences.  Use only 5-6 words ONLY. Split each item using a vertical bar "|". Give at least 5 items.USE VERTICAL BAR TO SPLIT.Do not use any other symbols to split ONLY VERTCAL BAR. Do not comment, do not use numbers, respond in one single line')
 
             # Split the text using the pipe symbol
             content_obas = prompt_3.split('|')
@@ -2401,7 +2423,7 @@ class RegenerateCourseOutline(View):
                 oba = Outcome_Based_Activity(course_outline_id=course_outline, oba=content_oba.strip())
                 oba.save()
 
-            prompt_4 = ask_openai2('Speak in this language:'+ syllabus_ai.language +'Based on this Course Content: '+ joined_content +'. And Based on this subject: '+ syllabus.course_name +'. Generate the Evidence of Outcome based on the Course Content. Example of Evidence of outcome: Quiz, Lab Activity Submision, Presentation.  Do not use long sentences. Use only 2-3 words ONLY. Split each item using a vertical bar "|". Give at least 5 items.USE VERTICAL BAR TO SPLIT.Do not use any other symbols to split ONLY VERTCAL BAR. Do not comment, do not use numbers, respond in one single line')
+            prompt_4 = ask_openai('Speak in this language:'+ syllabus_ai.language +'Based on this Course Content: '+ joined_content +'. And Based on this subject: '+ syllabus.course_name +'. Generate the Evidence of Outcome based on the Course Content. Example of Evidence of outcome: Quiz, Lab Activity Submision, Presentation.  Do not use long sentences. Use only 2-3 words ONLY. Split each item using a vertical bar "|". Give at least 5 items.USE VERTICAL BAR TO SPLIT.Do not use any other symbols to split ONLY VERTCAL BAR. Do not comment, do not use numbers, respond in one single line')
 
             # Split the text using the pipe symbol
             content_eoos = prompt_4.split('|')
@@ -2412,7 +2434,7 @@ class RegenerateCourseOutline(View):
                 eoo = Evidence_of_Outcome(course_outline_id=course_outline, eoo=content_eoo.strip())
                 eoo.save()
 
-            prompt_5 = ask_openai2('Speak in this language:'+ syllabus_ai.language +'Based on this Topic: '+ course_outline.topic +'. And Based on this subject: '+ syllabus.course_name +'. And Based on this Course Content:'+ joined_content +' Generate the Values integration or what values can be gain from the Topic and Course Content.Do not use long sentences. Example of Values Integration: Critical Thinking, Analytical Reasoning. Use only 3-5 words ONLY. Split each item using a vertical bar "|". USE VERTICAL BAR TO SPLIT. Give at least 5 items.Do not use any other symbols to split ONLY VERTCAL BAR. Do not comment, do not use numbers, respond in one single line')
+            prompt_5 = ask_openai('Speak in this language:'+ syllabus_ai.language +'Based on this Topic: '+ course_outline.topic +'. And Based on this subject: '+ syllabus.course_name +'. And Based on this Course Content:'+ joined_content +' Generate the Values integration or what values can be gain from the Topic and Course Content.Do not use long sentences. Example of Values Integration: Critical Thinking, Analytical Reasoning. Use only 3-5 words ONLY. Split each item using a vertical bar "|". USE VERTICAL BAR TO SPLIT. Give at least 5 items.Do not use any other symbols to split ONLY VERTCAL BAR. Do not comment, do not use numbers, respond in one single line')
 
             # Split the text using the pipe symbol
             content_values = prompt_5.split('|')
@@ -2517,9 +2539,9 @@ class RegenerateCourseRubricView(View):
             topics = Topic.objects.filter(syllabus_ai_id=syllabus_ai)
             joined_topics = ', '.join(topic.topic_name for topic in topics)
 
-            # Use ask_openai2 to generate content
+            # Use ask_openai to generate content
             prompt_message = f'Speak in this language: "{syllabus_ai.language}".Generate a table for rubrics'+ rubric.title +' for the subject:'+ syllabus.course_name +' and Based on these Topics: '+ joined_topics +'.First Column is the Criteria Name:(Example: Organization(15%)). Second Column for beginner (Example:Very hard to find information.6pts.) Third Column: Capable (Example: Information difficult to locate.9pts) Fourth Column for Accomplished (Example:Can find information with slight effort. 12pts) Fifth Column for Expert (Example: All information is easy to find and important points stand out.15pts) Do only 5 Criteria Based on the topics and subject. Do not comment, Do not add anything. Do not add any headers. Do not Use Parenthesis. Use the DOUBLE VERITCAL LINE "||" to proceed to the next criteria.Follow this given format: (Criteria✓Beginner✓Capable✓Accomplished✓Expert||Criteria✓Beginner✓Capable✓Accomplished✓Expert||Criteria✓Beginner✓Capable✓Accomplished✓Expert||Criteria✓Beginner✓Capable✓Accomplished✓Expert) Example of Format: Organization (20%)✓The information appears to be disorganized.8pts✓Information is organized, but paragraphs are not wellconstructed. 12pts✓ Information is organized with well-constructed paragraphs.16pts✓Information is very organized with well-constructed paragraphs and subheadings.20pts||Amount of Information (30%)✓ One or more topics were not addressed.12pts✓All topics are addressed, and most questions are answered with 1 sentence about each.18pts✓All topics are addressed and most questions answered with at least 2 sentences about each.24pts✓All topics are addressed and all questions answered with at least 2 sentences about each.30pts.Do not forget the double vertical line to separate the criterias , the percentage of each criteria must all sum up into 100 percent and the points of each items. DO NOT PUT A DOUBLE VERICAL LINE IN THE END. DO NOT FORGET THE PERCENTAGE OF EACH CRITERIA. DO NOT FORGET TO SPEAK IN THIS LANGUAGE:'+ syllabus_ai.language +'.DO NOT FORGET TO PUT DOUBLE VERTICAL "||" TO SEPARATE EACH CRITERIA. ALWAYS PUT DOUBLE VERTICAL LINE WHEN PROCEEDING TO THE NEXT CRITERIA'
-            new_raw_cr = ask_openai2(prompt_message)
+            new_raw_cr = ask_openai(prompt_message)
 
             rubric.raw_source_course_rubric_ai = new_raw_cr
             rubric.save()
