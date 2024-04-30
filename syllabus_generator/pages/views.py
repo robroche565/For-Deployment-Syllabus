@@ -66,32 +66,9 @@ def reset_conversation():
     global conversation_history
     conversation_history = []
 
-def ask_openai(message, api):
-    if api == 1:
-        openai.api_key = settings.OPENAI_API_KEY
-    else:
-        openai.api_key = settings.OPENAI_API_KEY3
-
-    # Append the user's message to the conversation history
-    conversation_history.append({"role": "user", "content": message})
-
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo-16k", messages=conversation_history, max_tokens=15000)
-
-    # Get the assistant's reply from the response
-    try:
-        answer = response['choices'][0]['message']['content'].replace('<br>', '').replace('\n', '')
-    except:
-        answer = 'Oops try again'
-
-    # Append the assistant's reply to the conversation history
-    conversation_history.append({"role": "assistant", "content": answer})
-
-    reset_conversation()
-    return answer
 
 def ask_openai2(message):
-    openai.api_key = settings.OPENAI_API_KEY2
+    openai.api_key = settings.OPENAI_API_KEY
 
     # Append the user's message to the conversation history
     conversation_history.append({"role": "user", "content": message})
@@ -111,47 +88,6 @@ def ask_openai2(message):
     reset_conversation()
     return answer
 
-def ask_openai3(message):
-    openai.api_key = settings.OPENAI_API_KEY3
-
-    # Append the user's message to the conversation history
-    conversation_history.append({"role": "user", "content": message})
-
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo-16k", messages=conversation_history, max_tokens=15000)
-
-    # Get the assistant's reply from the response
-    try:
-        answer = response['choices'][0]['message']['content'].replace('<br>', '').replace('\n', '')
-    except:
-        answer = 'Oops try again'
-
-    # Append the assistant's reply to the conversation history
-    conversation_history.append({"role": "assistant", "content": answer})
-
-    reset_conversation()
-    return answer
-
-def ask_openai4(message):
-    openai.api_key = settings.OPENAI_API_KEY4
-
-    # Append the user's message to the conversation history
-    conversation_history.append({"role": "user", "content": message})
-
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo-16k", messages=conversation_history, max_tokens=15000)
-
-    # Get the assistant's reply from the response
-    try:
-        answer = response['choices'][0]['message']['content'].replace('<br>', '').replace('\n', '')
-    except:
-        answer = 'Oops try again'
-
-    # Append the assistant's reply to the conversation history
-    conversation_history.append({"role": "assistant", "content": answer})
-
-    reset_conversation()
-    return answer
 
 def landing_view (request):
     return render(request, 'landing.html')
@@ -1077,7 +1013,7 @@ def new_syllabus(request):
             while  True:
                 try:
                     prompt = 'Speak in this language:'+ syllabus_ai.language + '.' + syllabus.course_name + ' "' + syllabus.course_description + '" please generate 5 popular and existing references in ' + grading_system_type + ' type for exactly ' + syllabus.time_frame + ' weeks\' time frame ALWAYS INCLUDE THE YEAR OF THE REFERENCES. Each should be separated by "|". Then extract a comprehensive range of significant and pertinent 10-16 topics from the reference sources that align with the objectives of the 18-week time frame, feel free to suggest any additional areas of focus or related subjects that may enhance the depth and breadth of the content, separate each topic by "|". Then after, generate 7 exact course learning outcomes or what should student accomplish based on all information provided and you will provide. Do not explain, comment, add labels, foot notes, no break lines, empty lines, do not provide in a list, no number list or other ordered number format. Provide information right away in single line and in normal style and font style. Use this format: source1 | source2 | and so on || topic1 | topic2 | and so on || course learning outcome1 | course learning outcome2 | and so on. Sample output: "A Theory of Islamic Finance" by Muhammad Nejatullah Siddiqi (1983) | "Islamic Banking and Interest: A Study of the Prohibition of Riba and Its Contemporary Interpretation" by Waheeduddeen Ahmed (1996) || Introduction to OOP principles | Classes and Objects || Design and implement object-oriented programs using Java | Demonstrate proficiency in using inheritance and polymorphism. (Do not put extra "||" at the very end)'
-                    response = ask_openai(prompt, 1)
+                    response = ask_openai2(prompt)
 
                     syllabus_ai.raw_first_prompt = prompt
                     syllabus_ai.raw_first_response = response
@@ -2361,7 +2297,7 @@ class RegenerateCourseOutline(View):
             course_outline.course_learning_outcomes = ''
             course_outline.save()
 
-            prompt_0 = ask_openai4('Based on this Course Learning Outcomes:'+ syllabus_ai.raw_course_learning_outcomes_ai_with_letters +'. Choose the letters that corresponds or similar or connected with the topic:'+ course_outline.topic +'. Example: A,C,D. Respond only with the letters with commas. Do not put period.')
+            prompt_0 = ask_openai2('Based on this Course Learning Outcomes:'+ syllabus_ai.raw_course_learning_outcomes_ai_with_letters +'. Choose the letters that corresponds or similar or connected with the topic:'+ course_outline.topic +'. Example: A,C,D. Respond only with the letters with commas. Do not put period.')
             course_outline.course_learning_outcomes = prompt_0
             course_outline.save()
 
@@ -2401,7 +2337,7 @@ class RegenerateCourseOutline(View):
                 oba = Outcome_Based_Activity(course_outline_id=course_outline, oba=content_oba.strip())
                 oba.save()
 
-            prompt_4 = ask_openai3('Speak in this language:'+ syllabus_ai.language +'Based on this Topic: '+ course_outline.topic +'. And Based on this subject: '+ syllabus.course_name +'. Generate the Evidence of Outcome based on the Course Content. Example of Evidence of outcome: Quiz, Lab Activity Submision, Presentation.  Do not use long sentences. Use only 2-3 words ONLY. Split each item using a vertical bar "|". Give at least 5 items.USE VERTICAL BAR TO SPLIT.Do not use any other symbols to split ONLY VERTCAL BAR. Do not comment, do not use numbers, respond in one single line')
+            prompt_4 = ask_openai2('Speak in this language:'+ syllabus_ai.language +'Based on this Topic: '+ course_outline.topic +'. And Based on this subject: '+ syllabus.course_name +'. Generate the Evidence of Outcome based on the Course Content. Example of Evidence of outcome: Quiz, Lab Activity Submision, Presentation.  Do not use long sentences. Use only 2-3 words ONLY. Split each item using a vertical bar "|". Give at least 5 items.USE VERTICAL BAR TO SPLIT.Do not use any other symbols to split ONLY VERTCAL BAR. Do not comment, do not use numbers, respond in one single line')
 
             # Split the text using the pipe symbol
             content_eoos = prompt_4.split('|')
@@ -2412,7 +2348,7 @@ class RegenerateCourseOutline(View):
                 eoo = Evidence_of_Outcome(course_outline_id=course_outline, eoo=content_eoo.strip())
                 eoo.save()
 
-            prompt_5 = ask_openai3('Speak in this language:'+ syllabus_ai.language +'Based on this Topic: '+ course_outline.topic +'. And Based on this subject: '+ syllabus.course_name +'. Generate the Values integration or what values can be gain from the Topic.Do not use long sentences. Example of Values Integration: Critical Thinking, Analytical Reasoning. Use only 3-5 words ONLY. Split each item using a vertical bar "|". USE VERTICAL BAR TO SPLIT. Give at least 5 items.Do not use any other symbols to split ONLY VERTCAL BAR. Do not comment, do not use numbers, respond in one single line')
+            prompt_5 = ask_openai2('Speak in this language:'+ syllabus_ai.language +'Based on this Topic: '+ course_outline.topic +'. And Based on this subject: '+ syllabus.course_name +'. Generate the Values integration or what values can be gain from the Topic.Do not use long sentences. Example of Values Integration: Critical Thinking, Analytical Reasoning. Use only 3-5 words ONLY. Split each item using a vertical bar "|". USE VERTICAL BAR TO SPLIT. Give at least 5 items.Do not use any other symbols to split ONLY VERTCAL BAR. Do not comment, do not use numbers, respond in one single line')
 
             # Split the text using the pipe symbol
             content_values = prompt_5.split('|')
@@ -2433,7 +2369,7 @@ class RegenerateCourseOutline(View):
             course_outline.course_learning_outcomes = ''
             course_outline.save()
 
-            prompt_0 = ask_openai4('Based on this Course Learning Outcomes:'+ syllabus_ai.raw_course_learning_outcomes_ai_with_letters +'. Choose the letters that corresponds or similar or connected with the topic:'+ course_outline.topic +'. Example: A,C,D. Respond only with the letters with commas. Do not put period.')
+            prompt_0 = ask_openai2('Based on this Course Learning Outcomes:'+ syllabus_ai.raw_course_learning_outcomes_ai_with_letters +'. Choose the letters that corresponds or similar or connected with the topic:'+ course_outline.topic +'. Example: A,C,D. Respond only with the letters with commas. Do not put period.')
             course_outline.course_learning_outcomes = prompt_0
             course_outline.save()
 
@@ -2465,7 +2401,7 @@ class RegenerateCourseOutline(View):
                 oba = Outcome_Based_Activity(course_outline_id=course_outline, oba=content_oba.strip())
                 oba.save()
 
-            prompt_4 = ask_openai3('Speak in this language:'+ syllabus_ai.language +'Based on this Course Content: '+ joined_content +'. And Based on this subject: '+ syllabus.course_name +'. Generate the Evidence of Outcome based on the Course Content. Example of Evidence of outcome: Quiz, Lab Activity Submision, Presentation.  Do not use long sentences. Use only 2-3 words ONLY. Split each item using a vertical bar "|". Give at least 5 items.USE VERTICAL BAR TO SPLIT.Do not use any other symbols to split ONLY VERTCAL BAR. Do not comment, do not use numbers, respond in one single line')
+            prompt_4 = ask_openai2('Speak in this language:'+ syllabus_ai.language +'Based on this Course Content: '+ joined_content +'. And Based on this subject: '+ syllabus.course_name +'. Generate the Evidence of Outcome based on the Course Content. Example of Evidence of outcome: Quiz, Lab Activity Submision, Presentation.  Do not use long sentences. Use only 2-3 words ONLY. Split each item using a vertical bar "|". Give at least 5 items.USE VERTICAL BAR TO SPLIT.Do not use any other symbols to split ONLY VERTCAL BAR. Do not comment, do not use numbers, respond in one single line')
 
             # Split the text using the pipe symbol
             content_eoos = prompt_4.split('|')
@@ -2476,7 +2412,7 @@ class RegenerateCourseOutline(View):
                 eoo = Evidence_of_Outcome(course_outline_id=course_outline, eoo=content_eoo.strip())
                 eoo.save()
 
-            prompt_5 = ask_openai3('Speak in this language:'+ syllabus_ai.language +'Based on this Topic: '+ course_outline.topic +'. And Based on this subject: '+ syllabus.course_name +'. And Based on this Course Content:'+ joined_content +' Generate the Values integration or what values can be gain from the Topic and Course Content.Do not use long sentences. Example of Values Integration: Critical Thinking, Analytical Reasoning. Use only 3-5 words ONLY. Split each item using a vertical bar "|". USE VERTICAL BAR TO SPLIT. Give at least 5 items.Do not use any other symbols to split ONLY VERTCAL BAR. Do not comment, do not use numbers, respond in one single line')
+            prompt_5 = ask_openai2('Speak in this language:'+ syllabus_ai.language +'Based on this Topic: '+ course_outline.topic +'. And Based on this subject: '+ syllabus.course_name +'. And Based on this Course Content:'+ joined_content +' Generate the Values integration or what values can be gain from the Topic and Course Content.Do not use long sentences. Example of Values Integration: Critical Thinking, Analytical Reasoning. Use only 3-5 words ONLY. Split each item using a vertical bar "|". USE VERTICAL BAR TO SPLIT. Give at least 5 items.Do not use any other symbols to split ONLY VERTCAL BAR. Do not comment, do not use numbers, respond in one single line')
 
             # Split the text using the pipe symbol
             content_values = prompt_5.split('|')
